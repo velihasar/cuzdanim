@@ -1,0 +1,1 @@
+2025-11-27 19:40:17.948 +03:00 [Information] GetUserId - ClaimTypes.NameIdentifier sonucu: 1

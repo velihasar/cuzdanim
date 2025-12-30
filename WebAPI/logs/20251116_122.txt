@@ -1,0 +1,28 @@
+2025-11-16 23:20:41.444 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for GrAltin
+2025-11-16 23:20:41.716 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-16 23:20:41.721 +03:00 [Information] AssetTypePriceService: Gold-related properties found: CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, IKIBUCUKALTIN, BESLIALTIN, GREMSEALTIN, RESATALTIN, HAMITALTIN
+2025-11-16 23:20:41.723 +03:00 [Information] AssetTypePriceService: Found potential gold property: GRA, ValueKind: Object
+2025-11-16 23:20:41.723 +03:00 [Information] AssetTypePriceService: Property GRA content: {"Selling":5559.75,"Type":"Gold","Name":"GRAMALTIN","Change":-1.71,"Buying":5558.99}
+2025-11-16 23:20:41.725 +03:00 [Information] AssetTypePriceService: Gold price extracted successfully: 5558,99
+2025-11-16 23:20:41.870 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for YarimAltin
+2025-11-16 23:20:41.907 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-16 23:20:41.907 +03:00 [Information] AssetTypePriceService: Gold-related properties found: CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, IKIBUCUKALTIN, BESLIALTIN, GREMSEALTIN, RESATALTIN, HAMITALTIN
+2025-11-16 23:20:41.908 +03:00 [Information] AssetTypePriceService: Found potential gold property: GRA, ValueKind: Object
+2025-11-16 23:20:41.908 +03:00 [Information] AssetTypePriceService: Property GRA content: {"Selling":5559.75,"Type":"Gold","Name":"GRAMALTIN","Change":-1.71,"Buying":5558.99}
+2025-11-16 23:20:41.908 +03:00 [Information] AssetTypePriceService: Gold price extracted successfully: 5558,99
+2025-11-16 23:20:41.912 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for TamAltin
+2025-11-16 23:20:41.946 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-16 23:20:41.947 +03:00 [Information] AssetTypePriceService: Gold-related properties found: CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, IKIBUCUKALTIN, BESLIALTIN, GREMSEALTIN, RESATALTIN, HAMITALTIN
+2025-11-16 23:20:41.948 +03:00 [Information] AssetTypePriceService: Found potential gold property: GRA, ValueKind: Object
+2025-11-16 23:20:41.948 +03:00 [Information] AssetTypePriceService: Property GRA content: {"Selling":5559.75,"Type":"Gold","Name":"GRAMALTIN","Change":-1.71,"Buying":5558.99}
+2025-11-16 23:20:41.948 +03:00 [Information] AssetTypePriceService: Gold price extracted successfully: 5558,99
+2025-11-16 23:20:41.951 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for CeyrekAltin
+2025-11-16 23:20:41.984 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-16 23:20:41.985 +03:00 [Information] AssetTypePriceService: Gold-related properties found: CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, IKIBUCUKALTIN, BESLIALTIN, GREMSEALTIN, RESATALTIN, HAMITALTIN
+2025-11-16 23:20:41.985 +03:00 [Information] AssetTypePriceService: Found potential gold property: GRA, ValueKind: Object
+2025-11-16 23:20:41.985 +03:00 [Information] AssetTypePriceService: Property GRA content: {"Selling":5559.75,"Type":"Gold","Name":"GRAMALTIN","Change":-1.71,"Buying":5558.99}
+2025-11-16 23:20:41.985 +03:00 [Information] AssetTypePriceService: Gold price extracted successfully: 5558,99
+2025-11-16 23:20:42.005 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Avro
+2025-11-16 23:20:42.044 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for JaponYeni
+2025-11-16 23:20:42.081 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Dolar
+2025-11-16 23:20:42.119 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for IngilizSterlini

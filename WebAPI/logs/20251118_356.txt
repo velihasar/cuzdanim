@@ -1,0 +1,8 @@
+2025-11-18 18:32:10.238 +03:00 [Information] 2025.11.18 18:32:10 UpdateAssetTypePrices job started...
+2025-11-18 18:32:10.288 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Kripto (Diger)
+2025-11-18 18:32:10.310 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=False, Value=null
+2025-11-18 18:32:10.310 +03:00 [Warning] UpdateAssetTypePrices: Failed to get price for Kripto (Diger)
+2025-11-18 18:32:10.310 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Yarım Altın (YarimAltin)
+2025-11-18 18:32:10.523 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=19413,520
+2025-11-18 18:32:10.526 +03:00 [Information] UpdateAssetTypePrices: Updated Yarım Altın (YarimAltin) to 19413,520
+2025-11-18 18:32:10.526 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Tam Altın (TamAltin)

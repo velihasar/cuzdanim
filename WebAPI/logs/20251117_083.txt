@@ -1,0 +1,28 @@
+2025-11-17 13:31:12.290 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for YarimAltin
+2025-11-17 13:31:12.520 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-17 13:31:12.522 +03:00 [Information] AssetTypePriceService: Gold-related properties found: CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, IKIBUCUKALTIN, BESLIALTIN, GREMSEALTIN, RESATALTIN, HAMITALTIN
+2025-11-17 13:31:12.523 +03:00 [Information] AssetTypePriceService: Found potential gold property: GRA, ValueKind: Object
+2025-11-17 13:31:12.527 +03:00 [Information] AssetTypePriceService: Property GRA content: {"Selling":5547.49,"Type":"Gold","Name":"GRAMALTIN","Change":-0.07,"Buying":5546.72}
+2025-11-17 13:31:12.527 +03:00 [Information] AssetTypePriceService: Gold price extracted successfully: 5546,72
+2025-11-17 13:31:12.533 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for TamAltin
+2025-11-17 13:31:12.568 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-17 13:31:12.571 +03:00 [Information] AssetTypePriceService: Gold-related properties found: CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, IKIBUCUKALTIN, BESLIALTIN, GREMSEALTIN, RESATALTIN, HAMITALTIN
+2025-11-17 13:31:12.571 +03:00 [Information] AssetTypePriceService: Found potential gold property: GRA, ValueKind: Object
+2025-11-17 13:31:12.571 +03:00 [Information] AssetTypePriceService: Property GRA content: {"Selling":5547.49,"Type":"Gold","Name":"GRAMALTIN","Change":-0.07,"Buying":5546.72}
+2025-11-17 13:31:12.571 +03:00 [Information] AssetTypePriceService: Gold price extracted successfully: 5546,72
+2025-11-17 13:31:12.573 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Avro
+2025-11-17 13:31:12.608 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Dolar
+2025-11-17 13:31:12.644 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for JaponYeni
+2025-11-17 13:31:12.679 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for IngilizSterlini
+2025-11-17 13:31:12.714 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for GrAltin
+2025-11-17 13:31:12.748 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-17 13:31:12.748 +03:00 [Information] AssetTypePriceService: Gold-related properties found: CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, IKIBUCUKALTIN, BESLIALTIN, GREMSEALTIN, RESATALTIN, HAMITALTIN
+2025-11-17 13:31:12.748 +03:00 [Information] AssetTypePriceService: Found potential gold property: GRA, ValueKind: Object
+2025-11-17 13:31:12.748 +03:00 [Information] AssetTypePriceService: Property GRA content: {"Selling":5547.49,"Type":"Gold","Name":"GRAMALTIN","Change":-0.07,"Buying":5546.72}
+2025-11-17 13:31:12.748 +03:00 [Information] AssetTypePriceService: Gold price extracted successfully: 5546,72
+2025-11-17 13:31:12.749 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for CeyrekAltin
+2025-11-17 13:31:12.783 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-17 13:31:12.783 +03:00 [Information] AssetTypePriceService: Gold-related properties found: CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, IKIBUCUKALTIN, BESLIALTIN, GREMSEALTIN, RESATALTIN, HAMITALTIN
+2025-11-17 13:31:12.784 +03:00 [Information] AssetTypePriceService: Found potential gold property: GRA, ValueKind: Object
+2025-11-17 13:31:12.784 +03:00 [Information] AssetTypePriceService: Property GRA content: {"Selling":5547.49,"Type":"Gold","Name":"GRAMALTIN","Change":-0.07,"Buying":5546.72}
+2025-11-17 13:31:12.784 +03:00 [Information] AssetTypePriceService: Gold price extracted successfully: 5546,72

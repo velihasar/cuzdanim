@@ -1,0 +1,6 @@
+2025-11-27 15:21:06.381 +03:00 [Error] {"ExceptionMessage":"42703: a.ApiUrlKey sütunu mevcut değil\r\n\r\nPOSITION: 16","FullName":null,"MethodName":"Handle","User":"?","Parameters":[{"Name":"request","Value":{"Name":"asdasd","ConvertedAmountType":0,"TlValue":1.0,"ApiUrlKey":"asdasd"},"Type":"CreateAssetTypeCommand"},{"Name":"cancellationToken","Value":{"IsCancellationRequested":false,"CanBeCanceled":false,"WaitHandle":{"Handle":{"value":4296},"SafeWaitHandle":{"IsInvalid":false,"IsClosed":false}},"Type":"CancellationToken"}]}
+2025-11-27 15:25:30.897 +03:00 [Error] UpdateAssetTypePrices job error: 42703: a.ApiUrlKey sütunu mevcut değil
+
+POSITION: 16
+2025-11-27 15:29:52.839 +03:00 [Information] Admin kullanıcısı başarıyla oluşturuldu: UserId = 1, UserName = velihasar, Email = vhas_ar@hotmail.com
+2025-11-27 18:21:15.333 +03:00 [Information] {"FullName":null,"MethodName":"Handle","User":"?","Parameters":[{"Name":"request","Value":{"UserName":"velihasar","Password":"Adana.14531989."},"Type":"LoginUserQuery"},{"Name":"cancellationToken","Value":{"IsCancellationRequested":false,"CanBeCanceled":false,"WaitHandle":{"Handle":{"value":3812},"SafeWaitHandle":{"IsInvalid":false,"IsClosed":false}},"Type":"CancellationToken"}]}

@@ -1,0 +1,30 @@
+2025-11-18 02:10:08.339 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Diger
+2025-11-18 02:10:08.359 +03:00 [Warning] AssetTypePriceService: Unknown AssetConvertType: Diger
+2025-11-18 02:10:08.359 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for YarimAltin
+2025-11-18 02:10:08.523 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-18 02:10:08.529 +03:00 [Information] AssetTypePriceService: Gold-related properties found: CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, IKIBUCUKALTIN, BESLIALTIN, GREMSEALTIN, RESATALTIN, HAMITALTIN
+2025-11-18 02:10:08.541 +03:00 [Information] AssetTypePriceService: Found potential gold property: GRA, ValueKind: Object
+2025-11-18 02:10:08.542 +03:00 [Information] AssetTypePriceService: Property GRA content: {"Selling":5547.49,"Type":"Gold","Name":"GRAMALTIN","Change":-0.07,"Buying":5546.72}
+2025-11-18 02:10:08.542 +03:00 [Information] AssetTypePriceService: Gold price extracted successfully: 5546,72
+2025-11-18 02:10:08.557 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for TamAltin
+2025-11-18 02:10:08.593 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-18 02:10:08.597 +03:00 [Information] AssetTypePriceService: Gold-related properties found: CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, IKIBUCUKALTIN, BESLIALTIN, GREMSEALTIN, RESATALTIN, HAMITALTIN
+2025-11-18 02:10:08.597 +03:00 [Information] AssetTypePriceService: Found potential gold property: GRA, ValueKind: Object
+2025-11-18 02:10:08.598 +03:00 [Information] AssetTypePriceService: Property GRA content: {"Selling":5547.49,"Type":"Gold","Name":"GRAMALTIN","Change":-0.07,"Buying":5546.72}
+2025-11-18 02:10:08.598 +03:00 [Information] AssetTypePriceService: Gold price extracted successfully: 5546,72
+2025-11-18 02:10:08.604 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Avro
+2025-11-18 02:10:08.646 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for GrAltin
+2025-11-18 02:10:08.680 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-18 02:10:08.680 +03:00 [Information] AssetTypePriceService: Gold-related properties found: CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, IKIBUCUKALTIN, BESLIALTIN, GREMSEALTIN, RESATALTIN, HAMITALTIN
+2025-11-18 02:10:08.680 +03:00 [Information] AssetTypePriceService: Found potential gold property: GRA, ValueKind: Object
+2025-11-18 02:10:08.680 +03:00 [Information] AssetTypePriceService: Property GRA content: {"Selling":5547.49,"Type":"Gold","Name":"GRAMALTIN","Change":-0.07,"Buying":5546.72}
+2025-11-18 02:10:08.680 +03:00 [Information] AssetTypePriceService: Gold price extracted successfully: 5546,72
+2025-11-18 02:10:08.683 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for CeyrekAltin
+2025-11-18 02:10:08.717 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-18 02:10:08.717 +03:00 [Information] AssetTypePriceService: Gold-related properties found: CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, IKIBUCUKALTIN, BESLIALTIN, GREMSEALTIN, RESATALTIN, HAMITALTIN
+2025-11-18 02:10:08.719 +03:00 [Information] AssetTypePriceService: Found potential gold property: GRA, ValueKind: Object
+2025-11-18 02:10:08.720 +03:00 [Information] AssetTypePriceService: Property GRA content: {"Selling":5547.49,"Type":"Gold","Name":"GRAMALTIN","Change":-0.07,"Buying":5546.72}
+2025-11-18 02:10:08.720 +03:00 [Information] AssetTypePriceService: Gold price extracted successfully: 5546,72
+2025-11-18 02:10:08.725 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Dolar
+2025-11-18 02:10:08.762 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for JaponYeni
+2025-11-18 02:10:08.804 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for IngilizSterlini

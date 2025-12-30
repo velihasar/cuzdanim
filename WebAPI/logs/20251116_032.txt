@@ -1,0 +1,14 @@
+2025-11-16 15:51:48.672 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for GrAltin
+2025-11-16 15:51:48.684 +03:00 [Information] AssetTypePriceService: Calling GetGoldPriceAsync for GrAltin
+2025-11-16 15:51:48.817 +03:00 [Error] AssetTypePriceService: Error getting price for GrAltin. Could not load file or assembly 'HtmlAgilityPack, Version=1.11.71.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a'. Sistem belirtilen dosyayı bulamıyor.. StackTrace:    at Business.Services.AssetTypePriceService.GetGoldPriceAsync(AssetConvertType assetConvertType)
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Business.Services.AssetTypePriceService.GetGoldPriceAsync(AssetConvertType assetConvertType)
+   at Business.Services.AssetTypePriceService.GetPriceForAssetConvertTypeAsync(AssetConvertType assetConvertType) in C:\Cuzdanim\BE\Business\Services\AssetTypePriceService.cs:line 45
+2025-11-16 15:51:48.825 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for CeyrekAltin
+2025-11-16 15:51:48.826 +03:00 [Information] AssetTypePriceService: Calling GetGoldPriceAsync for CeyrekAltin
+2025-11-16 15:51:48.916 +03:00 [Error] AssetTypePriceService: Error getting price for CeyrekAltin. Could not load file or assembly 'HtmlAgilityPack, Version=1.11.71.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a'. Sistem belirtilen dosyayı bulamıyor.. StackTrace:    at Business.Services.AssetTypePriceService.GetGoldPriceAsync(AssetConvertType assetConvertType)
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Business.Services.AssetTypePriceService.GetGoldPriceAsync(AssetConvertType assetConvertType)
+   at Business.Services.AssetTypePriceService.GetPriceForAssetConvertTypeAsync(AssetConvertType assetConvertType) in C:\Cuzdanim\BE\Business\Services\AssetTypePriceService.cs:line 45
+2025-11-16 15:51:48.917 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Dolar
+2025-11-16 15:53:07.332 +03:00 [Information] {"FullName":null,"MethodName":"Handle","User":"?","Parameters":[{"Name":"request","Value":{"GroupName":"Default Group"},"Type":"CreateGroupCommand"},{"Name":"cancellationToken","Value":{"IsCancellationRequested":false,"CanBeCanceled":false,"WaitHandle":{"Handle":{"value":2312},"SafeWaitHandle":{"IsInvalid":false,"IsClosed":false}},"Type":"CancellationToken"}]}

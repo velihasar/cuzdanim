@@ -1,0 +1,11 @@
+2025-11-16 22:54:09.864 +03:00 [Information] 2025.11.16 22:54:09 UpdateAssetTypePrices job started...
+2025-11-16 22:54:09.938 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Gr Altın (GrAltin)
+2025-11-16 22:54:10.950 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=3500,0
+2025-11-16 22:54:10.958 +03:00 [Information] UpdateAssetTypePrices: Updated Gr Altın (GrAltin) to 3500,0
+2025-11-16 22:54:10.959 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Çeyek Altın (CeyrekAltin)
+2025-11-16 22:54:11.383 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=6125,0
+2025-11-16 22:54:11.389 +03:00 [Information] UpdateAssetTypePrices: Updated Çeyek Altın (CeyrekAltin) to 6125,0
+2025-11-16 22:54:11.389 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Dolar (Dolar)
+2025-11-16 22:54:11.430 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=42,1661
+2025-11-16 22:54:11.434 +03:00 [Information] UpdateAssetTypePrices: Updated Dolar (Dolar) to 42,1661
+2025-11-16 22:54:11.434 +03:00 [Information] 2025.11.16 22:54:11 UpdateAssetTypePrices job completed. Success: 3, Failed: 0

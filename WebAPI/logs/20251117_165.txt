@@ -1,0 +1,60 @@
+2025-11-17 14:16:14.274 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for YarimAltin
+2025-11-17 14:16:14.458 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-17 14:16:14.460 +03:00 [Information] AssetTypePriceService: Gold-related properties found: CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, IKIBUCUKALTIN, BESLIALTIN, GREMSEALTIN, RESATALTIN, HAMITALTIN
+2025-11-17 14:16:14.461 +03:00 [Information] AssetTypePriceService: Found potential gold property: GRA, ValueKind: Object
+2025-11-17 14:16:14.465 +03:00 [Information] AssetTypePriceService: Property GRA content: {"Selling":5547.49,"Type":"Gold","Name":"GRAMALTIN","Change":-0.07,"Buying":5546.72}
+2025-11-17 14:16:14.465 +03:00 [Information] AssetTypePriceService: Gold price extracted successfully: 5546,72
+2025-11-17 14:16:14.472 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for TamAltin
+2025-11-17 14:16:14.507 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-17 14:16:14.508 +03:00 [Information] AssetTypePriceService: Gold-related properties found: CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, IKIBUCUKALTIN, BESLIALTIN, GREMSEALTIN, RESATALTIN, HAMITALTIN
+2025-11-17 14:16:14.509 +03:00 [Information] AssetTypePriceService: Found potential gold property: GRA, ValueKind: Object
+2025-11-17 14:16:14.509 +03:00 [Information] AssetTypePriceService: Property GRA content: {"Selling":5547.49,"Type":"Gold","Name":"GRAMALTIN","Change":-0.07,"Buying":5546.72}
+2025-11-17 14:16:14.509 +03:00 [Information] AssetTypePriceService: Gold price extracted successfully: 5546,72
+2025-11-17 14:16:14.517 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Avro
+2025-11-17 14:16:14.566 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Dolar
+2025-11-17 14:16:14.601 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for JaponYeni
+2025-11-17 14:16:14.636 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for IngilizSterlini
+2025-11-17 14:16:14.672 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for GrAltin
+2025-11-17 14:16:14.706 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-17 14:16:14.706 +03:00 [Information] AssetTypePriceService: Gold-related properties found: CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, IKIBUCUKALTIN, BESLIALTIN, GREMSEALTIN, RESATALTIN, HAMITALTIN
+2025-11-17 14:16:14.706 +03:00 [Information] AssetTypePriceService: Found potential gold property: GRA, ValueKind: Object
+2025-11-17 14:16:14.706 +03:00 [Information] AssetTypePriceService: Property GRA content: {"Selling":5547.49,"Type":"Gold","Name":"GRAMALTIN","Change":-0.07,"Buying":5546.72}
+2025-11-17 14:16:14.706 +03:00 [Information] AssetTypePriceService: Gold price extracted successfully: 5546,72
+2025-11-17 14:16:14.708 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for CeyrekAltin
+2025-11-17 14:16:14.756 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-17 14:16:14.756 +03:00 [Information] AssetTypePriceService: Gold-related properties found: CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, IKIBUCUKALTIN, BESLIALTIN, GREMSEALTIN, RESATALTIN, HAMITALTIN
+2025-11-17 14:16:14.756 +03:00 [Information] AssetTypePriceService: Found potential gold property: GRA, ValueKind: Object
+2025-11-17 14:16:14.756 +03:00 [Information] AssetTypePriceService: Property GRA content: {"Selling":5547.49,"Type":"Gold","Name":"GRAMALTIN","Change":-0.07,"Buying":5546.72}
+2025-11-17 14:16:14.756 +03:00 [Information] AssetTypePriceService: Gold price extracted successfully: 5546,72
+2025-11-17 14:17:14.312 +03:00 [Information] 2025.11.17 14:17:14 UpdateAssetTypePrices job started...
+2025-11-17 14:17:14.405 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Yarım Altın (YarimAltin)
+2025-11-17 14:17:14.581 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=19413,520
+2025-11-17 14:17:14.586 +03:00 [Information] UpdateAssetTypePrices: Updated Yarım Altın (YarimAltin) to 19413,520
+2025-11-17 14:17:14.586 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Tam Altın (TamAltin)
+2025-11-17 14:17:14.623 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=38827,040
+2025-11-17 14:17:14.626 +03:00 [Information] UpdateAssetTypePrices: Updated Tam Altın (TamAltin) to 38827,040
+2025-11-17 14:17:14.626 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Euro (EUR) (Avro)
+2025-11-17 14:17:14.669 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=49,1338
+2025-11-17 14:17:14.674 +03:00 [Information] UpdateAssetTypePrices: Updated Euro (EUR) (Avro) to 49,1338
+2025-11-17 14:17:14.674 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Dolar (Dolar)
+2025-11-17 14:17:14.709 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=42,3243
+2025-11-17 14:17:14.710 +03:00 [Information] UpdateAssetTypePrices: Updated Dolar (Dolar) to 42,3243
+2025-11-17 14:17:14.710 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Japon Yeni (JPY) (JaponYeni)
+2025-11-17 14:17:14.744 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=0,002736
+2025-11-17 14:17:14.745 +03:00 [Information] UpdateAssetTypePrices: Updated Japon Yeni (JPY) (JaponYeni) to 0,002736
+2025-11-17 14:17:14.745 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for İngiliz Sterlini (GBP) (IngilizSterlini)
+2025-11-17 14:17:14.779 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=55,6905
+2025-11-17 14:17:14.780 +03:00 [Information] UpdateAssetTypePrices: Updated İngiliz Sterlini (GBP) (IngilizSterlini) to 55,6905
+2025-11-17 14:17:14.780 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Gram Altın (GrAltin)
+2025-11-17 14:17:14.815 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=5546,72
+2025-11-17 14:17:14.817 +03:00 [Information] UpdateAssetTypePrices: Updated Gram Altın (GrAltin) to 5546,72
+2025-11-17 14:17:14.817 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Çeyrek Altın (CeyrekAltin)
+2025-11-17 14:17:14.851 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=9706,7600
+2025-11-17 14:17:14.853 +03:00 [Information] UpdateAssetTypePrices: Updated Çeyrek Altın (CeyrekAltin) to 9706,7600
+2025-11-17 14:17:14.853 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Nakit (JaponYeni)
+2025-11-17 14:17:14.887 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=0,002736
+2025-11-17 14:17:14.888 +03:00 [Information] UpdateAssetTypePrices: Updated Nakit (JaponYeni) to 0,002736
+2025-11-17 14:17:14.889 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Aaa (JaponYeni)
+2025-11-17 14:17:14.922 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=0,002736
+2025-11-17 14:17:14.923 +03:00 [Information] UpdateAssetTypePrices: Updated Aaa (JaponYeni) to 0,002736
+2025-11-17 14:17:14.923 +03:00 [Information] 2025.11.17 14:17:14 UpdateAssetTypePrices job completed. Success: 10, Failed: 0

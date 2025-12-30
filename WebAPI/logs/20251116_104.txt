@@ -1,0 +1,13 @@
+2025-11-16 23:12:09.923 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for GrAltin
+2025-11-16 23:12:10.114 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-16 23:12:10.115 +03:00 [Information] AssetTypePriceService: Gold-related properties found: CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, IKIBUCUKALTIN, BESLIALTIN, GREMSEALTIN, RESATALTIN, HAMITALTIN
+2025-11-16 23:12:10.115 +03:00 [Information] AssetTypePriceService: Found potential gold property: GRA, ValueKind: Object
+2025-11-16 23:12:10.115 +03:00 [Information] AssetTypePriceService: Property GRA content: {"Selling":5559.75,"Type":"Gold","Name":"GRAMALTIN","Change":-1.71,"Buying":5558.99}
+2025-11-16 23:12:10.116 +03:00 [Information] AssetTypePriceService: Gold price extracted successfully: 5558,99
+2025-11-16 23:12:10.120 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for CeyrekAltin
+2025-11-16 23:12:10.154 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-16 23:12:10.155 +03:00 [Information] AssetTypePriceService: Gold-related properties found: CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, IKIBUCUKALTIN, BESLIALTIN, GREMSEALTIN, RESATALTIN, HAMITALTIN
+2025-11-16 23:12:10.155 +03:00 [Information] AssetTypePriceService: Found potential gold property: GRA, ValueKind: Object
+2025-11-16 23:12:10.155 +03:00 [Information] AssetTypePriceService: Property GRA content: {"Selling":5559.75,"Type":"Gold","Name":"GRAMALTIN","Change":-1.71,"Buying":5558.99}
+2025-11-16 23:12:10.155 +03:00 [Information] AssetTypePriceService: Gold price extracted successfully: 5558,99
+2025-11-16 23:12:10.159 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Dolar

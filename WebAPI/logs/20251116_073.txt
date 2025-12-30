@@ -1,0 +1,7 @@
+2025-11-16 22:56:14.954 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Dolar
+2025-11-16 22:56:15.156 +03:00 [Warning] AssetTypePriceService: Truncgil API failed, falling back to TCMB. Expected end of string, but instead reached end of data. LineNumber: 0 | BytePositionInLine: 14441.
+2025-11-16 22:56:15.402 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for GrAltin
+2025-11-16 22:56:15.479 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for gold prices. Expected end of string, but instead reached end of data. LineNumber: 0 | BytePositionInLine: 14441.
+2025-11-16 22:56:15.966 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for CeyrekAltin
+2025-11-16 22:56:16.078 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for gold prices. Expected end of string, but instead reached end of data. LineNumber: 0 | BytePositionInLine: 14441.
+2025-11-16 22:56:43.817 +03:00 [Information] {"FullName":null,"MethodName":"Handle","User":"?","Parameters":[{"Name":"request","Value":{"GroupName":"Default Group"},"Type":"CreateGroupCommand"},{"Name":"cancellationToken","Value":{"IsCancellationRequested":false,"CanBeCanceled":false,"WaitHandle":{"Handle":{"value":2300},"SafeWaitHandle":{"IsInvalid":false,"IsClosed":false}},"Type":"CancellationToken"}]}

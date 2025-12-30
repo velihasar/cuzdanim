@@ -1,0 +1,6 @@
+2025-11-16 23:09:09.440 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for GrAltin
+2025-11-16 23:09:09.663 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for gold prices. Expected end of string, but instead reached end of data. LineNumber: 0 | BytePositionInLine: 14476.
+2025-11-16 23:09:10.570 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for CeyrekAltin
+2025-11-16 23:09:10.674 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for gold prices. Expected end of string, but instead reached end of data. LineNumber: 0 | BytePositionInLine: 14476.
+2025-11-16 23:09:11.096 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Dolar
+2025-11-16 23:09:11.211 +03:00 [Warning] AssetTypePriceService: Truncgil API failed, falling back to TCMB. Expected end of string, but instead reached end of data. LineNumber: 0 | BytePositionInLine: 14476.

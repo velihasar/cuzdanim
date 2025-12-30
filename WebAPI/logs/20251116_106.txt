@@ -1,0 +1,5 @@
+2025-11-16 23:13:10.067 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for GrAltin
+2025-11-16 23:13:10.602 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for gold prices. An error occurred while sending the request.
+2025-11-16 23:13:11.513 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for CeyrekAltin
+2025-11-16 23:13:12.046 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for gold prices. An error occurred while sending the request.
+2025-11-16 23:13:12.605 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Dolar

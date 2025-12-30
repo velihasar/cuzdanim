@@ -1,0 +1,8 @@
+2025-11-27 13:49:10.358 +03:00 [Error] UpdateAssetTypePrices: Error updating Çeyrek Altın. An error occurred while saving the entity changes. See the inner exception for details.
+2025-11-27 13:49:10.487 +03:00 [Error] UpdateAssetTypePrices: Error updating Dolar. An error occurred while saving the entity changes. See the inner exception for details.
+2025-11-27 13:49:10.580 +03:00 [Error] UpdateAssetTypePrices: Error updating Japon Yeni (JPY). An error occurred while saving the entity changes. See the inner exception for details.
+2025-11-27 13:49:10.678 +03:00 [Error] UpdateAssetTypePrices: Error updating İngiliz Sterlini (GBP). An error occurred while saving the entity changes. See the inner exception for details.
+2025-11-27 13:49:10.772 +03:00 [Error] UpdateAssetTypePrices: Error updating Yarım Altın. An error occurred while saving the entity changes. See the inner exception for details.
+2025-11-27 13:49:10.860 +03:00 [Error] UpdateAssetTypePrices: Error updating Tam Altın. An error occurred while saving the entity changes. See the inner exception for details.
+2025-11-27 13:49:10.938 +03:00 [Error] UpdateAssetTypePrices: Error updating Euro (EUR). An error occurred while saving the entity changes. See the inner exception for details.
+2025-11-27 13:49:11.025 +03:00 [Error] UpdateAssetTypePrices: Error updating Gram Altın. An error occurred while saving the entity changes. See the inner exception for details.

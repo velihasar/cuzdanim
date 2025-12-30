@@ -1,0 +1,12 @@
+2025-11-16 16:01:36.664 +03:00 [Error] {"ExceptionMessage":"System.Security.SecurityException: AuthorizationsDenied\r\n   at Business.BusinessAspects.SecuredOperation.OnBefore(IInvocation invocation) in C:\\Cuzdanim\\BE\\Business\\BusinessAspects\\SecuredOperation.cs:line 38\r\n   at Core.Utilities.Interceptors.MethodInterception.Intercept(IInvocation invocation) in C:\\Cuzdanim\\BE\\Core\\Utilities\\Interceptors\\MethodInterception.cs:line 12\r\n   at Castle.DynamicProxy.AbstractInvocation.Proceed()\r\n   at Core.Utilities.Interceptors.MethodInterception.Intercept(IInvocation invocation) in C:\\Cuzdanim\\BE\\Core\\Utilities\\Interceptors\\MethodInterception.cs:line 15","FullName":null,"MethodName":"Handle","User":"?","Parameters":[{"Name":"request","Value":{"GroupName":"Default Group"},"Type":"CreateGroupCommand"},{"Name":"cancellationToken","Value":{"IsCancellationRequested":false,"CanBeCanceled":false,"WaitHandle":{"Handle":{"value":2324},"SafeWaitHandle":{"IsInvalid":false,"IsClosed":false}},"Type":"CancellationToken"}]}
+2025-11-16 16:01:39.849 +03:00 [Information] 2025.11.16 16:01:39 UpdateAssetTypePrices job started...
+2025-11-16 16:01:39.981 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Gr Altın (GrAltin)
+2025-11-16 16:01:40.099 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=False, Value=null
+2025-11-16 16:01:40.100 +03:00 [Warning] UpdateAssetTypePrices: Failed to get price for Gr Altın (GrAltin)
+2025-11-16 16:01:40.100 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Çeyek Altın (CeyrekAltin)
+2025-11-16 16:01:40.165 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=False, Value=null
+2025-11-16 16:01:40.165 +03:00 [Warning] UpdateAssetTypePrices: Failed to get price for Çeyek Altın (CeyrekAltin)
+2025-11-16 16:01:40.166 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Dolar (Dolar)
+2025-11-16 16:01:40.571 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=42,1661
+2025-11-16 16:01:40.806 +03:00 [Information] UpdateAssetTypePrices: Updated Dolar (Dolar) to 42,1661
+2025-11-16 16:01:40.807 +03:00 [Information] 2025.11.16 16:01:40 UpdateAssetTypePrices job completed. Success: 1, Failed: 2

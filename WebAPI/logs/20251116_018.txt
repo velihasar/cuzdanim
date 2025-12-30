@@ -1,0 +1,4 @@
+2025-11-16 15:38:50.234 +03:00 [Information] 2025.11.16 15:38:50 UpdateAssetTypePrices job started...
+2025-11-16 15:38:53.073 +03:00 [Warning] UpdateAssetTypePrices: Failed to get price for Gr Altın (GrAltin)
+2025-11-16 15:38:53.518 +03:00 [Information] UpdateAssetTypePrices: Updated Dolar (Dolar) to 42,1661
+2025-11-16 15:38:53.518 +03:00 [Information] 2025.11.16 15:38:53 UpdateAssetTypePrices job completed. Success: 1, Failed: 1

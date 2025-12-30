@@ -1,0 +1,7 @@
+2025-11-27 14:51:17.506 +03:00 [Error] {"ExceptionMessage":"3D000: \"CuzdanimDb\" veritaban� mevcut de�il","FullName":null,"MethodName":"Handle","User":"?","Parameters":[{"Name":"request","Value":{"UserName":null,"Password":"123456"},"Type":"LoginUserQuery"},{"Name":"cancellationToken","Value":{"IsCancellationRequested":false,"CanBeCanceled":false,"WaitHandle":{"Handle":{"value":2296},"SafeWaitHandle":{"IsInvalid":false,"IsClosed":false}},"Type":"CancellationToken"}]}
+2025-11-27 15:07:37.312 +03:00 [Error] UpdateAssetTypePrices job error: 42703: a.ApiUrlKey sütunu mevcut değil
+
+POSITION: 16
+2025-11-27 15:08:07.030 +03:00 [Error] UpdateAssetTypePrices job error: 42703: a.ApiUrlKey sütunu mevcut değil
+
+POSITION: 16

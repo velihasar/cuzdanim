@@ -1,0 +1,26 @@
+2025-11-16 23:20:10.890 +03:00 [Information] 2025.11.16 23:20:10 UpdateAssetTypePrices job started...
+2025-11-16 23:20:10.999 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Gr Altın (GrAltin)
+2025-11-16 23:20:12.245 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=False, Value=null
+2025-11-16 23:20:12.245 +03:00 [Warning] UpdateAssetTypePrices: Failed to get price for Gr Altın (GrAltin)
+2025-11-16 23:20:12.246 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Yarım Altın (YarimAltin)
+2025-11-16 23:20:13.083 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=False, Value=null
+2025-11-16 23:20:13.083 +03:00 [Warning] UpdateAssetTypePrices: Failed to get price for Yarım Altın (YarimAltin)
+2025-11-16 23:20:13.083 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Tam Altın (TamAltin)
+2025-11-16 23:20:13.867 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=False, Value=null
+2025-11-16 23:20:13.867 +03:00 [Warning] UpdateAssetTypePrices: Failed to get price for Tam Altın (TamAltin)
+2025-11-16 23:20:13.867 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Çeyek Altın (CeyrekAltin)
+2025-11-16 23:20:14.718 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=False, Value=null
+2025-11-16 23:20:14.718 +03:00 [Warning] UpdateAssetTypePrices: Failed to get price for Çeyek Altın (CeyrekAltin)
+2025-11-16 23:20:14.718 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Euro (EUR) (Avro)
+2025-11-16 23:20:15.450 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=49,0216
+2025-11-16 23:20:15.459 +03:00 [Information] UpdateAssetTypePrices: Updated Euro (EUR) (Avro) to 49,0216
+2025-11-16 23:20:15.459 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Japon Yeni (JPY) (JaponYeni)
+2025-11-16 23:20:15.937 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=27,1991
+2025-11-16 23:20:15.942 +03:00 [Information] UpdateAssetTypePrices: Updated Japon Yeni (JPY) (JaponYeni) to 27,1991
+2025-11-16 23:20:15.942 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Dolar (Dolar)
+2025-11-16 23:20:16.441 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=42,1661
+2025-11-16 23:20:16.445 +03:00 [Information] UpdateAssetTypePrices: Updated Dolar (Dolar) to 42,1661
+2025-11-16 23:20:16.445 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for İngiliz Sterlini (GBP) (IngilizSterlini)
+2025-11-16 23:20:16.991 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=55,3491
+2025-11-16 23:20:16.998 +03:00 [Information] UpdateAssetTypePrices: Updated İngiliz Sterlini (GBP) (IngilizSterlini) to 55,3491
+2025-11-16 23:20:16.998 +03:00 [Information] 2025.11.16 23:20:16 UpdateAssetTypePrices job completed. Success: 4, Failed: 4

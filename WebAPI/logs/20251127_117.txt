@@ -1,0 +1,6 @@
+2025-11-27 15:14:13.211 +03:00 [Error] UpdateAssetTypePrices job error: 42703: a.ApiUrlKey sütunu mevcut değil
+
+POSITION: 16
+2025-11-27 15:19:00.758 +03:00 [Error] UpdateAssetTypePrices job error: 42703: a.ApiUrlKey sütunu mevcut değil
+
+POSITION: 16

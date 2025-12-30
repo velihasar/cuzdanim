@@ -1,0 +1,14 @@
+2025-12-20 16:34:23.726 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType Çeyrek Altın (ApiUrlKey: api). Bağlanılan uygun olarak belli bir süre içinde yanıt vermediğinden veya kurulan
+bağlantı bağlanılan ana bilgisayar yanıt vermediğinden bir bağlantı kurulamadı. (finans.truncgil.com:443)
+2025-12-20 21:24:23.826 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType Çeyrek Altın (ApiUrlKey: api). Bağlanılan uygun olarak belli bir süre içinde yanıt vermediğinden veya kurulan
+bağlantı bağlanılan ana bilgisayar yanıt vermediğinden bir bağlantı kurulamadı. (finans.truncgil.com:443)
+2025-12-20 21:24:46.868 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType Yarım Altın (ApiUrlKey: api). The SSL connection could not be established, see inner exception.
+2025-12-20 21:41:24.712 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType Çeyrek Altın (ApiUrlKey: api). Bağlanılan uygun olarak belli bir süre içinde yanıt vermediğinden veya kurulan
+bağlantı bağlanılan ana bilgisayar yanıt vermediğinden bir bağlantı kurulamadı. (finans.truncgil.com:443)
+2025-12-20 21:41:45.107 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType Yarım Altın (ApiUrlKey: api). The SSL connection could not be established, see inner exception.
+2025-12-20 21:53:25.382 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType Tam Altın (ApiUrlKey: api). Bağlanılan uygun olarak belli bir süre içinde yanıt vermediğinden veya kurulan
+bağlantı bağlanılan ana bilgisayar yanıt vermediğinden bir bağlantı kurulamadı. (finans.truncgil.com:443)
+2025-12-20 21:59:25.695 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType Tam Altın (ApiUrlKey: api). Bağlanılan uygun olarak belli bir süre içinde yanıt vermediğinden veya kurulan
+bağlantı bağlanılan ana bilgisayar yanıt vermediğinden bir bağlantı kurulamadı. (finans.truncgil.com:443)
+2025-12-20 21:59:46.900 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType Dolar (USD) (ApiUrlKey: api). Bağlanılan uygun olarak belli bir süre içinde yanıt vermediğinden veya kurulan
+bağlantı bağlanılan ana bilgisayar yanıt vermediğinden bir bağlantı kurulamadı. (finans.truncgil.com:443)

@@ -1,0 +1,3 @@
+2025-12-20 14:28:30.138 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType İngiliz Sterlini (GBP) (ApiUrlKey: api). The SSL connection could not be established, see inner exception.
+2025-12-20 14:30:10.340 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType Gram Altın (ApiUrlKey: api). The request was canceled due to the configured HttpClient.Timeout of 100 seconds elapsing.
+2025-12-20 14:30:22.008 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType Çeyrek Altın (ApiUrlKey: api). The SSL connection could not be established, see inner exception.

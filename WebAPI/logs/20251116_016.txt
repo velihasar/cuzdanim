@@ -1,0 +1,5 @@
+2025-11-16 15:34:11.857 +03:00 [Warning] AssetTypePriceService: TCMB XML'de altın bilgisi bulunamadı
+2025-11-16 15:34:12.157 +03:00 [Warning] AssetTypePriceService: altin.org API failed for GrAltin. Error: The SSL connection could not be established, see inner exception.
+2025-11-16 15:34:12.561 +03:00 [Warning] AssetTypePriceService: bigpara API failed for GrAltin. Error: Response status code does not indicate success: 500 (Internal Server Error).
+2025-11-16 15:34:12.561 +03:00 [Warning] AssetTypePriceService: All API attempts failed for GrAltin. Returning null.
+2025-11-16 15:38:47.782 +03:00 [Information] {"FullName":null,"MethodName":"Handle","User":"?","Parameters":[{"Name":"request","Value":{"GroupName":"Default Group"},"Type":"CreateGroupCommand"},{"Name":"cancellationToken","Value":{"IsCancellationRequested":false,"CanBeCanceled":false,"WaitHandle":{"Handle":{"value":2304},"SafeWaitHandle":{"IsInvalid":false,"IsClosed":false}},"Type":"CancellationToken"}]}

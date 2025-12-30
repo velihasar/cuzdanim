@@ -1,0 +1,38 @@
+2025-11-16 16:12:03.282 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for GrAltin
+2025-11-16 16:12:04.318 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for GrAltin. Error: An error occurred while sending the request.
+2025-11-16 16:12:04.423 +03:00 [Warning] AssetTypePriceService: Kapalı Çarşı API failed for GrAltin. Error: Response status code does not indicate success: 404 (Not Found).
+2025-11-16 16:12:04.616 +03:00 [Warning] AssetTypePriceService: altin.org API failed for GrAltin. Error: The SSL connection could not be established, see inner exception.
+2025-11-16 16:12:04.773 +03:00 [Warning] AssetTypePriceService: bigpara API failed for GrAltin. Error: Response status code does not indicate success: 500 (Internal Server Error).
+2025-11-16 16:12:04.773 +03:00 [Information] AssetTypePriceService: Trying altin.org HTML scraping for GrAltin
+2025-11-16 16:12:04.924 +03:00 [Warning] AssetTypePriceService: altin.org HTML scraping failed for GrAltin. Error: The SSL connection could not be established, see inner exception.. StackTrace:    at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.GetStringAsyncCore(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Business.Services.AssetTypePriceService.GetGoldPriceAsync(AssetConvertType assetConvertType) in C:\Cuzdanim\BE\Business\Services\AssetTypePriceService.cs:line 465
+2025-11-16 16:12:04.927 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for CeyrekAltin
+2025-11-16 16:12:05.566 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for CeyrekAltin. Error: An error occurred while sending the request.
+2025-11-16 16:12:05.679 +03:00 [Warning] AssetTypePriceService: Kapalı Çarşı API failed for CeyrekAltin. Error: Response status code does not indicate success: 404 (Not Found).
+2025-11-16 16:12:05.831 +03:00 [Warning] AssetTypePriceService: altin.org API failed for CeyrekAltin. Error: The SSL connection could not be established, see inner exception.
+2025-11-16 16:12:05.976 +03:00 [Warning] AssetTypePriceService: bigpara API failed for CeyrekAltin. Error: Response status code does not indicate success: 500 (Internal Server Error).
+2025-11-16 16:12:05.976 +03:00 [Information] AssetTypePriceService: Trying altin.org HTML scraping for CeyrekAltin
+2025-11-16 16:12:06.188 +03:00 [Warning] AssetTypePriceService: altin.org HTML scraping failed for CeyrekAltin. Error: The SSL connection could not be established, see inner exception.. StackTrace:    at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.GetStringAsyncCore(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Business.Services.AssetTypePriceService.GetGoldPriceAsync(AssetConvertType assetConvertType) in C:\Cuzdanim\BE\Business\Services\AssetTypePriceService.cs:line 465
+2025-11-16 16:12:06.194 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Dolar
+2025-11-16 16:12:38.627 +03:00 [Information] {"FullName":null,"MethodName":"Handle","User":"?","Parameters":[{"Name":"request","Value":{"GroupName":"Default Group"},"Type":"CreateGroupCommand"},{"Name":"cancellationToken","Value":{"IsCancellationRequested":false,"CanBeCanceled":false,"WaitHandle":{"Handle":{"value":2312},"SafeWaitHandle":{"IsInvalid":false,"IsClosed":false}},"Type":"CancellationToken"}]}

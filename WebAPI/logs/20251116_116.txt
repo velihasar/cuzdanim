@@ -1,0 +1,16 @@
+2025-11-16 23:18:10.692 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for GrAltin
+2025-11-16 23:18:11.215 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for gold prices. An error occurred while sending the request.
+2025-11-16 23:18:11.916 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for YarimAltin
+2025-11-16 23:18:12.426 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for gold prices. An error occurred while sending the request.
+2025-11-16 23:18:12.835 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for TamAltin
+2025-11-16 23:18:13.338 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for gold prices. An error occurred while sending the request.
+2025-11-16 23:18:13.756 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for CeyrekAltin
+2025-11-16 23:18:14.272 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for gold prices. An error occurred while sending the request.
+2025-11-16 23:18:14.704 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Avro
+2025-11-16 23:18:16.233 +03:00 [Warning] AssetTypePriceService: Truncgil API failed, falling back to TCMB. An error occurred while sending the request.
+2025-11-16 23:18:16.467 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for JaponYeni
+2025-11-16 23:18:16.948 +03:00 [Warning] AssetTypePriceService: Truncgil API failed, falling back to TCMB. An error occurred while sending the request.
+2025-11-16 23:18:16.991 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Dolar
+2025-11-16 23:18:17.469 +03:00 [Warning] AssetTypePriceService: Truncgil API failed, falling back to TCMB. An error occurred while sending the request.
+2025-11-16 23:18:17.515 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for IngilizSterlini
+2025-11-16 23:18:18.062 +03:00 [Warning] AssetTypePriceService: Truncgil API failed, falling back to TCMB. An error occurred while sending the request.

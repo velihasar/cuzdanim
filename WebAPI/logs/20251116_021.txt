@@ -1,0 +1,11 @@
+2025-11-16 15:40:23.094 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for GrAltin. Error: Expected depth to be zero at the end of the JSON payload. There is an open JSON object or array that should be closed. LineNumber: 0 | BytePositionInLine: 14417.
+2025-11-16 15:40:23.342 +03:00 [Warning] AssetTypePriceService: Kapalı Çarşı API failed for GrAltin. Error: Response status code does not indicate success: 404 (Not Found).
+2025-11-16 15:40:23.497 +03:00 [Warning] AssetTypePriceService: altin.org API failed for GrAltin. Error: The SSL connection could not be established, see inner exception.
+2025-11-16 15:40:23.835 +03:00 [Warning] AssetTypePriceService: bigpara API failed for GrAltin. Error: Response status code does not indicate success: 500 (Internal Server Error).
+2025-11-16 15:40:23.836 +03:00 [Warning] AssetTypePriceService: All API attempts failed for GrAltin. Returning null.
+2025-11-16 15:40:24.179 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for CeyrekAltin. Error: Expected depth to be zero at the end of the JSON payload. There is an open JSON object or array that should be closed. LineNumber: 0 | BytePositionInLine: 14417.
+2025-11-16 15:40:24.312 +03:00 [Warning] AssetTypePriceService: Kapalı Çarşı API failed for CeyrekAltin. Error: Response status code does not indicate success: 404 (Not Found).
+2025-11-16 15:40:24.458 +03:00 [Warning] AssetTypePriceService: altin.org API failed for CeyrekAltin. Error: The SSL connection could not be established, see inner exception.
+2025-11-16 15:40:24.567 +03:00 [Warning] AssetTypePriceService: bigpara API failed for CeyrekAltin. Error: Response status code does not indicate success: 500 (Internal Server Error).
+2025-11-16 15:40:24.567 +03:00 [Warning] AssetTypePriceService: All API attempts failed for CeyrekAltin. Returning null.
+2025-11-16 15:45:27.268 +03:00 [Information] {"FullName":null,"MethodName":"Handle","User":"?","Parameters":[{"Name":"request","Value":{"GroupName":"Default Group"},"Type":"CreateGroupCommand"},{"Name":"cancellationToken","Value":{"IsCancellationRequested":false,"CanBeCanceled":false,"WaitHandle":{"Handle":{"value":2240},"SafeWaitHandle":{"IsInvalid":false,"IsClosed":false}},"Type":"CancellationToken"}]}

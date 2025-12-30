@@ -1,0 +1,18 @@
+2025-11-16 23:03:09.712 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for GrAltin
+2025-11-16 23:03:09.984 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-16 23:03:09.988 +03:00 [Information] AssetTypePriceService: Available properties: Update_Date, USD, EUR, GBP, CHF, CAD, RUB, AED, AUD, DKK, SEK, NOK, JPY, KWD, ZAR, BHD, LYD, SAR, IQD, ILS, IRR, INR, MXN, HUF, NZD, BRL, IDR, CZK, PLN, RON, CNY, ARS, ALL, AZN, BAM, CLP, COP, CRC, DZD, EGP, HKD, ISK, KRW, KZT, LBP, LKR, MAD, MDL, MKD, MYR, OMR, PEN, PHP, PKR, QAR, RSD, SGD, SYP, THB, TWD, UAH, UYU, GEL, TND, BGN, GRA, XU100, DBITCOIN, GUMUS, BRENT, ONS, HAS, CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, YIA, IKIBUCUKALTIN, BESLIALTIN, 
+2025-11-16 23:03:11.020 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for CeyrekAltin
+2025-11-16 23:03:11.084 +03:00 [Information] AssetTypePriceService: Searching for gold in Truncgil API. Total properties: 137
+2025-11-16 23:03:11.084 +03:00 [Information] AssetTypePriceService: Available properties: Update_Date, USD, EUR, GBP, CHF, CAD, RUB, AED, AUD, DKK, SEK, NOK, JPY, KWD, ZAR, BHD, LYD, SAR, IQD, ILS, IRR, INR, MXN, HUF, NZD, BRL, IDR, CZK, PLN, RON, CNY, ARS, ALL, AZN, BAM, CLP, COP, CRC, DZD, EGP, HKD, ISK, KRW, KZT, LBP, LKR, MAD, MDL, MKD, MYR, OMR, PEN, PHP, PKR, QAR, RSD, SGD, SYP, THB, TWD, UAH, UYU, GEL, TND, BGN, GRA, XU100, DBITCOIN, GUMUS, BRENT, ONS, HAS, CEYREKALTIN, YARIMALTIN, TAMALTIN, CUMHURIYETALTINI, ATAALTIN, 14AYARALTIN, 18AYARALTIN, YIA, IKIBUCUKALTIN, BESLIALTIN, 
+2025-11-16 23:03:11.589 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Dolar
+2025-11-16 23:04:09.937 +03:00 [Information] 2025.11.16 23:04:09 UpdateAssetTypePrices job started...
+2025-11-16 23:04:09.984 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Gr Altın (GrAltin)
+2025-11-16 23:04:10.534 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=False, Value=null
+2025-11-16 23:04:10.534 +03:00 [Warning] UpdateAssetTypePrices: Failed to get price for Gr Altın (GrAltin)
+2025-11-16 23:04:10.534 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Çeyek Altın (CeyrekAltin)
+2025-11-16 23:04:10.970 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=False, Value=null
+2025-11-16 23:04:10.970 +03:00 [Warning] UpdateAssetTypePrices: Failed to get price for Çeyek Altın (CeyrekAltin)
+2025-11-16 23:04:10.970 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Dolar (Dolar)
+2025-11-16 23:04:11.312 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=42,1661
+2025-11-16 23:04:11.324 +03:00 [Information] UpdateAssetTypePrices: Updated Dolar (Dolar) to 42,1661
+2025-11-16 23:04:11.324 +03:00 [Information] 2025.11.16 23:04:11 UpdateAssetTypePrices job completed. Success: 1, Failed: 2

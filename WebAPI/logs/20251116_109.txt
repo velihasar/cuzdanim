@@ -1,0 +1,20 @@
+2025-11-16 23:15:10.251 +03:00 [Information] 2025.11.16 23:15:10 UpdateAssetTypePrices job started...
+2025-11-16 23:15:10.299 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Euro (EUR) (Avro)
+2025-11-16 23:15:10.464 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=49,0165
+2025-11-16 23:15:10.528 +03:00 [Information] UpdateAssetTypePrices: Updated Euro (EUR) (Avro) to 49,0165
+2025-11-16 23:15:10.528 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Gr Altın (GrAltin)
+2025-11-16 23:15:10.581 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=5558,99
+2025-11-16 23:15:10.585 +03:00 [Information] UpdateAssetTypePrices: Updated Gr Altın (GrAltin) to 5558,99
+2025-11-16 23:15:10.585 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Çeyek Altın (CeyrekAltin)
+2025-11-16 23:15:10.622 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=9728,2325
+2025-11-16 23:15:10.635 +03:00 [Information] UpdateAssetTypePrices: Updated Çeyek Altın (CeyrekAltin) to 9728,2325
+2025-11-16 23:15:10.635 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Dolar (Dolar)
+2025-11-16 23:15:10.669 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=42,1704
+2025-11-16 23:15:10.686 +03:00 [Information] UpdateAssetTypePrices: Updated Dolar (Dolar) to 42,1704
+2025-11-16 23:15:10.686 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Yarım Altın (YarimAltin)
+2025-11-16 23:15:10.720 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=19456,465
+2025-11-16 23:15:10.736 +03:00 [Information] UpdateAssetTypePrices: Updated Yarım Altın (YarimAltin) to 19456,465
+2025-11-16 23:15:10.736 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Tam Altın (TamAltin)
+2025-11-16 23:15:10.771 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=38912,930
+2025-11-16 23:15:10.777 +03:00 [Information] UpdateAssetTypePrices: Updated Tam Altın (TamAltin) to 38912,930
+2025-11-16 23:15:10.777 +03:00 [Information] 2025.11.16 23:15:10 UpdateAssetTypePrices job completed. Success: 6, Failed: 0

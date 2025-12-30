@@ -1,0 +1,37 @@
+2025-11-16 16:11:03.033 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for GrAltin
+2025-11-16 16:11:03.321 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for GrAltin. Error: Expected end of string, but instead reached end of data. LineNumber: 0 | BytePositionInLine: 14453.
+2025-11-16 16:11:04.215 +03:00 [Warning] AssetTypePriceService: Kapalı Çarşı API failed for GrAltin. Error: Response status code does not indicate success: 404 (Not Found).
+2025-11-16 16:11:04.382 +03:00 [Warning] AssetTypePriceService: altin.org API failed for GrAltin. Error: The SSL connection could not be established, see inner exception.
+2025-11-16 16:11:04.497 +03:00 [Warning] AssetTypePriceService: bigpara API failed for GrAltin. Error: Response status code does not indicate success: 500 (Internal Server Error).
+2025-11-16 16:11:04.497 +03:00 [Information] AssetTypePriceService: Trying altin.org HTML scraping for GrAltin
+2025-11-16 16:11:04.652 +03:00 [Warning] AssetTypePriceService: altin.org HTML scraping failed for GrAltin. Error: The SSL connection could not be established, see inner exception.. StackTrace:    at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.GetStringAsyncCore(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Business.Services.AssetTypePriceService.GetGoldPriceAsync(AssetConvertType assetConvertType) in C:\Cuzdanim\BE\Business\Services\AssetTypePriceService.cs:line 465
+2025-11-16 16:11:04.663 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for CeyrekAltin
+2025-11-16 16:11:04.892 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for CeyrekAltin. Error: Expected end of string, but instead reached end of data. LineNumber: 0 | BytePositionInLine: 14453.
+2025-11-16 16:11:05.047 +03:00 [Warning] AssetTypePriceService: Kapalı Çarşı API failed for CeyrekAltin. Error: Response status code does not indicate success: 404 (Not Found).
+2025-11-16 16:11:05.200 +03:00 [Warning] AssetTypePriceService: altin.org API failed for CeyrekAltin. Error: The SSL connection could not be established, see inner exception.
+2025-11-16 16:11:05.305 +03:00 [Warning] AssetTypePriceService: bigpara API failed for CeyrekAltin. Error: Response status code does not indicate success: 500 (Internal Server Error).
+2025-11-16 16:11:05.305 +03:00 [Information] AssetTypePriceService: Trying altin.org HTML scraping for CeyrekAltin
+2025-11-16 16:11:05.447 +03:00 [Warning] AssetTypePriceService: altin.org HTML scraping failed for CeyrekAltin. Error: The SSL connection could not be established, see inner exception.. StackTrace:    at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.GetStringAsyncCore(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Business.Services.AssetTypePriceService.GetGoldPriceAsync(AssetConvertType assetConvertType) in C:\Cuzdanim\BE\Business\Services\AssetTypePriceService.cs:line 465
+2025-11-16 16:11:05.453 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Dolar

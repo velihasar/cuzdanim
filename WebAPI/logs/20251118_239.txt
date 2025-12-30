@@ -1,0 +1,29 @@
+2025-11-18 17:20:12.770 +03:00 [Information] 2025.11.18 17:20:12 UpdateAssetTypePrices job started...
+2025-11-18 17:20:12.820 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Kripto (Diger)
+2025-11-18 17:20:12.859 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=False, Value=null
+2025-11-18 17:20:12.859 +03:00 [Warning] UpdateAssetTypePrices: Failed to get price for Kripto (Diger)
+2025-11-18 17:20:12.859 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Yarım Altın (YarimAltin)
+2025-11-18 17:20:13.115 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=19413,520
+2025-11-18 17:20:13.144 +03:00 [Error] UpdateAssetTypePrices: Error updating Yarım Altın. The instance of entity type 'AssetType' cannot be tracked because another instance with the key value '{Id: 12}' is already being tracked. When attaching existing entities, ensure that only one entity instance with a given key value is attached.
+2025-11-18 17:20:13.144 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Tam Altın (TamAltin)
+2025-11-18 17:20:13.177 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=38827,040
+2025-11-18 17:20:13.201 +03:00 [Error] UpdateAssetTypePrices: Error updating Tam Altın. The instance of entity type 'AssetType' cannot be tracked because another instance with the key value '{Id: 13}' is already being tracked. When attaching existing entities, ensure that only one entity instance with a given key value is attached.
+2025-11-18 17:20:13.201 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Euro (EUR) (Avro)
+2025-11-18 17:20:13.238 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=49,1338
+2025-11-18 17:20:13.260 +03:00 [Error] UpdateAssetTypePrices: Error updating Euro (EUR). The instance of entity type 'AssetType' cannot be tracked because another instance with the key value '{Id: 14}' is already being tracked. When attaching existing entities, ensure that only one entity instance with a given key value is attached.
+2025-11-18 17:20:13.261 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Gram Altın (GrAltin)
+2025-11-18 17:20:13.293 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=5546,72
+2025-11-18 17:20:13.315 +03:00 [Error] UpdateAssetTypePrices: Error updating Gram Altın. The instance of entity type 'AssetType' cannot be tracked because another instance with the key value '{Id: 2}' is already being tracked. When attaching existing entities, ensure that only one entity instance with a given key value is attached.
+2025-11-18 17:20:13.315 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Çeyrek Altın (CeyrekAltin)
+2025-11-18 17:20:13.353 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=9706,7600
+2025-11-18 17:20:13.373 +03:00 [Error] UpdateAssetTypePrices: Error updating Çeyrek Altın. The instance of entity type 'AssetType' cannot be tracked because another instance with the key value '{Id: 11}' is already being tracked. When attaching existing entities, ensure that only one entity instance with a given key value is attached.
+2025-11-18 17:20:13.373 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Dolar (Dolar)
+2025-11-18 17:20:13.407 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=42,3243
+2025-11-18 17:20:13.425 +03:00 [Error] UpdateAssetTypePrices: Error updating Dolar. The instance of entity type 'AssetType' cannot be tracked because another instance with the key value '{Id: 3}' is already being tracked. When attaching existing entities, ensure that only one entity instance with a given key value is attached.
+2025-11-18 17:20:13.425 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for Japon Yeni (JPY) (JaponYeni)
+2025-11-18 17:20:13.458 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=0,002736
+2025-11-18 17:20:13.479 +03:00 [Error] UpdateAssetTypePrices: Error updating Japon Yeni (JPY). The instance of entity type 'AssetType' cannot be tracked because another instance with the key value '{Id: 15}' is already being tracked. When attaching existing entities, ensure that only one entity instance with a given key value is attached.
+2025-11-18 17:20:13.479 +03:00 [Information] UpdateAssetTypePrices: Calling GetPriceForAssetConvertTypeAsync for İngiliz Sterlini (GBP) (IngilizSterlini)
+2025-11-18 17:20:13.512 +03:00 [Information] UpdateAssetTypePrices: GetPriceForAssetConvertTypeAsync returned: HasValue=True, Value=55,6905
+2025-11-18 17:20:13.530 +03:00 [Error] UpdateAssetTypePrices: Error updating İngiliz Sterlini (GBP). The instance of entity type 'AssetType' cannot be tracked because another instance with the key value '{Id: 16}' is already being tracked. When attaching existing entities, ensure that only one entity instance with a given key value is attached.
+2025-11-18 17:20:13.530 +03:00 [Information] 2025.11.18 17:20:13 UpdateAssetTypePrices job completed. Success: 0, Failed: 9

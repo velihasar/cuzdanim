@@ -1,0 +1,1 @@
+2025-12-20 14:30:22.088 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType İngiliz Sterlini (GBP) (ApiUrlKey: api). The SSL connection could not be established, see inner exception.

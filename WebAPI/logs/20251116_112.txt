@@ -1,0 +1,14 @@
+2025-11-16 23:16:10.339 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Avro
+2025-11-16 23:16:10.839 +03:00 [Warning] AssetTypePriceService: Truncgil API failed, falling back to TCMB. An error occurred while sending the request.
+2025-11-16 23:16:11.078 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for GrAltin
+2025-11-16 23:16:11.598 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for gold prices. An error occurred while sending the request.
+2025-11-16 23:16:12.640 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for Dolar
+2025-11-16 23:16:13.135 +03:00 [Warning] AssetTypePriceService: Truncgil API failed, falling back to TCMB. An error occurred while sending the request.
+2025-11-16 23:16:13.187 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for YarimAltin
+2025-11-16 23:16:13.715 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for gold prices. An error occurred while sending the request.
+2025-11-16 23:16:14.131 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for TamAltin
+2025-11-16 23:16:14.672 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for gold prices. An error occurred while sending the request.
+2025-11-16 23:16:15.095 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for CeyrekAltin
+2025-11-16 23:16:15.685 +03:00 [Warning] AssetTypePriceService: Truncgil API failed for gold prices. An error occurred while sending the request.
+2025-11-16 23:16:16.120 +03:00 [Information] AssetTypePriceService: GetPriceForAssetConvertTypeAsync called for JaponYeni
+2025-11-16 23:16:16.623 +03:00 [Warning] AssetTypePriceService: Truncgil API failed, falling back to TCMB. An error occurred while sending the request.

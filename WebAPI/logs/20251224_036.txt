@@ -1,0 +1,8 @@
+2025-12-24 22:46:01.033 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType İngiliz Sterlini (GBP) (ApiUrlKey: api). An error occurred while sending the request.
+2025-12-24 22:46:01.622 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType Gram Altın (ApiUrlKey: api). An error occurred while sending the request.
+2025-12-24 22:46:02.215 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType Çeyrek Altın (ApiUrlKey: api). An error occurred while sending the request.
+2025-12-24 22:46:02.768 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType Yarım Altın (ApiUrlKey: api). An error occurred while sending the request.
+2025-12-24 22:46:03.294 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType Tam Altın (ApiUrlKey: api). An error occurred while sending the request.
+2025-12-24 22:46:03.816 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType Dolar (USD) (ApiUrlKey: api). An error occurred while sending the request.
+2025-12-24 22:46:04.332 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType Euro (EUR) (ApiUrlKey: api). An error occurred while sending the request.
+2025-12-24 22:46:04.897 +03:00 [Error] AssetTypePriceService: Error getting price from custom API for AssetType Japon Yeni (JPY) (ApiUrlKey: api). An error occurred while sending the request.

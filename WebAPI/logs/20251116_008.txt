@@ -1,0 +1,4 @@
+2025-11-16 15:27:02.764 +03:00 [Warning] AssetTypePriceService: altin.org API failed for GrAltin. Trying alternative. The SSL connection could not be established, see inner exception.
+2025-11-16 15:27:02.776 +03:00 [Warning] AssetTypePriceService: bigpara.com.tr API not implemented yet for GrAltin
+2025-11-16 15:27:02.986 +03:00 [Warning] AssetTypePriceService: TCMB gold price parsing not implemented yet
+2025-11-16 15:29:17.058 +03:00 [Information] {"FullName":null,"MethodName":"Handle","User":"?","Parameters":[{"Name":"request","Value":{"GroupName":"Default Group"},"Type":"CreateGroupCommand"},{"Name":"cancellationToken","Value":{"IsCancellationRequested":false,"CanBeCanceled":false,"WaitHandle":{"Handle":{"value":2324},"SafeWaitHandle":{"IsInvalid":false,"IsClosed":false}},"Type":"CancellationToken"}]}

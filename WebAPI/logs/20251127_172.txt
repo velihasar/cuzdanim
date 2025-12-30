@@ -1,0 +1,4 @@
+2025-11-27 21:46:07.484 +03:00 [Error] AssetTypePriceService: API URL not found for key 'api'
+2025-11-27 21:46:07.545 +03:00 [Error] AssetTypePriceService: API URL not found for key 'api'
+2025-11-27 21:46:07.549 +03:00 [Error] AssetTypePriceService: API URL not found for key 'api'
+2025-11-27 21:46:07.552 +03:00 [Error] AssetTypePriceService: API URL not found for key 'api'
