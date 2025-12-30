@@ -1,5 +1,5 @@
 # Database Configuration
-DB_HOST=localhost
+DB_HOST=postgres
 DB_PORT=5432
 DB_NAME=CuzdanimDb
 DB_USER=postgres
@@ -41,6 +41,7 @@ HANGFIRE_DB_NAME=cuzdanim_hangfire
 HANGFIRE_CONNECTION_STRING=Host=${DB_HOST};Port=${DB_PORT};Database=${HANGFIRE_DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
 HANGFIRE_USERNAME=admin
 HANGFIRE_PASSWORD=admin123
+TaskSchedulerOptions__ConnectionString=Host=${DB_HOST};Port=${DB_PORT};Database=${HANGFIRE_DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
 
 # MongoDB Configuration
 MONGODB_CONNECTIONSTRING=mongodb://mongodb:27017
