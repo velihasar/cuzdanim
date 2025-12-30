@@ -56,15 +56,17 @@ namespace Business.Handlers.Contact.Commands
                 var senderEmail = _configuration.GetSection("EmailConfiguration").GetSection("SenderEmail").Value;
                 var senderName = _configuration.GetSection("EmailConfiguration").GetSection("SenderName").Value;
                 
-                if (string.IsNullOrEmpty(senderEmail))
-                {
-                    senderEmail = "noreply@cuzdanim.com";
-                }
-                
                 if (string.IsNullOrEmpty(senderName))
                 {
                     senderName = "Cüzdanım";
                 }
+
+                // Support email adresi
+                var supportEmail = "support@masavtech.com";
+                var supportName = senderName + " Support";
+                
+                // Uygulama adı (mail içinde gösterilecek)
+                var appName = senderName;
 
                 // Kullanıcıdan gelen mesajı admin'e gönder
                 var emailContent = $@"
@@ -79,6 +81,7 @@ namespace Business.Handlers.Contact.Commands
         .content {{ background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px; }}
         .info {{ background-color: #fff; padding: 15px; margin: 15px 0; border-left: 4px solid #0a7ea4; }}
         .message {{ background-color: #fff; padding: 20px; margin: 15px 0; border-radius: 5px; }}
+        .app-info {{ background-color: #e3f2fd; padding: 10px; margin: 15px 0; border-radius: 5px; font-size: 12px; color: #666; }}
     </style>
 </head>
 <body>
@@ -87,6 +90,9 @@ namespace Business.Handlers.Contact.Commands
             <h2>Yeni İletişim Formu Mesajı</h2>
         </div>
         <div class='content'>
+            <div class='app-info'>
+                <strong>Uygulama:</strong> {appName}
+            </div>
             <div class='info'>
                 <strong>Kullanıcı Adı:</strong> {request.UserName ?? "Belirtilmemiş"}<br>
                 <strong>E-posta:</strong> {request.UserEmail ?? "Belirtilmemiş"}<br>
@@ -107,16 +113,16 @@ namespace Business.Handlers.Contact.Commands
                     { 
                         new EmailAddress 
                         { 
-                            Name = senderName, 
-                            Address = senderEmail 
+                            Name = supportName, 
+                            Address = supportEmail 
                         } 
                     },
                     FromAddresses = new List<EmailAddress> 
                     { 
                         new EmailAddress 
                         { 
-                            Name = senderName, 
-                            Address = senderEmail 
+                            Name = supportName, 
+                            Address = supportEmail 
                         } 
                     },
                     ReplyToAddresses = !string.IsNullOrWhiteSpace(request.UserEmail) 
@@ -129,7 +135,7 @@ namespace Business.Handlers.Contact.Commands
                             } 
                         }
                         : new List<EmailAddress>(),
-                    Subject = $"Cüzdanım - İletişim Formu: {request.Subject}",
+                    Subject = $"{appName} - İletişim Formu: {request.Subject}",
                     Content = emailContent
                 };
 
