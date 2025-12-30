@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using ConfigurationManager = Business.ConfigurationManager;
@@ -121,6 +122,21 @@ namespace WebAPI
         /// <param name="env"></param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // ✅ Auto Migration
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                try
+                {
+                    var db = scope.ServiceProvider.GetRequiredService<DataAccess.Concrete.EntityFramework.Contexts.ProjectDbContext>();
+                    db.Database.Migrate(); // deploy sırasında migrationları uygular
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Migration hatası: {ex.Message}");
+                    // Hata olsa bile uygulamanın çalışmasına devam etsin
+                }
+            }
+
             // VERY IMPORTANT. Since we removed the build from AddDependencyResolvers, let's set the Service provider manually.
             // By the way, we can construct with DI by taking type to avoid calling static methods in aspects.
             ServiceTool.ServiceProvider = app.ApplicationServices;
