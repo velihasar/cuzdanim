@@ -56,12 +56,17 @@ namespace Business.Handlers.Contact.Commands
                 var senderEmail = _configuration.GetSection("EmailConfiguration").GetSection("SenderEmail").Value;
                 var senderName = _configuration.GetSection("EmailConfiguration").GetSection("SenderName").Value;
                 
+                if (string.IsNullOrEmpty(senderEmail))
+                {
+                    senderEmail = "noreply@cuzdanim.com";
+                }
+                
                 if (string.IsNullOrEmpty(senderName))
                 {
                     senderName = "Cüzdanım";
                 }
 
-                // Support email adresi
+                // Support email adresi (alıcı)
                 var supportEmail = "support@masavtech.com";
                 var supportName = senderName + " Support";
                 
@@ -121,8 +126,8 @@ namespace Business.Handlers.Contact.Commands
                     { 
                         new EmailAddress 
                         { 
-                            Name = supportName, 
-                            Address = supportEmail 
+                            Name = senderName, 
+                            Address = senderEmail 
                         } 
                     },
                     ReplyToAddresses = !string.IsNullOrWhiteSpace(request.UserEmail) 
