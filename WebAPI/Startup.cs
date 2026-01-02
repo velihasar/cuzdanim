@@ -166,16 +166,14 @@ namespace WebAPI
             // Development modunda da çalıştır (test için)
             _ = app.UseAdminUserCreator();
             
-            if (!env.IsProduction())
-            {
-                app.UseSwagger();
+            // Swagger'ı tüm ortamlarda aç (Production dahil)
+            app.UseSwagger();
 
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("v1/swagger.json", "Cuzdanim");
-                    c.DocExpansion(DocExpansion.None);
-                });
-            }
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("v1/swagger.json", "Cuzdanim");
+                c.DocExpansion(DocExpansion.None);
+            });
 
             app.UseCors("AllowOrigin");
 
