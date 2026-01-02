@@ -58,6 +58,29 @@ namespace WebAPI
         {
             // Business katmanında olan dependency tanımlarının bir metot üzerinden buraya implemente edilmesi.
 
+            // Environment variable'lardan connection string oluştur
+            var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "postgres";
+            var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? "5432";
+            var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "CuzdanimDb";
+            var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "postgres";
+            var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "";
+            var hangfireDbName = Environment.GetEnvironmentVariable("HANGFIRE_DB_NAME") ?? "cuzdanim_hangfire";
+            var hangfireConnectionString = Environment.GetEnvironmentVariable("HANGFIRE_CONNECTION_STRING");
+            
+            // Hangfire connection string yoksa oluştur
+            if (string.IsNullOrEmpty(hangfireConnectionString))
+            {
+                hangfireConnectionString = $"Host={dbHost};Port={dbPort};Database={hangfireDbName};Username={dbUser};Password={dbPassword};Command Timeout=30;Timeout=30;";
+            }
+
+            // Connection string'leri oluştur
+            var pgConnectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword};Command Timeout=30;Timeout=30;";
+
+            // Configuration'a ekle (override) - appsettings.json'daki ${VAR} formatını replace et
+            Configuration["ConnectionStrings:DArchPgContext"] = pgConnectionString;
+            Configuration["TaskSchedulerOptions:ConnectionString"] = hangfireConnectionString;
+            Configuration["SeriLogConfigurations:PostgreConfiguration:ConnectionString"] = pgConnectionString;
+
             services.AddControllers()
                 .AddJsonOptions(options =>
                 {
