@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  webapi:
+    build:
+      context: .
+      dockerfile: WebAPI/Dockerfile
+    ports:
+      - "8080:80"  # Dış port:Container içi port (80 yerine 8080 kullanarak port çakışmasını önlüyoruz)
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+    env_file:
+      - .env
+    restart: unless-stopped
+
