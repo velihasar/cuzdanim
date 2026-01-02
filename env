@@ -38,10 +38,10 @@ RABBITMQ_PASSWORD=guest
 
 # Hangfire Configuration
 HANGFIRE_DB_NAME=cuzdanim_hangfire
-HANGFIRE_CONNECTION_STRING=Host=postgresql-database-x0okocg48g0o8g4ooc08kkoo;Port=5432;Database=cuzdanim_hangfire;Username=postgres;Password=Adana.14531989
+HANGFIRE_CONNECTION_STRING=Host=postgresql-database-x0okocg48g0o8g4ooc08kkoo;Port=5432;Database=cuzdanim_hangfire;Username=postgres;Password=Adana.14531989;Command Timeout=30;Timeout=30;
 HANGFIRE_USERNAME=admin
 HANGFIRE_PASSWORD=admin123
-TaskSchedulerOptions__ConnectionString=Host=postgresql-database-x0okocg48g0o8g4ooc08kkoo;Port=5432;Database=cuzdanim_hangfire;Username=postgres;Password=Adana.14531989
+TaskSchedulerOptions__ConnectionString=Host=postgresql-database-x0okocg48g0o8g4ooc08kkoo;Port=5432;Database=cuzdanim_hangfire;Username=postgres;Password=Adana.14531989;Command Timeout=30;Timeout=30;
 
 # MongoDB Configuration
 MONGODB_CONNECTIONSTRING=mongodb://mongodb:27017

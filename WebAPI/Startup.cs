@@ -122,22 +122,133 @@ namespace WebAPI
         /// <param name="env"></param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // ✅ Auto Migration - Geçici olarak kapatıldı (test için - database bağlantı sorunu çözülene kadar)
-            /*
-            using (var scope = app.ApplicationServices.CreateScope())
+            // ✅ Auto Migration - PostgreSQL hazır olana kadar bekleyip retry mekanizması ile çalıştır
+            Console.WriteLine("========================================");
+            Console.WriteLine("Starting database connection and migration process...");
+            Console.WriteLine("========================================");
+            
+            var maxRetries = 15; // 15 kez deneme
+            var migrationSuccess = false;
+            Exception lastException = null;
+
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
             {
                 try
                 {
-                    var db = scope.ServiceProvider.GetRequiredService<DataAccess.Concrete.EntityFramework.Contexts.ProjectDbContext>();
-                    db.Database.Migrate(); // deploy sırasında migrationları uygular
+                    Console.WriteLine($"\n[Attempt {attempt}/{maxRetries}] Trying to connect to PostgreSQL...");
+                    Console.WriteLine($"Connection String: Host=postgresql-database-x0okocg48g0o8g4ooc08kkoo;Port=5432;Database=CuzdanimDb");
+                    
+                    using (var scope = app.ApplicationServices.CreateScope())
+                    {
+                        var db = scope.ServiceProvider.GetRequiredService<DataAccess.Concrete.EntityFramework.Contexts.ProjectDbContext>();
+                        
+                        if (db == null)
+                        {
+                            throw new Exception("Database context is null. ServiceProvider issue.");
+                        }
+
+                        Console.WriteLine("Step 1: Testing database connection...");
+                        // Önce connection test et
+                        var canConnect = db.Database.CanConnect();
+                        
+                        if (canConnect)
+                        {
+                            Console.WriteLine($"✓ PostgreSQL connection successful on attempt {attempt}!");
+                            Console.WriteLine("Step 2: Running database migrations...");
+                            
+                            db.Database.Migrate(); // deploy sırasında migrationları uygular
+                            
+                            migrationSuccess = true;
+                            Console.WriteLine("✓ Migrations completed successfully!");
+                            Console.WriteLine("========================================");
+                            break;
+                        }
+                        else
+                        {
+                            throw new Exception("CanConnect() returned false. Database is not accessible.");
+                        }
+                    }
+                }
+                catch (System.Net.Sockets.SocketException socketEx)
+                {
+                    lastException = socketEx;
+                    Console.WriteLine($"✗ Socket Exception on attempt {attempt}/{maxRetries}:");
+                    Console.WriteLine($"  Error Code: {socketEx.ErrorCode}");
+                    Console.WriteLine($"  Socket Error: {socketEx.SocketErrorCode}");
+                    Console.WriteLine($"  Message: {socketEx.Message}");
+                    Console.WriteLine($"  Inner Exception: {socketEx.InnerException?.Message ?? "None"}");
+                    Console.WriteLine($"  Stack Trace: {socketEx.StackTrace}");
+                    
+                    if (attempt < maxRetries)
+                    {
+                        var delaySeconds = attempt <= 5 ? 2 : 3; // İlk 5 denemede 2 saniye, sonra 3 saniye
+                        Console.WriteLine($"  Waiting {delaySeconds} seconds before retry...");
+                        System.Threading.Thread.Sleep(delaySeconds * 1000);
+                    }
+                }
+                catch (Npgsql.NpgsqlException npgsqlEx)
+                {
+                    lastException = npgsqlEx;
+                    Console.WriteLine($"✗ PostgreSQL Exception on attempt {attempt}/{maxRetries}:");
+                    Console.WriteLine($"  Error Code: {npgsqlEx.SqlState}");
+                    Console.WriteLine($"  Message: {npgsqlEx.Message}");
+                    Console.WriteLine($"  Inner Exception: {npgsqlEx.InnerException?.Message ?? "None"}");
+                    Console.WriteLine($"  Stack Trace: {npgsqlEx.StackTrace}");
+                    
+                    if (attempt < maxRetries)
+                    {
+                        var delaySeconds = attempt <= 5 ? 2 : 3;
+                        Console.WriteLine($"  Waiting {delaySeconds} seconds before retry...");
+                        System.Threading.Thread.Sleep(delaySeconds * 1000);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Migration hatası: {ex.Message}");
-                    // Hata olsa bile uygulamanın çalışmasına devam etsin
+                    lastException = ex;
+                    Console.WriteLine($"✗ Exception on attempt {attempt}/{maxRetries}:");
+                    Console.WriteLine($"  Type: {ex.GetType().Name}");
+                    Console.WriteLine($"  Message: {ex.Message}");
+                    Console.WriteLine($"  Inner Exception: {ex.InnerException?.Message ?? "None"}");
+                    if (ex.InnerException != null)
+                    {
+                        Console.WriteLine($"  Inner Exception Type: {ex.InnerException.GetType().Name}");
+                        Console.WriteLine($"  Inner Exception Stack: {ex.InnerException.StackTrace}");
+                    }
+                    Console.WriteLine($"  Stack Trace: {ex.StackTrace}");
+                    
+                    if (attempt < maxRetries)
+                    {
+                        var delaySeconds = attempt <= 5 ? 2 : 3;
+                        Console.WriteLine($"  Waiting {delaySeconds} seconds before retry...");
+                        System.Threading.Thread.Sleep(delaySeconds * 1000);
+                    }
                 }
             }
-            */
+
+            if (!migrationSuccess)
+            {
+                Console.WriteLine("\n========================================");
+                Console.WriteLine("❌ DATABASE MIGRATION FAILED");
+                Console.WriteLine("========================================");
+                Console.WriteLine($"Failed after {maxRetries} attempts.");
+                Console.WriteLine($"Last Exception Type: {lastException?.GetType().Name ?? "Unknown"}");
+                Console.WriteLine($"Last Error Message: {lastException?.Message ?? "Unknown error"}");
+                Console.WriteLine($"Last Inner Exception: {lastException?.InnerException?.Message ?? "None"}");
+                Console.WriteLine("\nPossible causes:");
+                Console.WriteLine("1. PostgreSQL service is not running");
+                Console.WriteLine("2. PostgreSQL service name is incorrect: postgresql-database-x0okocg48g0o8g4ooc08kkoo");
+                Console.WriteLine("3. Network issue - containers are in different networks");
+                Console.WriteLine("4. PostgreSQL is not ready yet (timing issue)");
+                Console.WriteLine("5. Connection string parameters are incorrect");
+                Console.WriteLine("========================================");
+                
+                throw new Exception(
+                    $"Database migration failed after {maxRetries} attempts. " +
+                    $"Last error: {lastException?.GetType().Name} - {lastException?.Message}. " +
+                    $"Inner: {lastException?.InnerException?.Message ?? "None"}. " +
+                    $"Application cannot start without database connection.", 
+                    lastException);
+            }
 
             // VERY IMPORTANT. Since we removed the build from AddDependencyResolvers, let's set the Service provider manually.
             // By the way, we can construct with DI by taking type to avoid calling static methods in aspects.
@@ -162,13 +273,12 @@ namespace WebAPI
             app.ConfigureCustomExceptionMiddleware();
 
             // Önce operation claim'leri oluştur (ve Default Group'u oluşturur)
-            // Geçici olarak kapatıldı (test için - database bağlantı sorunu çözülene kadar)
-            // _ = app.UseDbOperationClaimCreator();
+            // Migration başarılı olduktan sonra çalışacak (database bağlantısı hazır)
+            _ = app.UseDbOperationClaimCreator();
             
             // Sonra admin kullanıcısını oluştur (operation claim'ler hazır olmalı)
             // Development modunda da çalıştır (test için)
-            // Geçici olarak kapatıldı (test için - database bağlantı sorunu çözülene kadar)
-            // _ = app.UseAdminUserCreator();
+            _ = app.UseAdminUserCreator();
             
             // Swagger'ı tüm ortamlarda aç (Production dahil)
             app.UseSwagger();
