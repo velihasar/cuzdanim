@@ -145,18 +145,36 @@ namespace WebAPI
         /// <param name="env"></param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // ✅ Auto Migration
+            // ✅ Auto Migration - Basit retry mekanizması
             using (var scope = app.ApplicationServices.CreateScope())
             {
-                try
+                var maxRetries = 5;
+                var retryDelay = 3000; // 3 saniye
+                var migrationSuccess = false;
+                
+                for (int i = 0; i < maxRetries; i++)
                 {
-                    var db = scope.ServiceProvider.GetRequiredService<DataAccess.Concrete.EntityFramework.Contexts.ProjectDbContext>();
-                    db.Database.Migrate(); // deploy sırasında migrationları uygular
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Migration hatası: {ex.Message}");
-                    // Hata olsa bile uygulamanın çalışmasına devam etsin
+                    try
+                    {
+                        var db = scope.ServiceProvider.GetRequiredService<DataAccess.Concrete.EntityFramework.Contexts.ProjectDbContext>();
+                        db.Database.Migrate(); // deploy sırasında migrationları uygular
+                        Console.WriteLine("✓ Migration başarılı!");
+                        migrationSuccess = true;
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Migration hatası (deneme {i + 1}/{maxRetries}): {ex.Message}");
+                        if (i < maxRetries - 1)
+                        {
+                            Console.WriteLine($"{retryDelay / 1000} saniye bekleniyor...");
+                            System.Threading.Thread.Sleep(retryDelay);
+                        }
+                        else
+                        {
+                            Console.WriteLine("⚠ Migration başarısız, uygulama devam ediyor...");
+                        }
+                    }
                 }
             }
 
