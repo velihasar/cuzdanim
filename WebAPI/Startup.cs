@@ -136,7 +136,7 @@ namespace WebAPI
                 try
                 {
                     Console.WriteLine($"\n[Attempt {attempt}/{maxRetries}] Trying to connect to PostgreSQL...");
-                    Console.WriteLine($"Connection String: Host=postgresql-database-x0okocg48g0o8g4ooc08kkoo;Port=5432;Database=CuzdanimDb");
+                    Console.WriteLine($"Connection String: Host=postgres;Port=5432;Database=CuzdanimDb");
                     
                     using (var scope = app.ApplicationServices.CreateScope())
                     {
@@ -238,7 +238,7 @@ namespace WebAPI
                 Console.WriteLine($"Last Inner Exception: {lastException?.InnerException?.Message ?? "None"}");
                 Console.WriteLine("\nPossible causes:");
                 Console.WriteLine("1. PostgreSQL service is not running");
-                Console.WriteLine("2. PostgreSQL service name is incorrect: postgresql-database-x0okocg48g0o8g4ooc08kkoo");
+                Console.WriteLine("2. PostgreSQL service name is incorrect: postgres");
                 Console.WriteLine("3. Network issue - containers are in different networks");
                 Console.WriteLine("4. PostgreSQL is not ready yet (timing issue)");
                 Console.WriteLine("5. Connection string parameters are incorrect");
