@@ -122,7 +122,8 @@ namespace WebAPI
         /// <param name="env"></param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // ✅ Auto Migration
+            // ✅ Auto Migration - Geçici olarak kapatıldı (test için - database bağlantı sorunu çözülene kadar)
+            /*
             using (var scope = app.ApplicationServices.CreateScope())
             {
                 try
@@ -136,6 +137,7 @@ namespace WebAPI
                     // Hata olsa bile uygulamanın çalışmasına devam etsin
                 }
             }
+            */
 
             // VERY IMPORTANT. Since we removed the build from AddDependencyResolvers, let's set the Service provider manually.
             // By the way, we can construct with DI by taking type to avoid calling static methods in aspects.
