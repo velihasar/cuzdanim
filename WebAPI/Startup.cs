@@ -152,12 +152,36 @@ namespace WebAPI
                 var retryDelay = 3000; // 3 saniye
                 var migrationSuccess = false;
                 
+                // Environment variable'ları logla
+                var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "postgres";
+                var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? "5432";
+                var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "CuzdanimDb";
+                var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "postgres";
+                Console.WriteLine($"🔍 DB Connection Info: Host={dbHost}, Port={dbPort}, Database={dbName}, User={dbUser}");
+                
                 for (int i = 0; i < maxRetries; i++)
                 {
                     try
                     {
                         var db = scope.ServiceProvider.GetRequiredService<DataAccess.Concrete.EntityFramework.Contexts.ProjectDbContext>();
-                        db.Database.Migrate(); // deploy sırasında migrationları uygular
+                        
+                        // Connection string'i logla
+                        var connection = db.Database.GetDbConnection();
+                        var maskedConnectionString = connection.ConnectionString?.Replace("Password=", "Password=***") ?? "null";
+                        Console.WriteLine($"🔍 Connection String: {maskedConnectionString}");
+                        
+                        // DNS test
+                        try
+                        {
+                            var addresses = System.Net.Dns.GetHostAddresses(dbHost);
+                            Console.WriteLine($"🔍 DNS çözümlemesi başarılı: {string.Join(", ", addresses.Select(a => a.ToString()))}");
+                        }
+                        catch (Exception dnsEx)
+                        {
+                            Console.WriteLine($"🔍 DNS çözümleme hatası: {dnsEx.Message}");
+                        }
+                        
+                        db.Database.Migrate();
                         Console.WriteLine("✓ Migration başarılı!");
                         migrationSuccess = true;
                         break;
@@ -165,6 +189,11 @@ namespace WebAPI
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Migration hatası (deneme {i + 1}/{maxRetries}): {ex.Message}");
+                        Console.WriteLine($"Exception Type: {ex.GetType().Name}");
+                        if (ex.InnerException != null)
+                        {
+                            Console.WriteLine($"Inner Exception: {ex.InnerException.GetType().Name} - {ex.InnerException.Message}");
+                        }
                         if (i < maxRetries - 1)
                         {
                             Console.WriteLine($"{retryDelay / 1000} saniye bekleniyor...");
