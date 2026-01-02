@@ -122,193 +122,19 @@ namespace WebAPI
         /// <param name="env"></param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // ✅ Auto Migration - PostgreSQL hazır olana kadar bekleyip retry mekanizması ile çalıştır
-            Console.WriteLine("========================================");
-            Console.WriteLine("PostgreSQL bağlantısı ve migration işlemi başlatılıyor...");
-            Console.WriteLine("========================================");
-            
-            var maxRetries = 30; // 30 kez deneme (DNS çözümleme için daha fazla zaman)
-            var migrationSuccess = false;
-            Exception lastException = null;
-
-            for (int attempt = 1; attempt <= maxRetries; attempt++)
+            // ✅ Auto Migration
+            using (var scope = app.ApplicationServices.CreateScope())
             {
                 try
                 {
-                    Console.WriteLine($"\n[Deneme {attempt}/{maxRetries}] PostgreSQL'e bağlanılmaya çalışılıyor...");
-                    Console.WriteLine($"Bağlantı String: Host=postgres;Port=5432;Database=CuzdanimDb");
-                    
-                    // DNS çözümlemesini önce test et
-                    try
-                    {
-                        Console.WriteLine("Adım 0: DNS çözümlemesi test ediliyor (postgres)...");
-                        var addresses = System.Net.Dns.GetHostAddresses("postgres");
-                        Console.WriteLine($"  ✓ DNS çözümlemesi başarılı! IP adresleri: {string.Join(", ", addresses.Select(a => a.ToString()))}");
-                    }
-                    catch (System.Net.Sockets.SocketException dnsEx)
-                    {
-                        Console.WriteLine($"  ⚠ DNS çözümleme hatası: {dnsEx.Message}");
-                        Console.WriteLine($"  ⚠ Bu normal olabilir - PostgreSQL servisi henüz hazır olmayabilir");
-                        // DNS hatası olsa bile bağlantıyı denemeye devam et
-                    }
-                    catch (Exception dnsEx)
-                    {
-                        Console.WriteLine($"  ⚠ DNS test hatası: {dnsEx.Message}");
-                    }
-                    
-                    using (var scope = app.ApplicationServices.CreateScope())
-                    {
-                        var db = scope.ServiceProvider.GetRequiredService<DataAccess.Concrete.EntityFramework.Contexts.ProjectDbContext>();
-                        
-                        if (db == null)
-                        {
-                            throw new Exception("Database context null. ServiceProvider sorunu.");
-                        }
-
-                        Console.WriteLine("Adım 1: Veritabanı bağlantısı test ediliyor...");
-                        var connection = db.Database.GetDbConnection();
-                        Console.WriteLine($"  Bağlantı tipi: {connection.GetType().Name}");
-                        Console.WriteLine($"  Bağlantı string (maskelenmiş): {connection.ConnectionString?.Replace("Password=Adana.14531989", "Password=***") ?? "null"}");
-                        
-                        connection.Open();
-                        Console.WriteLine($"  ✓ Bağlantı başarıyla açıldı!");
-                        Console.WriteLine($"  Veritabanı: {connection.Database}");
-                        Console.WriteLine($"  Sunucu Versiyonu: {connection.ServerVersion}");
-                        connection.Close();
-                        Console.WriteLine($"  ✓ Bağlantı başarıyla kapatıldı!");
-                        
-                        Console.WriteLine($"✓ PostgreSQL bağlantısı {attempt}. denemede başarılı!");
-                        Console.WriteLine("Adım 2: Veritabanı migration'ları çalıştırılıyor...");
-                        
-                        db.Database.Migrate(); // deploy sırasında migrationları uygular
-                        
-                        migrationSuccess = true;
-                        Console.WriteLine("✓ Migration'lar başarıyla tamamlandı!");
-                        Console.WriteLine("========================================");
-                        break;
-                    }
-                }
-                catch (InvalidOperationException invalidOpEx)
-                {
-                    lastException = invalidOpEx;
-                    var isPendingModelChanges = invalidOpEx.Message.Contains("PendingModelChangesWarning");
-                    
-                    Console.WriteLine($"✗ Geçersiz İşlem Hatası - Deneme {attempt}/{maxRetries}:");
-                    Console.WriteLine($"  Mesaj: {invalidOpEx.Message}");
-                    
-                    if (isPendingModelChanges)
-                    {
-                        Console.WriteLine($"  ⚠ Model'de bekleyen değişiklikler var.");
-                        Console.WriteLine($"  ⚠ Bu genellikle model ile veritabanı arasında uyumsuzluk olduğunu gösterir.");
-                        Console.WriteLine($"  ⚠ Çözüm: Yeni bir migration oluşturun veya veritabanını sıfırlayın.");
-                        Console.WriteLine($"  ⚠ Şimdilik bu warning'i ignore edip devam ediyoruz...");
-                        
-                        // Bu durumda migration'ı atla ve devam et
-                        migrationSuccess = true;
-                        Console.WriteLine("⚠ Migration atlandı - Model değişiklikleri var ama uygulama başlatılıyor");
-                        Console.WriteLine("========================================");
-                        break;
-                    }
-                    
-                    if (attempt < maxRetries)
-                    {
-                        var delaySeconds = Math.Min(2 + (attempt / 3), 8);
-                        Console.WriteLine($"  {delaySeconds} saniye bekleniyor...");
-                        System.Threading.Thread.Sleep(delaySeconds * 1000);
-                    }
-                }
-                catch (System.Net.Sockets.SocketException socketEx)
-                {
-                    lastException = socketEx;
-                    var isDnsError = socketEx.SocketErrorCode == System.Net.Sockets.SocketError.TryAgain || 
-                                    socketEx.SocketErrorCode == System.Net.Sockets.SocketError.HostNotFound ||
-                                    socketEx.Message.Contains("Resource temporarily unavailable") ||
-                                    socketEx.StackTrace?.Contains("Dns.GetHostEntryOrAddressesCore") == true;
-                    
-                    Console.WriteLine($"✗ Socket Hatası - Deneme {attempt}/{maxRetries}:");
-                    Console.WriteLine($"  Hata Kodu: {socketEx.ErrorCode}");
-                    Console.WriteLine($"  Socket Hatası: {socketEx.SocketErrorCode}");
-                    Console.WriteLine($"  Mesaj: {socketEx.Message}");
-                    
-                    if (isDnsError)
-                    {
-                        Console.WriteLine($"  ⚠ DNS Çözümleme Hatası: 'postgres' hostname'i çözülemiyor");
-                        Console.WriteLine($"  ⚠ Olası nedenler:");
-                        Console.WriteLine($"     - PostgreSQL container'ı henüz başlamadı");
-                        Console.WriteLine($"     - Container'lar farklı network'lerde");
-                        Console.WriteLine($"     - Docker network yapılandırması eksik");
-                    }
-                    
-                    if (attempt < maxRetries)
-                    {
-                        // Exponential backoff: İlk denemelerde kısa, sonra daha uzun bekleme
-                        var baseDelay = isDnsError ? 3 : 2; // DNS hataları için daha uzun bekleme
-                        var delaySeconds = Math.Min(baseDelay + (attempt / 3), 10); // Maksimum 10 saniye
-                        Console.WriteLine($"  {delaySeconds} saniye bekleniyor...");
-                        System.Threading.Thread.Sleep(delaySeconds * 1000);
-                    }
-                }
-                catch (Npgsql.NpgsqlException npgsqlEx)
-                {
-                    lastException = npgsqlEx;
-                    Console.WriteLine($"✗ PostgreSQL Hatası - Deneme {attempt}/{maxRetries}:");
-                    Console.WriteLine($"  Hata Kodu: {npgsqlEx.SqlState}");
-                    Console.WriteLine($"  Mesaj: {npgsqlEx.Message}");
-                    Console.WriteLine($"  İç Hata: {npgsqlEx.InnerException?.Message ?? "Yok"}");
-                    
-                    if (attempt < maxRetries)
-                    {
-                        var delaySeconds = Math.Min(2 + (attempt / 3), 8);
-                        Console.WriteLine($"  {delaySeconds} saniye bekleniyor...");
-                        System.Threading.Thread.Sleep(delaySeconds * 1000);
-                    }
+                    var db = scope.ServiceProvider.GetRequiredService<DataAccess.Concrete.EntityFramework.Contexts.ProjectDbContext>();
+                    db.Database.Migrate(); // deploy sırasında migrationları uygular
                 }
                 catch (Exception ex)
                 {
-                    lastException = ex;
-                    Console.WriteLine($"✗ Hata - Deneme {attempt}/{maxRetries}:");
-                    Console.WriteLine($"  Tip: {ex.GetType().Name}");
-                    Console.WriteLine($"  Mesaj: {ex.Message}");
-                    Console.WriteLine($"  İç Hata: {ex.InnerException?.Message ?? "Yok"}");
-                    
-                    if (attempt < maxRetries)
-                    {
-                        var delaySeconds = Math.Min(2 + (attempt / 3), 8);
-                        Console.WriteLine($"  {delaySeconds} saniye bekleniyor...");
-                        System.Threading.Thread.Sleep(delaySeconds * 1000);
-                    }
+                    Console.WriteLine($"Migration hatası: {ex.Message}");
+                    // Hata olsa bile uygulamanın çalışmasına devam etsin
                 }
-            }
-
-            if (!migrationSuccess)
-            {
-                Console.WriteLine("\n========================================");
-                Console.WriteLine("❌ VERİTABANI MİGRATİON BAŞARISIZ");
-                Console.WriteLine("========================================");
-                Console.WriteLine($"{maxRetries} denemeden sonra başarısız oldu.");
-                Console.WriteLine($"Son Hata Tipi: {lastException?.GetType().Name ?? "Bilinmiyor"}");
-                Console.WriteLine($"Son Hata Mesajı: {lastException?.Message ?? "Bilinmeyen hata"}");
-                Console.WriteLine($"İç Hata: {lastException?.InnerException?.Message ?? "Yok"}");
-                Console.WriteLine("\nOlası nedenler:");
-                Console.WriteLine("1. PostgreSQL servisi çalışmıyor");
-                Console.WriteLine("2. PostgreSQL servis adı yanlış: postgres");
-                Console.WriteLine("3. Network sorunu - container'lar farklı network'lerde");
-                Console.WriteLine("4. PostgreSQL henüz hazır değil (zamanlama sorunu)");
-                Console.WriteLine("5. Bağlantı string parametreleri yanlış");
-                Console.WriteLine("6. docker-compose.yaml'da PostgreSQL servisi tanımlı değil");
-                Console.WriteLine("\nÇözüm önerileri:");
-                Console.WriteLine("- docker-compose.yaml dosyasında PostgreSQL servisinin tanımlı olduğundan emin olun");
-                Console.WriteLine("- Container'ların aynı network'te olduğunu kontrol edin");
-                Console.WriteLine("- 'docker-compose ps' ile servislerin çalıştığını kontrol edin");
-                Console.WriteLine("- 'docker-compose logs postgres' ile PostgreSQL loglarını kontrol edin");
-                Console.WriteLine("========================================");
-                
-                throw new Exception(
-                    $"Veritabanı migration'ı {maxRetries} denemeden sonra başarısız oldu. " +
-                    $"Son hata: {lastException?.GetType().Name} - {lastException?.Message}. " +
-                    $"İç hata: {lastException?.InnerException?.Message ?? "Yok"}. " +
-                    $"Veritabanı bağlantısı olmadan uygulama başlatılamaz.", 
-                    lastException);
             }
 
             // VERY IMPORTANT. Since we removed the build from AddDependencyResolvers, let's set the Service provider manually.
