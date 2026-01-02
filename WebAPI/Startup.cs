@@ -148,25 +148,27 @@ namespace WebAPI
                         }
 
                         Console.WriteLine("Step 1: Testing database connection...");
-                        // Önce connection test et
-                        var canConnect = db.Database.CanConnect();
+                        // CanConnect() yerine direkt connection açmayı dene - gerçek exception'ı görmek için
+                        var connection = db.Database.GetDbConnection();
+                        Console.WriteLine($"  Connection type: {connection.GetType().Name}");
+                        Console.WriteLine($"  Connection string (masked): {connection.ConnectionString?.Replace("Password=Adana.14531989", "Password=***") ?? "null"}");
                         
-                        if (canConnect)
-                        {
-                            Console.WriteLine($"✓ PostgreSQL connection successful on attempt {attempt}!");
-                            Console.WriteLine("Step 2: Running database migrations...");
-                            
-                            db.Database.Migrate(); // deploy sırasında migrationları uygular
-                            
-                            migrationSuccess = true;
-                            Console.WriteLine("✓ Migrations completed successfully!");
-                            Console.WriteLine("========================================");
-                            break;
-                        }
-                        else
-                        {
-                            throw new Exception("CanConnect() returned false. Database is not accessible.");
-                        }
+                        connection.Open();
+                        Console.WriteLine($"  ✓ Connection opened successfully!");
+                        Console.WriteLine($"  Database: {connection.Database}");
+                        Console.WriteLine($"  Server Version: {connection.ServerVersion}");
+                        connection.Close();
+                        Console.WriteLine($"  ✓ Connection closed successfully!");
+                        
+                        Console.WriteLine($"✓ PostgreSQL connection successful on attempt {attempt}!");
+                        Console.WriteLine("Step 2: Running database migrations...");
+                        
+                        db.Database.Migrate(); // deploy sırasında migrationları uygular
+                        
+                        migrationSuccess = true;
+                        Console.WriteLine("✓ Migrations completed successfully!");
+                        Console.WriteLine("========================================");
+                        break;
                     }
                 }
                 catch (System.Net.Sockets.SocketException socketEx)
