@@ -69,7 +69,15 @@ namespace DataAccess.Concrete.EntityFramework.Contexts
             if (!optionsBuilder.IsConfigured)
             {
                 base.OnConfiguring(optionsBuilder.UseNpgsql(Configuration.GetConnectionString("DArchPgContext"))
-                    .EnableSensitiveDataLogging());
+                    .EnableSensitiveDataLogging()
+                    .ConfigureWarnings(warnings => 
+                        warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning)));
+            }
+            else
+            {
+                // Eğer zaten configure edilmişse, sadece warning'i suppress et
+                optionsBuilder.ConfigureWarnings(warnings => 
+                    warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
             }
         }
     }
