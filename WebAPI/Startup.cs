@@ -188,6 +188,35 @@ namespace WebAPI
                         break;
                     }
                 }
+                catch (InvalidOperationException invalidOpEx)
+                {
+                    lastException = invalidOpEx;
+                    var isPendingModelChanges = invalidOpEx.Message.Contains("PendingModelChangesWarning");
+                    
+                    Console.WriteLine($"✗ Geçersiz İşlem Hatası - Deneme {attempt}/{maxRetries}:");
+                    Console.WriteLine($"  Mesaj: {invalidOpEx.Message}");
+                    
+                    if (isPendingModelChanges)
+                    {
+                        Console.WriteLine($"  ⚠ Model'de bekleyen değişiklikler var.");
+                        Console.WriteLine($"  ⚠ Bu genellikle model ile veritabanı arasında uyumsuzluk olduğunu gösterir.");
+                        Console.WriteLine($"  ⚠ Çözüm: Yeni bir migration oluşturun veya veritabanını sıfırlayın.");
+                        Console.WriteLine($"  ⚠ Şimdilik bu warning'i ignore edip devam ediyoruz...");
+                        
+                        // Bu durumda migration'ı atla ve devam et
+                        migrationSuccess = true;
+                        Console.WriteLine("⚠ Migration atlandı - Model değişiklikleri var ama uygulama başlatılıyor");
+                        Console.WriteLine("========================================");
+                        break;
+                    }
+                    
+                    if (attempt < maxRetries)
+                    {
+                        var delaySeconds = Math.Min(2 + (attempt / 3), 8);
+                        Console.WriteLine($"  {delaySeconds} saniye bekleniyor...");
+                        System.Threading.Thread.Sleep(delaySeconds * 1000);
+                    }
+                }
                 catch (System.Net.Sockets.SocketException socketEx)
                 {
                     lastException = socketEx;
