@@ -160,11 +160,13 @@ namespace WebAPI
             app.ConfigureCustomExceptionMiddleware();
 
             // Önce operation claim'leri oluştur (ve Default Group'u oluşturur)
-            _ = app.UseDbOperationClaimCreator();
+            // Geçici olarak kapatıldı (test için - database bağlantı sorunu çözülene kadar)
+            // _ = app.UseDbOperationClaimCreator();
             
             // Sonra admin kullanıcısını oluştur (operation claim'ler hazır olmalı)
             // Development modunda da çalıştır (test için)
-            _ = app.UseAdminUserCreator();
+            // Geçici olarak kapatıldı (test için - database bağlantı sorunu çözülene kadar)
+            // _ = app.UseAdminUserCreator();
             
             // Swagger'ı tüm ortamlarda aç (Production dahil)
             app.UseSwagger();
