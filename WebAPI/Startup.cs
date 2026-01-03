@@ -73,8 +73,8 @@ namespace WebAPI
                 hangfireConnectionString = $"Host={dbHost};Port={dbPort};Database={hangfireDbName};Username={dbUser};Password={dbPassword};Command Timeout=30;Timeout=30;";
             }
 
-            // Connection string'leri oluştur
-            var pgConnectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword};Command Timeout=30;Timeout=30;";
+            // Connection string'leri oluştur - Timeout değerlerini artır ve pooling ekle
+            var pgConnectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword};Command Timeout=60;Timeout=60;Connection Lifetime=0;Pooling=true;MinPoolSize=1;MaxPoolSize=20;";
 
             // Configuration'a ekle (override) - appsettings.json'daki ${VAR} formatını replace et
             Configuration["ConnectionStrings:DArchPgContext"] = pgConnectionString;
@@ -145,11 +145,11 @@ namespace WebAPI
         /// <param name="env"></param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // ✅ Auto Migration - Basit retry mekanizması
+            // ✅ Auto Migration - Geliştirilmiş retry mekanizması (DNS testi kaldırıldı)
             using (var scope = app.ApplicationServices.CreateScope())
             {
-                var maxRetries = 5;
-                var retryDelay = 3000; // 3 saniye
+                var maxRetries = 20; // Retry sayısını artır (DNS/Network hazır olana kadar)
+                var retryDelay = 5000; // 5 saniye bekleme
                 var migrationSuccess = false;
                 
                 // Environment variable'ları logla
@@ -170,33 +170,59 @@ namespace WebAPI
                         var maskedConnectionString = connection.ConnectionString?.Replace("Password=", "Password=***") ?? "null";
                         Console.WriteLine($"🔍 Connection String: {maskedConnectionString}");
                         
-                        // DNS test
-                        try
-                        {
-                            var addresses = System.Net.Dns.GetHostAddresses(dbHost);
-                            Console.WriteLine($"🔍 DNS çözümlemesi başarılı: {string.Join(", ", addresses.Select(a => a.ToString()))}");
-                        }
-                        catch (Exception dnsEx)
-                        {
-                            Console.WriteLine($"🔍 DNS çözümleme hatası: {dnsEx.Message}");
-                        }
+                        // DNS testini kaldırdık - Npgsql kendi DNS çözümlemesini yapar
+                        // Direkt migration denemesi yapıyoruz, Npgsql daha iyi hata yönetimi yapar
                         
                         db.Database.Migrate();
-                        Console.WriteLine("✓ Migration başarılı!");
+                        Console.WriteLine("✅ Migration başarılı!");
                         migrationSuccess = true;
                         break;
                     }
+                    catch (System.Net.Sockets.SocketException socketEx)
+                    {
+                        // Socket/DNS hataları için özel mesaj
+                        Console.WriteLine($"🔴 Bağlantı hatası (deneme {i + 1}/{maxRetries}): {socketEx.Message}");
+                        Console.WriteLine($"   Exception Type: {socketEx.GetType().Name}");
+                        Console.WriteLine($"   Socket Error Code: {socketEx.SocketErrorCode}");
+                        
+                        if (i < maxRetries - 1)
+                        {
+                            Console.WriteLine($"   ⏳ {retryDelay / 1000} saniye bekleniyor (DNS/Network hazır olana kadar)...");
+                            System.Threading.Thread.Sleep(retryDelay);
+                        }
+                        else
+                        {
+                            Console.WriteLine("⚠ Migration başarısız, uygulama devam ediyor...");
+                            Console.WriteLine("💡 İpucu: PostgreSQL servisinin çalıştığından ve aynı network'te olduğundan emin olun.");
+                        }
+                    }
+                    catch (Npgsql.NpgsqlException npgsqlEx)
+                    {
+                        // PostgreSQL özel hataları
+                        Console.WriteLine($"🔴 PostgreSQL hatası (deneme {i + 1}/{maxRetries}): {npgsqlEx.Message}");
+                        Console.WriteLine($"   Exception Type: {npgsqlEx.GetType().Name}");
+                        
+                        if (i < maxRetries - 1)
+                        {
+                            Console.WriteLine($"   ⏳ {retryDelay / 1000} saniye bekleniyor...");
+                            System.Threading.Thread.Sleep(retryDelay);
+                        }
+                        else
+                        {
+                            Console.WriteLine("⚠ Migration başarısız, uygulama devam ediyor...");
+                        }
+                    }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Migration hatası (deneme {i + 1}/{maxRetries}): {ex.Message}");
-                        Console.WriteLine($"Exception Type: {ex.GetType().Name}");
+                        Console.WriteLine($"🔴 Migration hatası (deneme {i + 1}/{maxRetries}): {ex.Message}");
+                        Console.WriteLine($"   Exception Type: {ex.GetType().Name}");
                         if (ex.InnerException != null)
                         {
-                            Console.WriteLine($"Inner Exception: {ex.InnerException.GetType().Name} - {ex.InnerException.Message}");
+                            Console.WriteLine($"   Inner Exception: {ex.InnerException.GetType().Name} - {ex.InnerException.Message}");
                         }
                         if (i < maxRetries - 1)
                         {
-                            Console.WriteLine($"{retryDelay / 1000} saniye bekleniyor...");
+                            Console.WriteLine($"   ⏳ {retryDelay / 1000} saniye bekleniyor...");
                             System.Threading.Thread.Sleep(retryDelay);
                         }
                         else
