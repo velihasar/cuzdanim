@@ -81,6 +81,47 @@ namespace WebAPI
             Configuration["TaskSchedulerOptions:ConnectionString"] = hangfireConnectionString;
             Configuration["SeriLogConfigurations:PostgreConfiguration:ConnectionString"] = pgConnectionString;
 
+            // JWT TokenOptions için environment variable'ları replace et
+            var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
+            var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
+            var jwtSecurityKey = Environment.GetEnvironmentVariable("JWT_SECURITY_KEY");
+
+            if (!string.IsNullOrEmpty(jwtIssuer))
+            {
+                Configuration["TokenOptions:Issuer"] = jwtIssuer;
+            }
+            if (!string.IsNullOrEmpty(jwtAudience))
+            {
+                Configuration["TokenOptions:Audience"] = jwtAudience;
+            }
+            if (!string.IsNullOrEmpty(jwtSecurityKey))
+            {
+                Configuration["TokenOptions:SecurityKey"] = jwtSecurityKey;
+            }
+
+            // AdminSettings için environment variable'ları replace et (connection string'ler gibi)
+            var adminEmail = Environment.GetEnvironmentVariable("ADMIN_EMAIL");
+            var adminUserName = Environment.GetEnvironmentVariable("ADMIN_USERNAME");
+            var adminPassword = Environment.GetEnvironmentVariable("ADMIN_PASSWORD");
+            var adminFullName = Environment.GetEnvironmentVariable("ADMIN_FULL_NAME");
+
+            if (!string.IsNullOrEmpty(adminEmail))
+            {
+                Configuration["AdminSettings:Email"] = adminEmail;
+            }
+            if (!string.IsNullOrEmpty(adminUserName))
+            {
+                Configuration["AdminSettings:UserName"] = adminUserName;
+            }
+            if (!string.IsNullOrEmpty(adminPassword))
+            {
+                Configuration["AdminSettings:Password"] = adminPassword;
+            }
+            if (!string.IsNullOrEmpty(adminFullName))
+            {
+                Configuration["AdminSettings:FullName"] = adminFullName;
+            }
+
             services.AddControllers()
                 .AddJsonOptions(options =>
                 {
