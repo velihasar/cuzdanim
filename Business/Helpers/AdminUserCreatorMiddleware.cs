@@ -32,16 +32,22 @@ namespace Business.Helpers
             var adminPassword = configuration["AdminSettings:Password"];
             var adminFullName = configuration["AdminSettings:FullName"] ?? "System Administrator";
 
+            // Environment variable'dan gelen değerleri kontrol et (${VAR} formatından geliyorsa null olabilir)
+            var isPasswordFromEnv = !string.IsNullOrWhiteSpace(adminPassword) && !adminPassword.StartsWith("${");
+            var isUserNameFromEnv = !string.IsNullOrWhiteSpace(adminUserName) && !adminUserName.StartsWith("${");
+            var isEmailFromEnv = !string.IsNullOrWhiteSpace(adminEmail) && !adminEmail.StartsWith("${");
+            var isFullNameFromEnv = !string.IsNullOrWhiteSpace(adminFullName) && !adminFullName.StartsWith("${");
+
             // Eğer appsettings'te admin ayarları yoksa, default değerleri kullan
-            if (string.IsNullOrWhiteSpace(adminEmail))
+            if (string.IsNullOrWhiteSpace(adminEmail) || !isEmailFromEnv)
             {
                 adminEmail = "admin@adminmail.com";
             }
-            if (string.IsNullOrWhiteSpace(adminUserName))
+            if (string.IsNullOrWhiteSpace(adminUserName) || !isUserNameFromEnv)
             {
                 adminUserName = "admin";
             }
-            if (string.IsNullOrWhiteSpace(adminPassword))
+            if (string.IsNullOrWhiteSpace(adminPassword) || !isPasswordFromEnv)
             {
                 adminPassword = "Q1w212*_*"; // Production'da mutlaka değiştirin!
             }
@@ -160,8 +166,8 @@ namespace Business.Helpers
                     shouldUpdate = true;
                 }
 
-                // Password güncelleme (sadece appsettings'te belirtilmişse)
-                if (!string.IsNullOrWhiteSpace(adminPassword) && adminPassword != "Q1w212*_*")
+                // Password güncelleme (environment variable'dan geliyorsa veya default değilse)
+                if (isPasswordFromEnv && adminPassword != "Q1w212*_*")
                 {
                     HashingHelper.CreatePasswordHash(adminPassword, out var passwordSalt, out var passwordHash);
                     existingAdmin.PasswordHash = passwordHash;
