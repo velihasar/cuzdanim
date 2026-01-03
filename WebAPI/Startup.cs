@@ -145,11 +145,11 @@ namespace WebAPI
         /// <param name="env"></param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // ✅ Auto Migration - Geliştirilmiş retry mekanizması (DNS testi kaldırıldı)
+            // ✅ Auto Migration - Geliştirilmiş retry mekanizması + Environment variable debugging
             using (var scope = app.ApplicationServices.CreateScope())
             {
-                var maxRetries = 20; // Retry sayısını artır (DNS/Network hazır olana kadar)
-                var retryDelay = 5000; // 5 saniye bekleme
+                var maxRetries = 20;
+                var retryDelay = 5000;
                 var migrationSuccess = false;
                 
                 // Environment variable'ları logla
@@ -157,79 +157,154 @@ namespace WebAPI
                 var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? "5432";
                 var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "CuzdanimDb";
                 var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "postgres";
-                Console.WriteLine($"🔍 DB Connection Info: Host={dbHost}, Port={dbPort}, Database={dbName}, User={dbUser}");
+                var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "";
                 
-                for (int i = 0; i < maxRetries; i++)
+                // Tüm environment variable'ları logla (debugging için)
+                Console.WriteLine("🔍 === Environment Variables Debug ===");
+                Console.WriteLine($"DB_HOST: {dbHost}");
+                Console.WriteLine($"DB_PORT: {dbPort}");
+                Console.WriteLine($"DB_NAME: {dbName}");
+                Console.WriteLine($"DB_USER: {dbUser}");
+                
+                // Coolify'ın sağladığı alternatif environment variable'ları kontrol et
+                var possibleHosts = new List<string> { dbHost };
+                
+                // Coolify'ın sağladığı özel değişkenleri kontrol et
+                var coolifyDbHost = Environment.GetEnvironmentVariable("POSTGRES_HOST");
+                var coolifyDbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+                var postgresServiceName = Environment.GetEnvironmentVariable("POSTGRES_SERVICE_NAME");
+                
+                if (!string.IsNullOrEmpty(coolifyDbHost))
                 {
-                    try
+                    Console.WriteLine($"🔍 POSTGRES_HOST bulundu: {coolifyDbHost}");
+                    possibleHosts.Add(coolifyDbHost);
+                }
+                if (!string.IsNullOrEmpty(postgresServiceName))
+                {
+                    Console.WriteLine($"🔍 POSTGRES_SERVICE_NAME bulundu: {postgresServiceName}");
+                    possibleHosts.Add(postgresServiceName);
+                }
+                if (!string.IsNullOrEmpty(coolifyDbUrl))
+                {
+                    Console.WriteLine($"🔍 DATABASE_URL bulundu: {coolifyDbUrl}");
+                }
+                
+                // Tüm environment variable'ları listele (POSTGRES ile başlayanlar)
+                Console.WriteLine("🔍 PostgreSQL ile ilgili tüm environment variable'lar:");
+                foreach (var envVar in Environment.GetEnvironmentVariables().Cast<System.Collections.DictionaryEntry>()
+                    .Where(e => e.Key.ToString().ToUpper().Contains("POSTGRES") || 
+                               e.Key.ToString().ToUpper().Contains("DB_") ||
+                               e.Key.ToString().ToUpper().Contains("DATABASE")))
+                {
+                    var key = envVar.Key.ToString();
+                    var value = envVar.Value?.ToString() ?? "null";
+                    // Şifreleri maskele
+                    if (key.ToUpper().Contains("PASSWORD") || key.ToUpper().Contains("PASS"))
                     {
-                        var db = scope.ServiceProvider.GetRequiredService<DataAccess.Concrete.EntityFramework.Contexts.ProjectDbContext>();
-                        
-                        // Connection string'i logla
-                        var connection = db.Database.GetDbConnection();
-                        var maskedConnectionString = connection.ConnectionString?.Replace("Password=", "Password=***") ?? "null";
-                        Console.WriteLine($"🔍 Connection String: {maskedConnectionString}");
-                        
-                        // DNS testini kaldırdık - Npgsql kendi DNS çözümlemesini yapar
-                        // Direkt migration denemesi yapıyoruz, Npgsql daha iyi hata yönetimi yapar
-                        
-                        db.Database.Migrate();
-                        Console.WriteLine("✅ Migration başarılı!");
-                        migrationSuccess = true;
+                        value = "***";
+                    }
+                    Console.WriteLine($"   {key} = {value}");
+                }
+                
+                Console.WriteLine($"🔍 DB Connection Info: Host={dbHost}, Port={dbPort}, Database={dbName}, User={dbUser}");
+                Console.WriteLine($"🔍 Denenecek hostname'ler: {string.Join(", ", possibleHosts.Distinct())}");
+                
+                // Her hostname için deneme yap
+                foreach (var hostToTry in possibleHosts.Distinct())
+                {
+                    Console.WriteLine($"\n🔍 Hostname '{hostToTry}' deneniyor...");
+                    
+                    // Connection string'i oluştur
+                    var testConnectionString = $"Host={hostToTry};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword};Command Timeout=60;Timeout=60;Connection Lifetime=0;Pooling=true;MinPoolSize=1;MaxPoolSize=20;";
+                    
+                    for (int i = 0; i < maxRetries; i++)
+                    {
+                        try
+                        {
+                            // Connection string'i Configuration'a geçici olarak set et
+                            Configuration["ConnectionStrings:DArchPgContext"] = testConnectionString;
+                            
+                            // Yeni scope oluştur ve DbContext'i al
+                            using (var testScope = app.ApplicationServices.CreateScope())
+                            {
+                                var db = testScope.ServiceProvider.GetRequiredService<DataAccess.Concrete.EntityFramework.Contexts.ProjectDbContext>();
+                                
+                                var connection = db.Database.GetDbConnection();
+                                var maskedConnectionString = connection.ConnectionString?.Replace("Password=", "Password=***") ?? "null";
+                                Console.WriteLine($"🔍 Connection String: {maskedConnectionString}");
+                                
+                                db.Database.Migrate();
+                                Console.WriteLine($"✅ Migration başarılı! Hostname: {hostToTry}");
+                                
+                                // Başarılı olursa, connection string'i kalıcı olarak güncelle
+                                Configuration["ConnectionStrings:DArchPgContext"] = testConnectionString;
+                                Configuration["SeriLogConfigurations:PostgreConfiguration:ConnectionString"] = testConnectionString;
+                                
+                                migrationSuccess = true;
+                                break;
+                            }
+                        }
+                        catch (System.Net.Sockets.SocketException socketEx)
+                        {
+                            Console.WriteLine($"🔴 Bağlantı hatası (deneme {i + 1}/{maxRetries}, host: {hostToTry}): {socketEx.Message}");
+                            Console.WriteLine($"   Socket Error Code: {socketEx.SocketErrorCode}");
+                            
+                            if (i < maxRetries - 1)
+                            {
+                                Console.WriteLine($"   ⏳ {retryDelay / 1000} saniye bekleniyor...");
+                                System.Threading.Thread.Sleep(retryDelay);
+                            }
+                            else
+                            {
+                                Console.WriteLine($"   ❌ Hostname '{hostToTry}' başarısız, bir sonraki hostname deneniyor...");
+                            }
+                        }
+                        catch (Npgsql.NpgsqlException npgsqlEx)
+                        {
+                            Console.WriteLine($"🔴 PostgreSQL hatası (deneme {i + 1}/{maxRetries}, host: {hostToTry}): {npgsqlEx.Message}");
+                            
+                            if (i < maxRetries - 1)
+                            {
+                                Console.WriteLine($"   ⏳ {retryDelay / 1000} saniye bekleniyor...");
+                                System.Threading.Thread.Sleep(retryDelay);
+                            }
+                            else
+                            {
+                                Console.WriteLine($"   ❌ Hostname '{hostToTry}' başarısız, bir sonraki hostname deneniyor...");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"🔴 Migration hatası (deneme {i + 1}/{maxRetries}, host: {hostToTry}): {ex.Message}");
+                            Console.WriteLine($"   Exception Type: {ex.GetType().Name}");
+                            if (ex.InnerException != null)
+                            {
+                                Console.WriteLine($"   Inner Exception: {ex.InnerException.GetType().Name} - {ex.InnerException.Message}");
+                            }
+                            
+                            if (i < maxRetries - 1)
+                            {
+                                Console.WriteLine($"   ⏳ {retryDelay / 1000} saniye bekleniyor...");
+                                System.Threading.Thread.Sleep(retryDelay);
+                            }
+                            else
+                            {
+                                Console.WriteLine($"   ❌ Hostname '{hostToTry}' başarısız, bir sonraki hostname deneniyor...");
+                            }
+                        }
+                    }
+                    
+                    if (migrationSuccess)
+                    {
                         break;
                     }
-                    catch (System.Net.Sockets.SocketException socketEx)
-                    {
-                        // Socket/DNS hataları için özel mesaj
-                        Console.WriteLine($"🔴 Bağlantı hatası (deneme {i + 1}/{maxRetries}): {socketEx.Message}");
-                        Console.WriteLine($"   Exception Type: {socketEx.GetType().Name}");
-                        Console.WriteLine($"   Socket Error Code: {socketEx.SocketErrorCode}");
-                        
-                        if (i < maxRetries - 1)
-                        {
-                            Console.WriteLine($"   ⏳ {retryDelay / 1000} saniye bekleniyor (DNS/Network hazır olana kadar)...");
-                            System.Threading.Thread.Sleep(retryDelay);
-                        }
-                        else
-                        {
-                            Console.WriteLine("⚠ Migration başarısız, uygulama devam ediyor...");
-                            Console.WriteLine("💡 İpucu: PostgreSQL servisinin çalıştığından ve aynı network'te olduğundan emin olun.");
-                        }
-                    }
-                    catch (Npgsql.NpgsqlException npgsqlEx)
-                    {
-                        // PostgreSQL özel hataları
-                        Console.WriteLine($"🔴 PostgreSQL hatası (deneme {i + 1}/{maxRetries}): {npgsqlEx.Message}");
-                        Console.WriteLine($"   Exception Type: {npgsqlEx.GetType().Name}");
-                        
-                        if (i < maxRetries - 1)
-                        {
-                            Console.WriteLine($"   ⏳ {retryDelay / 1000} saniye bekleniyor...");
-                            System.Threading.Thread.Sleep(retryDelay);
-                        }
-                        else
-                        {
-                            Console.WriteLine("⚠ Migration başarısız, uygulama devam ediyor...");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"🔴 Migration hatası (deneme {i + 1}/{maxRetries}): {ex.Message}");
-                        Console.WriteLine($"   Exception Type: {ex.GetType().Name}");
-                        if (ex.InnerException != null)
-                        {
-                            Console.WriteLine($"   Inner Exception: {ex.InnerException.GetType().Name} - {ex.InnerException.Message}");
-                        }
-                        if (i < maxRetries - 1)
-                        {
-                            Console.WriteLine($"   ⏳ {retryDelay / 1000} saniye bekleniyor...");
-                            System.Threading.Thread.Sleep(retryDelay);
-                        }
-                        else
-                        {
-                            Console.WriteLine("⚠ Migration başarısız, uygulama devam ediyor...");
-                        }
-                    }
+                }
+                
+                if (!migrationSuccess)
+                {
+                    Console.WriteLine("⚠ Migration başarısız, uygulama devam ediyor...");
+                    Console.WriteLine("💡 İpucu: Coolify'da PostgreSQL servisinin gerçek hostname'ini kontrol edin.");
+                    Console.WriteLine("💡 İpucu: Environment variable'ları yukarıdaki loglardan kontrol edin.");
                 }
             }
 
