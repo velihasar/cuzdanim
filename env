@@ -39,8 +39,8 @@ RABBITMQ_PASSWORD=guest
 # Hangfire Configuration
 HANGFIRE_DB_NAME=cuzdanim_hangfire
 HANGFIRE_CONNECTION_STRING=Host=postgres;Port=5432;Database=cuzdanim_hangfire;Username=postgres;Password=Adana.14531989;Command Timeout=30;Timeout=30;
-HANGFIRE_USERNAME=admin
-HANGFIRE_PASSWORD=admin123
+HANGFIRE_USERNAME=hangfire_velihasar
+HANGFIRE_PASSWORD=Adana.14531989
 TaskSchedulerOptions__ConnectionString=Host=postgres;Port=5432;Database=cuzdanim_hangfire;Username=postgres;Password=Adana.14531989;Command Timeout=30;Timeout=30;
 
 # MongoDB Configuration
@@ -56,7 +56,7 @@ ELASTICSEARCH_PASSWORD=
 TEAMS_WEBHOOK_URL=
 
 # Email Encryption
-EMAIL_ENCRYPTION_KEY=YourSecretEncryptionKey32Chars!!
+EMAIL_ENCRYPTION_KEY=CuzdanimMasavTech2024!Key32!!
 
 # Google OAuth
 GOOGLE_CLIENT_ID=your_google_client_id
