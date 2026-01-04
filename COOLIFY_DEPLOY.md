@@ -41,9 +41,9 @@ DB_PASSWORD=Adana.14531989
 
 #### JWT Configuration
 ```
-JWT_AUDIENCE=www.mamyazilim.com
-JWT_ISSUER=www.mamyazilim.com
-JWT_SECURITY_KEY=!z2x3C4v5B*_*!z2x3C4v5B*_*!z2x3C4v5B*_*
+JWT_AUDIENCE=cuzdanim.masavtech.com
+JWT_ISSUER=cuzdanim.masavtech.com
+JWT_SECURITY_KEY=CuzdanimMasavTech2024!SecureJWTKey48Chars!!
 ```
 
 #### Turnstile Configuration (Opsiyonel)
