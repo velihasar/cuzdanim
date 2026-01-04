@@ -86,8 +86,8 @@ RABBITMQ_PASSWORD=guest
 ```
 HANGFIRE_DB_NAME=cuzdanim_hangfire
 HANGFIRE_CONNECTION_STRING=Host=${DB_HOST};Port=${DB_PORT};Database=${HANGFIRE_DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
-HANGFIRE_USERNAME=admin
-HANGFIRE_PASSWORD=admin123
+HANGFIRE_USERNAME=hangfire_velihasar
+HANGFIRE_PASSWORD=Adana.14531989
 ```
 
 #### MongoDB Configuration
@@ -110,7 +110,7 @@ TEAMS_WEBHOOK_URL=
 
 #### Email Encryption
 ```
-EMAIL_ENCRYPTION_KEY=YourSecretEncryptionKey32Chars!!
+EMAIL_ENCRYPTION_KEY=CuzdanimMasavTech2024!Key32!!
 ```
 
 #### Google OAuth
@@ -148,7 +148,7 @@ dotnet ef database update --project DataAccess --startup-project WebAPI
 
 - **Logs** sekmesinden uygulama loglarını takip edebilirsiniz
 - **Health Check** endpoint'i: `/health` (varsa)
-- **Hangfire Dashboard**: `/hangfire` (admin/admin123 ile giriş)
+- **Hangfire Dashboard**: `/hangfire` (hangfire_velihasar/Adana.14531989 ile giriş)
 - **Swagger UI**: Production'da kapalı (sadece Development/Staging'de açık)
 
 ## 🔍 Troubleshooting
@@ -263,7 +263,7 @@ redis-cli -h redis -p 6379 -a your_password ping
 - `GET /api/asset-types` - Varlık türleri
 
 ### Hangfire Dashboard
-- `/hangfire` - Background job yönetimi (admin/admin123)
+- `/hangfire` - Background job yönetimi (hangfire_velihasar/Adana.14531989)
 
 ## 🆘 Destek
 

@@ -14,7 +14,7 @@ namespace Core.Utilities.Security.Encyption
             if (string.IsNullOrWhiteSpace(key))
             {
                 // Default key (production'da mutlaka değiştirilmeli)
-                key = "YourSecretEncryptionKey32Chars!!"; // 32 karakter olmalı
+                key = "CuzdanimMasavTech2024!Key32!!"; // 32 karakter olmalı
             }
             return key;
         }
