@@ -10,7 +10,7 @@ namespace Tests.Helpers.Token
     public static class MockJwtTokens
     {
         private static readonly JwtSecurityTokenHandler s_tokenHandler = new ();
-        private static string s_keyString = "!z2x3C4v5B*_*!z2x3C4v5B*_*!z2x3C4v5B*_*";
+        private static string s_keyString = "CuzdanimMasavTech2024!SecureJWTKey48Chars!!";
 
         static MockJwtTokens()
         {
@@ -19,8 +19,8 @@ namespace Tests.Helpers.Token
             SigningCredentials = new SigningCredentials(SecurityKey, SecurityAlgorithms.HmacSha256Signature);
         }
 
-        public static string Issuer { get; } = "www.mamyazilim.com";
-        public static string Audience { get; } = "www.mamyazilim.com";
+        public static string Issuer { get; } = "cuzdanim.masavtech.com";
+        public static string Audience { get; } = "cuzdanim.masavtech.com";
         public static SecurityKey SecurityKey { get; }
         public static SigningCredentials SigningCredentials { get; }
 
