@@ -59,27 +59,38 @@ namespace WebAPI
             // Business katmanında olan dependency tanımlarının bir metot üzerinden buraya implemente edilmesi.
 
             // Environment variable'lardan connection string oluştur
-            var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "postgres";
-            var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? "5432";
-            var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "CuzdanimDb";
-            var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "postgres";
-            var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "";
+            var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
+            var dbPort = Environment.GetEnvironmentVariable("DB_PORT");
+            var dbName = Environment.GetEnvironmentVariable("DB_NAME");
+            var dbUser = Environment.GetEnvironmentVariable("DB_USER");
+            var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
             var hangfireDbName = Environment.GetEnvironmentVariable("HANGFIRE_DB_NAME") ?? "cuzdanim_hangfire";
             var hangfireConnectionString = Environment.GetEnvironmentVariable("HANGFIRE_CONNECTION_STRING");
             
-            // Hangfire connection string yoksa oluştur
-            if (string.IsNullOrEmpty(hangfireConnectionString))
+            // Sadece environment variable'lar varsa override et, yoksa appsettings.json'daki değerleri kullan
+            if (!string.IsNullOrEmpty(dbHost) && !string.IsNullOrEmpty(dbPort) && 
+                !string.IsNullOrEmpty(dbName) && !string.IsNullOrEmpty(dbUser) && 
+                !string.IsNullOrEmpty(dbPassword))
             {
-                hangfireConnectionString = $"Host={dbHost};Port={dbPort};Database={hangfireDbName};Username={dbUser};Password={dbPassword};Command Timeout=30;Timeout=30;";
+                // Hangfire connection string yoksa oluştur
+                if (string.IsNullOrEmpty(hangfireConnectionString))
+                {
+                    hangfireConnectionString = $"Host={dbHost};Port={dbPort};Database={hangfireDbName};Username={dbUser};Password={dbPassword};Command Timeout=30;Timeout=30;";
+                }
+
+                // Connection string'leri oluştur - Timeout değerlerini artır ve pooling ekle
+                var pgConnectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword};Command Timeout=60;Timeout=60;Connection Lifetime=0;Pooling=true;MinPoolSize=1;MaxPoolSize=20;";
+
+                // Configuration'a ekle (override) - appsettings.json'daki ${VAR} formatını replace et
+                Configuration["ConnectionStrings:DArchPgContext"] = pgConnectionString;
+                Configuration["TaskSchedulerOptions:ConnectionString"] = hangfireConnectionString;
+                Configuration["SeriLogConfigurations:PostgreConfiguration:ConnectionString"] = pgConnectionString;
             }
-
-            // Connection string'leri oluştur - Timeout değerlerini artır ve pooling ekle
-            var pgConnectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword};Command Timeout=60;Timeout=60;Connection Lifetime=0;Pooling=true;MinPoolSize=1;MaxPoolSize=20;";
-
-            // Configuration'a ekle (override) - appsettings.json'daki ${VAR} formatını replace et
-            Configuration["ConnectionStrings:DArchPgContext"] = pgConnectionString;
-            Configuration["TaskSchedulerOptions:ConnectionString"] = hangfireConnectionString;
-            Configuration["SeriLogConfigurations:PostgreConfiguration:ConnectionString"] = pgConnectionString;
+            else if (!string.IsNullOrEmpty(hangfireConnectionString))
+            {
+                // Sadece Hangfire connection string varsa onu set et
+                Configuration["TaskSchedulerOptions:ConnectionString"] = hangfireConnectionString;
+            }
 
             // JWT TokenOptions için environment variable'ları replace et
             var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
@@ -193,22 +204,58 @@ namespace WebAPI
                 var retryDelay = 5000;
                 var migrationSuccess = false;
                 
-                // Environment variable'ları logla
-                var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "postgres";
-                var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? "5432";
-                var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "CuzdanimDb";
-                var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "postgres";
-                var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "";
+                // Environment variable'ları kontrol et, yoksa Configuration'dan al
+                var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
+                var dbPort = Environment.GetEnvironmentVariable("DB_PORT");
+                var dbName = Environment.GetEnvironmentVariable("DB_NAME");
+                var dbUser = Environment.GetEnvironmentVariable("DB_USER");
+                var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
+                
+                // Environment variable yoksa Configuration'dan (appsettings.json) al
+                if (string.IsNullOrEmpty(dbHost) || string.IsNullOrEmpty(dbPort) || 
+                    string.IsNullOrEmpty(dbName) || string.IsNullOrEmpty(dbUser) || 
+                    string.IsNullOrEmpty(dbPassword))
+                {
+                    // Configuration'dan connection string'i parse et
+                    var configConnectionString = Configuration.GetConnectionString("DArchPgContext");
+                    if (!string.IsNullOrEmpty(configConnectionString))
+                    {
+                        // Connection string'i parse et: "Host=localhost;Port=5432;Database=CuzdanimDb;Username=postgres;Password=1111;"
+                        var parts = configConnectionString.Split(';');
+                        foreach (var part in parts)
+                        {
+                            if (part.StartsWith("Host=", StringComparison.OrdinalIgnoreCase))
+                                dbHost = dbHost ?? part.Substring(5).Trim();
+                            else if (part.StartsWith("Port=", StringComparison.OrdinalIgnoreCase))
+                                dbPort = dbPort ?? part.Substring(5).Trim();
+                            else if (part.StartsWith("Database=", StringComparison.OrdinalIgnoreCase))
+                                dbName = dbName ?? part.Substring(9).Trim();
+                            else if (part.StartsWith("Username=", StringComparison.OrdinalIgnoreCase))
+                                dbUser = dbUser ?? part.Substring(9).Trim();
+                            else if (part.StartsWith("Password=", StringComparison.OrdinalIgnoreCase))
+                                dbPassword = dbPassword ?? part.Substring(9).Trim();
+                        }
+                    }
+                }
                 
                 // Tüm environment variable'ları logla (debugging için)
                 Console.WriteLine("🔍 === Environment Variables Debug ===");
-                Console.WriteLine($"DB_HOST: {dbHost}");
-                Console.WriteLine($"DB_PORT: {dbPort}");
-                Console.WriteLine($"DB_NAME: {dbName}");
-                Console.WriteLine($"DB_USER: {dbUser}");
+                Console.WriteLine($"DB_HOST: {dbHost ?? "null (using appsettings.json)"}");
+                Console.WriteLine($"DB_PORT: {dbPort ?? "null (using appsettings.json)"}");
+                Console.WriteLine($"DB_NAME: {dbName ?? "null (using appsettings.json)"}");
+                Console.WriteLine($"DB_USER: {dbUser ?? "null (using appsettings.json)"}");
                 
                 // Coolify'ın sağladığı alternatif environment variable'ları kontrol et
-                var possibleHosts = new List<string> { dbHost };
+                var possibleHosts = new List<string>();
+                if (!string.IsNullOrEmpty(dbHost))
+                {
+                    possibleHosts.Add(dbHost);
+                }
+                // Eğer hala host yoksa, localhost'u ekle
+                if (possibleHosts.Count == 0)
+                {
+                    possibleHosts.Add("localhost");
+                }
                 
                 // Coolify'ın sağladığı özel değişkenleri kontrol et
                 var coolifyDbHost = Environment.GetEnvironmentVariable("POSTGRES_HOST");
