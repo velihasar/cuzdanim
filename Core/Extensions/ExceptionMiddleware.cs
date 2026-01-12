@@ -40,31 +40,35 @@ namespace Core.Extensions
 
         private async Task HandleExceptionAsync(HttpContext httpContext, Exception e)
         {
-            // Log exception
+            // Log exception - hem FileLogger hem Console'a yaz
             try
             {
+                var requestPath = httpContext.Request.Path;
+                var requestMethod = httpContext.Request.Method;
+                var requestBody = await GetRequestBodyAsync(httpContext);
+                
+                var logMessage = $"[ExceptionMiddleware] Exception caught - " +
+                                $"Path: {requestPath}, " +
+                                $"Method: {requestMethod}, " +
+                                $"Exception Type: {e.GetType().Name}, " +
+                                $"Message: {e.Message}, " +
+                                $"StackTrace: {e.StackTrace}, " +
+                                $"InnerException: {(e.InnerException != null ? e.InnerException.Message : "None")}, " +
+                                $"Request Body: {requestBody}";
+                
+                // Console'a yaz (Coolify'da görünecek)
+                Console.WriteLine(logMessage);
+                Console.Error.WriteLine(logMessage);
+                
+                // FileLogger'a da yaz
                 var logger = ServiceTool.ServiceProvider?.GetService<FileLogger>();
-                if (logger != null)
-                {
-                    var requestPath = httpContext.Request.Path;
-                    var requestMethod = httpContext.Request.Method;
-                    var requestBody = await GetRequestBodyAsync(httpContext);
-                    
-                    var logMessage = $"[ExceptionMiddleware] Exception caught - " +
-                                    $"Path: {requestPath}, " +
-                                    $"Method: {requestMethod}, " +
-                                    $"Exception Type: {e.GetType().Name}, " +
-                                    $"Message: {e.Message}, " +
-                                    $"StackTrace: {e.StackTrace}, " +
-                                    $"InnerException: {(e.InnerException != null ? e.InnerException.Message : "None")}, " +
-                                    $"Request Body: {requestBody}";
-                    
-                    logger.Error(logMessage);
-                }
+                logger?.Error(logMessage);
             }
-            catch
+            catch (Exception logEx)
             {
-                // Ignore logging errors
+                // Logging hatası olsa bile console'a yaz
+                Console.WriteLine($"[ExceptionMiddleware] Logging error: {logEx.Message}");
+                Console.Error.WriteLine($"[ExceptionMiddleware] Logging error: {logEx.Message}");
             }
 
             httpContext.Response.ContentType = "application/json";
