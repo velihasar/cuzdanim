@@ -53,6 +53,7 @@ namespace Business.Handlers.Authorizations.Commands
             private readonly ICacheManager _cacheManager;
             private readonly IMailService _mailService;
             private readonly IConfiguration _configuration;
+            private readonly FileLogger _logger;
 
             public RegisterUserCommandHandler(
                 IUserRepository userRepository, 
@@ -60,7 +61,8 @@ namespace Business.Handlers.Authorizations.Commands
                 IGroupRepository groupRepository,
                 ICacheManager cacheManager,
                 IMailService mailService,
-                IConfiguration configuration)
+                IConfiguration configuration,
+                FileLogger logger)
             {
                 _userRepository = userRepository;
                 _userGroupRepository = userGroupRepository;
@@ -68,6 +70,7 @@ namespace Business.Handlers.Authorizations.Commands
                 _cacheManager = cacheManager;
                 _mailService = mailService;
                 _configuration = configuration;
+                _logger = logger;
             }
 
 
@@ -76,34 +79,46 @@ namespace Business.Handlers.Authorizations.Commands
             [LogAspect(typeof(FileLogger))]
             public async Task<IResult> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
             {
-                // Null check'ler
-                if (request == null)
+                try
                 {
-                    return new ErrorResult("Geçersiz istek. Lütfen tüm alanları doldurun.");
-                }
+                    // Null check'ler
+                    if (request == null)
+                    {
+                        _logger?.Error("[RegisterUserCommand] Request is null");
+                        return new ErrorResult("Geçersiz istek. Lütfen tüm alanları doldurun.");
+                    }
 
-                if (string.IsNullOrWhiteSpace(request.UserName))
-                {
-                    return new ErrorResult("Kullanıcı adı zorunludur.");
-                }
+                    _logger?.Info($"[RegisterUserCommand] Handle started - UserName: {request.UserName}, Email: {request.Email}, KvkkAccepted: {request.KvkkAccepted}");
 
-                if (string.IsNullOrWhiteSpace(request.Email))
-                {
-                    return new ErrorResult("E-posta adresi zorunludur.");
-                }
+                    if (string.IsNullOrWhiteSpace(request.UserName))
+                    {
+                        return new ErrorResult("Kullanıcı adı zorunludur.");
+                    }
 
-                if (string.IsNullOrWhiteSpace(request.Password))
-                {
-                    return new ErrorResult("Şifre zorunludur.");
-                }
+                    if (string.IsNullOrWhiteSpace(request.Email))
+                    {
+                        return new ErrorResult("E-posta adresi zorunludur.");
+                    }
 
-                if (!request.KvkkAccepted)
-                {
-                    return new ErrorResult("KVKK Aydınlatma Metni'ni kabul etmelisiniz.");
-                }
+                    if (string.IsNullOrWhiteSpace(request.Password))
+                    {
+                        return new ErrorResult("Şifre zorunludur.");
+                    }
 
-                // 1. Username kontrolü
-                var existingUserByUsername = await _userRepository.GetAsync(u => u.UserName == request.UserName);
+                    if (!request.KvkkAccepted)
+                    {
+                        return new ErrorResult("KVKK Aydınlatma Metni'ni kabul etmelisiniz.");
+                    }
+
+                    // Configuration kontrolü
+                    if (_configuration == null)
+                    {
+                        _logger?.Error("[RegisterUserCommand] Configuration is null");
+                        throw new Exception("Configuration is null");
+                    }
+
+                    // 1. Username kontrolü
+                    var existingUserByUsername = await _userRepository.GetAsync(u => u.UserName == request.UserName);
                 
                 User existingUser = null;
                 bool isUpdating = false;
@@ -128,7 +143,18 @@ namespace Business.Handlers.Authorizations.Commands
                 {
                     if (!string.IsNullOrEmpty(userInList.Email))
                     {
-                        var decryptedEmail = EmailEncryptionHelper.DecryptEmail(userInList.Email, _configuration);
+                        string decryptedEmail = null;
+                        try
+                        {
+                            decryptedEmail = EmailEncryptionHelper.DecryptEmail(userInList.Email, _configuration);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger?.Error($"[RegisterUserCommand] Email decryption error for user {userInList.UserId}: {ex.Message}");
+                            // Decrypt edilemezse eski format olarak kabul et
+                            decryptedEmail = null;
+                        }
+                        
                         // Eğer decrypt edilemezse (eski format), direkt karşılaştır
                         if (string.IsNullOrEmpty(decryptedEmail))
                         {
@@ -188,7 +214,16 @@ namespace Business.Handlers.Authorizations.Commands
                 HashingHelper.CreatePasswordHash(request.Password, out var passwordSalt, out var passwordHash);
                 
                 // Email'i deterministik olarak şifrele (arama performansı için)
-                var encryptedEmail = EmailEncryptionHelper.EncryptEmailDeterministic(request.Email, _configuration);
+                string encryptedEmail;
+                try
+                {
+                    encryptedEmail = EmailEncryptionHelper.EncryptEmailDeterministic(request.Email, _configuration);
+                }
+                catch (Exception ex)
+                {
+                    _logger?.Error($"[RegisterUserCommand] Email encryption error: {ex.Message}, StackTrace: {ex.StackTrace}");
+                    throw new Exception($"E-posta şifreleme hatası: {ex.Message}", ex);
+                }
                 
                 User user;
                 
@@ -343,13 +378,12 @@ namespace Business.Handlers.Authorizations.Commands
                 catch (Exception ex)
                 {
                     // Email gönderme hatası - sadece hata durumunda logla
-                    var logger = ServiceTool.ServiceProvider.GetService<FileLogger>();
-                    if (logger != null)
+                    if (_logger != null)
                     {
                         var errorDetails = $"Mail gönderme hatası - Email: {request.Email}, UserName: {request.UserName}, " +
                                          $"Exception Type: {ex.GetType().Name}, Message: {ex.Message}, " +
                                          $"InnerException: {(ex.InnerException != null ? ex.InnerException.Message : "Yok")}";
-                        logger.Error(errorDetails);
+                        _logger.Error(errorDetails);
                     }
                     
                     // Email gönderme hatası olsa bile kullanıcı kaydedildi
@@ -367,6 +401,20 @@ namespace Business.Handlers.Authorizations.Commands
                 }
                 
                 return new SuccessResult("Kayıt işlemi başarılı. E-posta adresinize gönderilen doğrulama kodunu giriniz.");
+                }
+                catch (Exception ex)
+                {
+                    // Genel exception handling
+                    _logger?.Error($"[RegisterUserCommand] Unhandled exception - " +
+                                $"Message: {ex.Message}, " +
+                                $"StackTrace: {ex.StackTrace}, " +
+                                $"InnerException: {(ex.InnerException != null ? ex.InnerException.Message : "None")}, " +
+                                $"UserName: {request?.UserName}, " +
+                                $"Email: {request?.Email}");
+                    
+                    // Exception'ı tekrar fırlat - ExceptionMiddleware yakalayacak
+                    throw;
+                }
             }
         }
     }
