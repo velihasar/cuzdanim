@@ -32,6 +32,7 @@ namespace Business.Handlers.Authorizations.Commands
         public string Password { get; set; }
         public string Email { get; set; }
         public string FullName { get; set; }
+        public bool KvkkAccepted { get; set; }
 
 
         public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, IResult>

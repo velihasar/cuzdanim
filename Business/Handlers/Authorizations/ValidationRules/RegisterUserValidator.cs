@@ -17,6 +17,9 @@ namespace Business.Handlers.Authorizations.ValidationRules
             RuleFor(p => p.Email)
                 .NotEmpty().WithMessage("E-posta adresi zorunludur.")
                 .EmailAddress().WithMessage("Geçerli bir e-posta adresi giriniz.");
+            
+            RuleFor(p => p.KvkkAccepted)
+                .Must(x => x == true).WithMessage("KVKK Aydınlatma Metni'ni kabul etmelisiniz.");
         }
     }
 }

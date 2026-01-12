@@ -72,19 +72,19 @@ namespace WebAPI
                 !string.IsNullOrEmpty(dbName) && !string.IsNullOrEmpty(dbUser) && 
                 !string.IsNullOrEmpty(dbPassword))
             {
-                // Hangfire connection string yoksa oluştur
-                if (string.IsNullOrEmpty(hangfireConnectionString))
-                {
-                    hangfireConnectionString = $"Host={dbHost};Port={dbPort};Database={hangfireDbName};Username={dbUser};Password={dbPassword};Command Timeout=30;Timeout=30;";
-                }
+            // Hangfire connection string yoksa oluştur
+            if (string.IsNullOrEmpty(hangfireConnectionString))
+            {
+                hangfireConnectionString = $"Host={dbHost};Port={dbPort};Database={hangfireDbName};Username={dbUser};Password={dbPassword};Command Timeout=30;Timeout=30;";
+            }
 
-                // Connection string'leri oluştur - Timeout değerlerini artır ve pooling ekle
-                var pgConnectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword};Command Timeout=60;Timeout=60;Connection Lifetime=0;Pooling=true;MinPoolSize=1;MaxPoolSize=20;";
+            // Connection string'leri oluştur - Timeout değerlerini artır ve pooling ekle
+            var pgConnectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword};Command Timeout=60;Timeout=60;Connection Lifetime=0;Pooling=true;MinPoolSize=1;MaxPoolSize=20;";
 
-                // Configuration'a ekle (override) - appsettings.json'daki ${VAR} formatını replace et
-                Configuration["ConnectionStrings:DArchPgContext"] = pgConnectionString;
-                Configuration["TaskSchedulerOptions:ConnectionString"] = hangfireConnectionString;
-                Configuration["SeriLogConfigurations:PostgreConfiguration:ConnectionString"] = pgConnectionString;
+            // Configuration'a ekle (override) - appsettings.json'daki ${VAR} formatını replace et
+            Configuration["ConnectionStrings:DArchPgContext"] = pgConnectionString;
+            Configuration["TaskSchedulerOptions:ConnectionString"] = hangfireConnectionString;
+            Configuration["SeriLogConfigurations:PostgreConfiguration:ConnectionString"] = pgConnectionString;
             }
             else if (!string.IsNullOrEmpty(hangfireConnectionString))
             {
