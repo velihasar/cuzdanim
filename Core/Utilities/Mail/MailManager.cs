@@ -66,15 +66,33 @@ namespace Core.Utilities.Mail
             {
                 // ConnectAsync'e CancellationToken ekle ve timeout ayarla
                 using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(30));
+                
+                Console.WriteLine($"[MailManager] SMTP bağlantısı başlatılıyor - Server: {smtpServer}, Port: {smtpPort}, To: {string.Join(", ", emailMessage.ToAddresses.Select(x => x.Address))}");
+                
                 await emailClient.ConnectAsync(smtpServer, smtpPort, SecureSocketOptions.StartTls, cts.Token);
+                Console.WriteLine($"[MailManager] SMTP bağlantısı başarılı");
+                
                 await emailClient.AuthenticateAsync(userName, password, cts.Token);
+                Console.WriteLine($"[MailManager] SMTP kimlik doğrulama başarılı");
+                
                 await emailClient.SendAsync(message, cts.Token);
+                Console.WriteLine($"[MailManager] Email gönderildi - To: {string.Join(", ", emailMessage.ToAddresses.Select(x => x.Address))}, Subject: {emailMessage.Subject}");
+                
                 await emailClient.DisconnectAsync(true, cts.Token);
+                Console.WriteLine($"[MailManager] SMTP bağlantısı kapatıldı");
             }
             catch (Exception ex)
             {
                 // Detaylı hata mesajı ile exception fırlat
-                throw new Exception($"Mail gönderme hatası - SMTP Server: {smtpServer}, Port: {smtpPort}, To: {string.Join(", ", emailMessage.ToAddresses.Select(x => x.Address))}, Hata: {ex.Message}", ex);
+                var errorMessage = $"Mail gönderme hatası - SMTP Server: {smtpServer}, Port: {smtpPort}, To: {string.Join(", ", emailMessage.ToAddresses.Select(x => x.Address))}, Hata: {ex.Message}";
+                Console.WriteLine($"[MailManager] {errorMessage}");
+                Console.Error.WriteLine($"[MailManager] {errorMessage}");
+                Console.Error.WriteLine($"[MailManager] StackTrace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.Error.WriteLine($"[MailManager] InnerException: {ex.InnerException.Message}");
+                }
+                throw new Exception(errorMessage, ex);
             }
         }
     }

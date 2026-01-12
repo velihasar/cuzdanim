@@ -372,19 +372,25 @@ namespace Business.Handlers.Authorizations.Commands
 
                     await _mailService.SendAsync(emailMessage);
 
+                    // Email gönderme başarılı - logla
+                    var successLog = $"[RegisterUserCommand] Email gönderildi - Email: {request.Email}, UserName: {request.UserName}, VerificationToken: {verificationToken}";
+                    _logger?.Info(successLog);
+                    Console.WriteLine(successLog);
+
                     // Rate limiting için cache'e kaydet (3 dakika)
                     _cacheManager.Add(rateLimitKey, DateTime.Now, 3);
                 }
                 catch (Exception ex)
                 {
-                    // Email gönderme hatası - sadece hata durumunda logla
-                    if (_logger != null)
-                    {
-                        var errorDetails = $"Mail gönderme hatası - Email: {request.Email}, UserName: {request.UserName}, " +
-                                         $"Exception Type: {ex.GetType().Name}, Message: {ex.Message}, " +
-                                         $"InnerException: {(ex.InnerException != null ? ex.InnerException.Message : "Yok")}";
-                        _logger.Error(errorDetails);
-                    }
+                    // Email gönderme hatası - hem FileLogger hem Console'a logla
+                    var errorDetails = $"[RegisterUserCommand] Mail gönderme hatası - Email: {request.Email}, UserName: {request.UserName}, " +
+                                     $"Exception Type: {ex.GetType().Name}, Message: {ex.Message}, " +
+                                     $"StackTrace: {ex.StackTrace}, " +
+                                     $"InnerException: {(ex.InnerException != null ? ex.InnerException.Message : "Yok")}";
+                    
+                    _logger?.Error(errorDetails);
+                    Console.WriteLine(errorDetails);
+                    Console.Error.WriteLine(errorDetails);
                     
                     // Email gönderme hatası olsa bile kullanıcı kaydedildi
                     // Kullanıcıya mail gönderilemediği bilgisini ver
