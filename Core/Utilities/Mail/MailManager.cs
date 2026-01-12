@@ -19,12 +19,38 @@ namespace Core.Utilities.Mail
             _configuration = configuration;
         }
 
+        public static string ResolveConfigurationValue(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return value;
+
+            // ${VAR} formatındaki değerleri environment variable'dan oku
+            if (value.StartsWith("${") && value.EndsWith("}"))
+            {
+                var envVarName = value.Substring(2, value.Length - 3); // ${VAR} -> VAR
+                var envValue = Environment.GetEnvironmentVariable(envVarName);
+                if (!string.IsNullOrEmpty(envValue))
+                {
+                    Console.WriteLine($"[MailManager] Environment variable resolved: {envVarName} = {envValue}");
+                    return envValue;
+                }
+                else
+                {
+                    Console.WriteLine($"[MailManager] Warning: Environment variable not found: {envVarName}, using original value: {value}");
+                }
+            }
+
+            return value;
+        }
+
         public async Task SendAsync(EmailMessage emailMessage)
         {
-            var smtpServer = _configuration.GetSection("EmailConfiguration").GetSection("SmtpServer").Value;
-            var smtpPortStr = _configuration.GetSection("EmailConfiguration").GetSection("SmtpPort").Value;
-            var userName = _configuration.GetSection("EmailConfiguration").GetSection("UserName").Value;
-            var password = _configuration.GetSection("EmailConfiguration").GetSection("Password").Value;
+            var smtpServer = ResolveConfigurationValue(_configuration.GetSection("EmailConfiguration").GetSection("SmtpServer").Value);
+            var smtpPortStr = ResolveConfigurationValue(_configuration.GetSection("EmailConfiguration").GetSection("SmtpPort").Value);
+            var userName = ResolveConfigurationValue(_configuration.GetSection("EmailConfiguration").GetSection("UserName").Value);
+            var password = ResolveConfigurationValue(_configuration.GetSection("EmailConfiguration").GetSection("Password").Value);
+            var senderEmail = ResolveConfigurationValue(_configuration.GetSection("EmailConfiguration").GetSection("SenderEmail").Value);
+            var senderName = ResolveConfigurationValue(_configuration.GetSection("EmailConfiguration").GetSection("SenderName").Value);
 
             if (string.IsNullOrEmpty(smtpServer))
             {
