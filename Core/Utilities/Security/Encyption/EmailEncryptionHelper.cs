@@ -9,8 +9,22 @@ namespace Core.Utilities.Security.Encyption
     {
         private static string GetEncryptionKey(IConfiguration configuration)
         {
-            // appsettings.json'dan encryption key al
-            var key = configuration["EmailEncryption:Key"];
+            if (configuration == null)
+            {
+                // Configuration null ise default key kullan
+                return "CuzdanimMasavTech2024!Key32!!"; // 32 karakter olmalı
+            }
+
+            // Önce environment variable'dan dene
+            var key = Environment.GetEnvironmentVariable("EMAIL_ENCRYPTION_KEY");
+            
+            // Environment variable yoksa appsettings.json'dan dene
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                key = configuration["EmailEncryption:Key"];
+            }
+            
+            // Hala yoksa default key kullan
             if (string.IsNullOrWhiteSpace(key))
             {
                 // Default key (production'da mutlaka değiştirilmeli)
