@@ -20,7 +20,8 @@ namespace Business.Handlers.Authorizations.Queries
 {
     public class GoogleLoginQuery : IRequest<IDataResult<AccessToken>>
     {
-        public string IdToken { get; set; } // Google'dan gelen ID token
+        public string IdToken { get; set; } // Google'dan gelen ID token (eski yöntem)
+        public string AuthorizationCode { get; set; } // Google OAuth authorization code (yeni yöntem - standart OAuth flow)
     }
 
     public class GoogleLoginQueryHandler : IRequestHandler<GoogleLoginQuery, IDataResult<AccessToken>>
@@ -45,16 +46,34 @@ namespace Business.Handlers.Authorizations.Queries
         [LogAspect(typeof(FileLogger))]
         public async Task<IDataResult<AccessToken>> Handle(GoogleLoginQuery request, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(request.IdToken))
+            string idToken = null;
+            
+            // Authorization code varsa, ID token'a çevir
+            if (!string.IsNullOrWhiteSpace(request.AuthorizationCode))
             {
-                return new ErrorDataResult<AccessToken>("Google token gereklidir.");
+                try
+                {
+                    idToken = await GoogleTokenValidator.ExchangeAuthorizationCodeAsync(request.AuthorizationCode, _configuration);
+                }
+                catch (Exception ex)
+                {
+                    return new ErrorDataResult<AccessToken>($"Authorization code ID token'a çevrilemedi: {ex.Message}");
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(request.IdToken))
+            {
+                idToken = request.IdToken;
+            }
+            else
+            {
+                return new ErrorDataResult<AccessToken>("Google token veya authorization code gereklidir.");
             }
 
             // Google token'ı doğrula
             GoogleUserInfo googleUser;
             try
             {
-                googleUser = await GoogleTokenValidator.ValidateTokenAsync(request.IdToken, _configuration);
+                googleUser = await GoogleTokenValidator.ValidateTokenAsync(idToken, _configuration);
             }
             catch (UnauthorizedAccessException ex)
             {
