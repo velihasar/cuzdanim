@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Business.BusinessAspects;
@@ -28,10 +29,19 @@ namespace Business.Handlers.Authorizations.Commands
 {
     public class RegisterUserCommand : IRequest<IResult>
     {
+        [JsonPropertyName("userName")]
         public string UserName { get; set; }
+        
+        [JsonPropertyName("password")]
         public string Password { get; set; }
+        
+        [JsonPropertyName("email")]
         public string Email { get; set; }
+        
+        [JsonPropertyName("fullName")]
         public string FullName { get; set; }
+        
+        [JsonPropertyName("kvkkAccepted")]
         public bool KvkkAccepted { get; set; }
 
 
@@ -66,6 +76,32 @@ namespace Business.Handlers.Authorizations.Commands
             [LogAspect(typeof(FileLogger))]
             public async Task<IResult> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
             {
+                // Null check'ler
+                if (request == null)
+                {
+                    return new ErrorResult("Geçersiz istek. Lütfen tüm alanları doldurun.");
+                }
+
+                if (string.IsNullOrWhiteSpace(request.UserName))
+                {
+                    return new ErrorResult("Kullanıcı adı zorunludur.");
+                }
+
+                if (string.IsNullOrWhiteSpace(request.Email))
+                {
+                    return new ErrorResult("E-posta adresi zorunludur.");
+                }
+
+                if (string.IsNullOrWhiteSpace(request.Password))
+                {
+                    return new ErrorResult("Şifre zorunludur.");
+                }
+
+                if (!request.KvkkAccepted)
+                {
+                    return new ErrorResult("KVKK Aydınlatma Metni'ni kabul etmelisiniz.");
+                }
+
                 // 1. Username kontrolü
                 var existingUserByUsername = await _userRepository.GetAsync(u => u.UserName == request.UserName);
                 

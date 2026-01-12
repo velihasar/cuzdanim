@@ -208,6 +208,87 @@ redis-cli -h redis -p 6379 -a your_password ping
 - GOOGLE_CLIENT_ID'in doğru set edildiğini kontrol edin
 - Google Cloud Console'da redirect URI'ların doğru yapılandırıldığını kontrol edin
 
+#### 7. GitHub Repository Authentication Hatası
+**Hata Mesajı:**
+```
+fatal: could not read Username for 'https://github.com': No such device or address
+```
+
+**Neden:**
+- Repository private ise ve Coolify'da GitHub credentials yapılandırılmamışsa
+- HTTPS URL kullanılıyorsa ve authentication gerekiyorsa
+- Coolify'ın GitHub'a erişim izni yoksa
+
+**Çözümler:**
+
+**Çözüm 1: GitHub OAuth App (En Önerilen - Coolify'da OAuth Altında)**
+1. **GitHub'da OAuth App Oluşturma:**
+   - GitHub'da **Settings** → **Developer settings** → **OAuth Apps** → **New OAuth App**
+   - **Application name:** `Coolify - Cuzdanim` (veya istediğiniz bir isim)
+   - **Homepage URL:** `https://your-coolify-domain.com` (Coolify domain'iniz)
+   - **Authorization callback URL:** 
+     - Coolify Dashboard'da **Settings** → **OAuth** → **GitHub** bölümüne gidin
+     - Burada **Redirect URL** veya **Callback URL** gösterilir
+     - ⚠️ **Önemli:** GitHub OAuth callback URL'leri **port numarası kabul etmez** ve **HTTPS gerektirir**
+     - Eğer Coolify'ın gösterdiği URL'de port varsa (örn: `:8080`), port'u kaldırın
+     - Örnek formatlar:
+       - ✅ **Doğru:** `https://ik0cwwkokgcowogssg448g0o.217.195.207.219.sslip.io/oauth/github/callback`
+       - ❌ **Yanlış:** `http://ik0cwwkokgcowogssg448g0o.217.195.207.219.sslip.io:8080/oauth/github/callback`
+     - **Not:** Eğer sslip.io domain'i HTTPS desteklemiyorsa, Coolify'da özel domain kullanmanız gerekebilir
+   - **Register application** butonuna tıklayın
+
+2. **Client ID ve Client Secret Alma:**
+   - OAuth App oluşturulduktan sonra **Client ID** ve **Client Secret** göreceksiniz
+   - **Client Secret**'ı hemen kopyalayın (bir daha gösterilmeyebilir)
+   - Gerekirse **Generate a new client secret** ile yeni secret oluşturabilirsiniz
+
+3. **Coolify'da OAuth Yapılandırması:**
+   - Coolify Dashboard'da **Settings** → **OAuth** → **GitHub** bölümüne gidin
+   - **Client ID:** GitHub'dan aldığınız Client ID'yi yapıştırın
+   - **Client Secret:** GitHub'dan aldığınız Client Secret'ı yapıştırın
+   - **Redirect URL:** Coolify otomatik olarak gösterir, bu URL'yi GitHub OAuth App'te kullanın
+   - **Save** butonuna tıklayın
+
+4. **Repository Erişimi:**
+   - Coolify'da **Settings** → **Source Providers** → **GitHub** bölümüne gidin
+   - OAuth ile bağlanın (artık Client ID ve Secret ile authentication yapılacak)
+   - Repository URL'yi tekrar deneyin: `https://github.com/velihasar/cuzdanim`
+
+**Not:** OAuth App kullanarak daha güvenli ve yönetilebilir bir authentication sağlarsınız. Token'lar otomatik olarak yenilenir.
+
+**Çözüm 2: GitHub Personal Access Token (Alternatif)**
+1. GitHub'da **Settings** → **Developer settings** → **Personal access tokens** → **Tokens (classic)**
+2. **Generate new token (classic)** ile yeni token oluşturun
+3. Gerekli izinleri seçin: `repo` (private repository için)
+4. Token'ı kopyalayın
+5. Coolify Dashboard'da:
+   - **Settings** → **Source Providers** → **GitHub**
+   - Token'ı ekleyin veya güncelleyin
+   - Repository URL'yi tekrar deneyin
+
+**Çözüm 2: SSH URL Kullanma**
+1. Coolify'da repository URL'yi değiştirin:
+   - **HTTPS:** `https://github.com/velihasar/cuzdanim`
+   - **SSH:** `git@github.com:velihasar/cuzdanim.git`
+2. Coolify'da SSH key yapılandırın:
+   - **Settings** → **Source Providers** → **GitHub**
+   - SSH key ekleyin (GitHub'da SSH key oluşturup Coolify'a ekleyin)
+
+**Çözüm 3: Repository'yi Public Yapma (Güvenlik Riski)**
+- Repository'yi public yaparsanız authentication gerekmez
+- ⚠️ **Önerilmez:** Kodunuz herkese açık olur
+
+**Çözüm 4: Deploy Key Kullanma**
+1. GitHub repository'de **Settings** → **Deploy keys** → **Add deploy key**
+2. Coolify'ın SSH public key'ini ekleyin
+3. **Allow write access** seçeneğini işaretleyin (gerekirse)
+4. Repository URL'yi SSH formatında kullanın: `git@github.com:velihasar/cuzdanim.git`
+
+**En İyi Pratik:**
+- Private repository için **Personal Access Token** kullanın
+- Token'ı düzenli olarak yenileyin
+- Token'ı sadece gerekli izinlerle oluşturun (`repo` scope yeterli)
+
 ## 📊 Performans Optimizasyonları
 
 ### 1. Database Optimizasyonu
