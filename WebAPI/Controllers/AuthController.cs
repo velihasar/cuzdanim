@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Entities.Dtos;
 using IResult = Core.Utilities.Results.IResult;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WebAPI.Controllers
 {
