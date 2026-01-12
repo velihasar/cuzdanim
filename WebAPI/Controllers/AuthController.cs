@@ -80,6 +80,33 @@ namespace WebAPI.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserCommand createUser)
         {
+            // Model binding kontrolü ve logging
+            if (createUser == null)
+            {
+                var logger = HttpContext.RequestServices.GetService<Core.CrossCuttingConcerns.Logging.Serilog.Loggers.FileLogger>();
+                logger?.Error("[AuthController.Register] Model binding failed - createUser is null");
+                return BadRequest(new { Success = false, Message = "Geçersiz istek. Lütfen tüm alanları doldurun." });
+            }
+
+            // Request body'yi logla
+            try
+            {
+                var logger = HttpContext.RequestServices.GetService<Core.CrossCuttingConcerns.Logging.Serilog.Loggers.FileLogger>();
+                if (logger != null)
+                {
+                    logger.Info($"[AuthController.Register] Register request received - " +
+                              $"UserName: {createUser.UserName}, " +
+                              $"Email: {createUser.Email}, " +
+                              $"FullName: {createUser.FullName}, " +
+                              $"KvkkAccepted: {createUser.KvkkAccepted}, " +
+                              $"Password: {(string.IsNullOrEmpty(createUser.Password) ? "Empty" : "***")}");
+                }
+            }
+            catch
+            {
+                // Ignore logging errors
+            }
+
             return GetResponseOnlyResult(await Mediator.Send(createUser));
         }
 
