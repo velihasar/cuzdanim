@@ -185,8 +185,11 @@ namespace Business.Handlers.Users.Commands
 </body>
 </html>";
 
-                var senderEmail = _configuration.GetSection("EmailConfiguration").GetSection("SenderEmail").Value;
-                var senderName = _configuration.GetSection("EmailConfiguration").GetSection("SenderName").Value;
+                // Environment variable resolution için MailManager'ın static metodunu kullan
+                var senderEmail = Core.Utilities.Mail.MailManager.ResolveConfigurationValue(
+                    _configuration.GetSection("EmailConfiguration").GetSection("SenderEmail").Value);
+                var senderName = Core.Utilities.Mail.MailManager.ResolveConfigurationValue(
+                    _configuration.GetSection("EmailConfiguration").GetSection("SenderName").Value);
                 
                 if (string.IsNullOrEmpty(senderEmail))
                 {
