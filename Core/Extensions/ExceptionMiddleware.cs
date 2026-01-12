@@ -91,27 +91,48 @@ namespace Core.Extensions
             }
             else if (e.GetType() == typeof(ApplicationException))
             {
-                message = e.Message;
+                message = JsonConvert.SerializeObject(new
+                {
+                    Success = false,
+                    Message = e.Message
+                });
                 httpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
             }
             else if (e.GetType() == typeof(UnauthorizedAccessException))
             {
-                message = e.Message;
+                message = JsonConvert.SerializeObject(new
+                {
+                    Success = false,
+                    Message = e.Message
+                });
                 httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
             }
             else if (e.GetType() == typeof(SecurityException))
             {
-                message = e.Message;
+                message = JsonConvert.SerializeObject(new
+                {
+                    Success = false,
+                    Message = e.Message
+                });
                 httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
             }
             else if (e.GetType() == typeof(NotSupportedException))
             {
-                message = e.Message;
+                message = JsonConvert.SerializeObject(new
+                {
+                    Success = false,
+                    Message = e.Message
+                });
                 httpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
             }
             else
             {
-                message = ExceptionMessage.InternalServerError;
+                // Her zaman JSON formatında döndür
+                message = JsonConvert.SerializeObject(new
+                {
+                    Success = false,
+                    Message = ExceptionMessage.InternalServerError
+                });
             }
             await httpContext.Response.WriteAsync(message);
         }
