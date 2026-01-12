@@ -39,7 +39,7 @@ namespace Business.Handlers.Authorizations.Commands
         public string Email { get; set; }
         
         [JsonPropertyName("fullName")]
-        public string FullName { get; set; }
+        public string? FullName { get; set; }
         
         [JsonPropertyName("kvkkAccepted")]
         public bool KvkkAccepted { get; set; }
