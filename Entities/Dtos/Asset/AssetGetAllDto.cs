@@ -12,7 +12,7 @@ namespace Entities.Dtos.Asset
         public int Id { get; set; }
         public string Name { get; set; }
         public string AssetType { get; set; }
-        public int Piece { get; set; }
+        public decimal Piece { get; set; }
         public bool IsDebt { get; set; }
 
     }

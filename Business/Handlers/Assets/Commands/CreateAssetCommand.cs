@@ -26,7 +26,7 @@ namespace Business.Handlers.Assets.Commands
 
         public int AssetTypeId { get; set; }
         public string Name { get; set; }
-        public int Piece { get; set; }
+        public decimal Piece { get; set; }
         public bool IsDebt { get; set; } = false;
 
 
