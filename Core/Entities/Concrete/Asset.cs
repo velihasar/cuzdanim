@@ -10,7 +10,7 @@ namespace Core.Entities.Concrete
         public int UserId { get; set; }
         public int AssetTypeId { get; set; }
         public string Name { get; set; } // Örn: "Garanti TL Hesabı"
-        public int Piece { get; set; } //Varlık Miktarı
+        public decimal Piece { get; set; } //Varlık Miktarı
         public bool IsDebt { get; set; } = false; // Borç mu yoksa varlık mı?
 
         // Navigation
