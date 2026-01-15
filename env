@@ -58,8 +58,8 @@ TEAMS_WEBHOOK_URL=
 # Email Encryption
 EMAIL_ENCRYPTION_KEY=CuzdanimMasavTech2024!Key32!!
 
-# Google OAuth
-GOOGLE_CLIENT_ID=your_google_client_id
+# Google OAuth (Backend Web Client ID)
+GOOGLE_CLIENT_ID=137422679898-3pu4dpsf86cc8jsoa07jdfml84nr016v.apps.googleusercontent.com
 
 # Admin Settings
 ADMIN_EMAIL=no-reply@masavtech.com
