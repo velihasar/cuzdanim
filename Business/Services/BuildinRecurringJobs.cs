@@ -84,5 +84,77 @@ public class BuildinRecurringJobs
             throw;
         }
     }
+
+    // Her gün saat 03:00'de çalışır
+    // Cron expression: "0 3 * * *" = Her gün saat 03:00
+    // Son bir yıldan eski olan transaction'ları siler (son bir yılın verileri kalır)
+    [RecurringJob("0 3 * * *", RecurringJobId = "DeleteOldTransactions")]
+    public static async Task DeleteOldTransactions()
+    {
+        // ServiceProvider'dan dependency'leri resolve et
+        var serviceProvider = ServiceTool.ServiceProvider;
+        var transactionRepository = serviceProvider?.GetService<ITransactionRepository>();
+        var logger = serviceProvider?.GetService<FileLogger>();
+        
+        try
+        {
+            if (transactionRepository == null)
+            {
+                logger?.Error("DeleteOldTransactions: ITransactionRepository not found in DI container");
+                return;
+            }
+
+            // Son bir yıl öncesinin tarihini hesapla
+            var oneYearAgo = DateTime.UtcNow.AddYears(-1);
+            
+            logger?.Info($"DeleteOldTransactions: Starting deletion of transactions older than {oneYearAgo:yyyy-MM-dd}");
+
+            // Son bir yıldan eski olan transaction'ları bul (son bir yılın verileri kalacak)
+            var oldTransactions = await transactionRepository.GetListAsync(
+                x => x.Date < oneYearAgo && x.IsActive != false
+            );
+
+            if (oldTransactions == null || !oldTransactions.Any())
+            {
+                logger?.Info("DeleteOldTransactions: No old transactions found to delete");
+                return;
+            }
+
+            int totalCount = oldTransactions.Count();
+            int deletedCount = 0;
+            int errorCount = 0;
+
+            // Transaction'ları sil
+            foreach (var transaction in oldTransactions)
+            {
+                try
+                {
+                    transactionRepository.Delete(transaction);
+                    deletedCount++;
+                }
+                catch (Exception ex)
+                {
+                    logger?.Error($"DeleteOldTransactions: Error deleting transaction ID {transaction.Id}. {ex.Message}");
+                    errorCount++;
+                }
+            }
+
+            // Değişiklikleri kaydet
+            if (deletedCount > 0)
+            {
+                await transactionRepository.SaveChangesAsync();
+                logger?.Info($"DeleteOldTransactions: Successfully deleted {deletedCount} transactions (older than {oneYearAgo:yyyy-MM-dd}). Errors: {errorCount}");
+            }
+            else
+            {
+                logger?.Warn($"DeleteOldTransactions: No transactions were deleted. Errors: {errorCount}");
+            }
+        }
+        catch (Exception ex)
+        {
+            logger?.Error($"DeleteOldTransactions job error: {ex.Message}");
+            throw;
+        }
+    }
 }
 
