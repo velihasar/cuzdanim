@@ -1,10 +1,12 @@
 using System;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Google.Apis.Auth;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Core.Utilities.Security.Google
 {
@@ -31,6 +33,21 @@ namespace Core.Utilities.Security.Google
 
             try
             {
+                // Token'ı decode et ve 'aud' claim'ini kontrol et
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadJwtToken(idToken);
+                
+                // 'aud' claim'ini kontrol et (Web Application Client ID olmalı)
+                var audClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == "aud")?.Value;
+                if (string.IsNullOrWhiteSpace(audClaim) || audClaim != clientId)
+                {
+                    throw new UnauthorizedAccessException(
+                        $"Google token 'aud' claim'i beklenen Client ID ile eşleşmiyor. " +
+                        $"Beklenen: {clientId}, Token'da: {audClaim}");
+                }
+
+                // Token'ı Google'ın kütüphanesi ile doğrula (imza ve diğer kontroller için)
+                // Audience kontrolünü atla çünkü zaten yukarıda kontrol ettik
                 var settings = new GoogleJsonWebSignature.ValidationSettings
                 {
                     Audience = new[] { clientId }
