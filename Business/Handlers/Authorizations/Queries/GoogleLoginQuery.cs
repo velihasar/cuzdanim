@@ -30,17 +30,23 @@ namespace Business.Handlers.Authorizations.Queries
         private readonly ITokenHelper _tokenHelper;
         private readonly ICacheManager _cacheManager;
         private readonly IConfiguration _configuration;
+        private readonly IGroupRepository _groupRepository;
+        private readonly IUserGroupRepository _userGroupRepository;
 
         public GoogleLoginQueryHandler(
             IUserRepository userRepository,
             ITokenHelper tokenHelper,
             ICacheManager cacheManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IGroupRepository groupRepository,
+            IUserGroupRepository userGroupRepository)
         {
             _userRepository = userRepository;
             _tokenHelper = tokenHelper;
             _cacheManager = cacheManager;
             _configuration = configuration;
+            _groupRepository = groupRepository;
+            _userGroupRepository = userGroupRepository;
         }
 
         [LogAspect(typeof(FileLogger))]
@@ -176,6 +182,23 @@ namespace Business.Handlers.Authorizations.Queries
 
                 _userRepository.Add(user);
                 await _userRepository.SaveChangesAsync();
+
+                // Yeni kullanıcıyı Default Group'a ekle
+                var defaultGroup = await _groupRepository.GetAsync(g => g.GroupName == "Default Group");
+                if (defaultGroup != null)
+                {
+                    var existingUserGroup = await _userGroupRepository.GetAsync(ug => ug.UserId == user.UserId && ug.GroupId == defaultGroup.Id);
+                    if (existingUserGroup == null)
+                    {
+                        var userGroup = new UserGroup
+                        {
+                            UserId = user.UserId,
+                            GroupId = defaultGroup.Id
+                        };
+                        _userGroupRepository.Add(userGroup);
+                        await _userGroupRepository.SaveChangesAsync();
+                    }
+                }
             }
             else
             {

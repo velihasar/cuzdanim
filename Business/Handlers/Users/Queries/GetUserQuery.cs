@@ -31,6 +31,7 @@ namespace Business.Handlers.Users.Queries
                 _configuration = configuration;
             }
 
+            [SecuredOperation(Priority = 1)]
             [LogAspect(typeof(FileLogger))]
             public async Task<IDataResult<UserDto>> Handle(GetUserQuery request, CancellationToken cancellationToken)
             {
