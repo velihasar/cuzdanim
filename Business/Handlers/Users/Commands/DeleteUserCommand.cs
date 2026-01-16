@@ -29,10 +29,16 @@ namespace Business.Handlers.Users.Commands
             [LogAspect(typeof(FileLogger))]
             public async Task<IResult> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
             {
-                var userToDelete = _userRepository.Get(p => p.UserId == request.UserId);
+                var userToDelete = await _userRepository.GetAsync(p => p.UserId == request.UserId);
 
-                userToDelete.Status = false;
-                _userRepository.Update(userToDelete);
+                if (userToDelete == null)
+                {
+                    return new ErrorResult(Messages.UserNotFound);
+                }
+
+                // Hard delete - Kullanıcıyı gerçekten sil
+                // Cascade delete ile bağlı veriler (Assets, Transactions) otomatik silinecek
+                _userRepository.Delete(userToDelete);
                 await _userRepository.SaveChangesAsync();
                 return new SuccessResult(Messages.Deleted);
             }
