@@ -115,8 +115,10 @@ EMAIL_ENCRYPTION_KEY=CuzdanimMasavTech2024!Key32!!
 
 #### Google OAuth
 ```
-GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_ID=137422679898-3pu4dpsf86cc8jsoa07jdfml84nr016v.apps.googleusercontent.com
 ```
+
+**Not:** Bu Web Application Client ID'dir. Backend Google ID token doğrulaması için kullanır. Android keystore bilgileri backend'de gerekli değildir (sadece Google Console'da Android Client ID'ye SHA-1 eklenir).
 
 #### Admin Settings
 ```
