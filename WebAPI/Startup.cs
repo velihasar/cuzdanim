@@ -133,6 +133,13 @@ namespace WebAPI
                 Configuration["AdminSettings:FullName"] = adminFullName;
             }
 
+            // Google OAuth için environment variable'ı replace et
+            var googleClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID");
+            if (!string.IsNullOrEmpty(googleClientId))
+            {
+                Configuration["Google:ClientId"] = googleClientId;
+            }
+
             services.AddControllers()
                 .AddJsonOptions(options =>
                 {
