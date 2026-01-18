@@ -491,22 +491,40 @@ namespace WebAPI
                     {
                         // UpdateAssetTypePrices job'unu register et
                         // async Task method için Expression<Func<Task>> kullan
-                        System.Linq.Expressions.Expression<Func<System.Threading.Tasks.Task>> jobExpression = 
+                        System.Linq.Expressions.Expression<Func<System.Threading.Tasks.Task>> updatePricesExpression = 
                             () => Business.Services.BuildinRecurringJobs.UpdateAssetTypePrices();
                         
                         recurringJobManager.AddOrUpdate(
                             "UpdateAssetTypePrices",
-                            jobExpression,
-                            "* * * * *"); // Her dakika çalışır
+                            updatePricesExpression,
+                            "*/30 * * * *"); // Her 30 dakikada bir çalışır
 
-                        // Proje başladığında job'u bir kere çalıştır
+                        // DeleteOldTransactions job'unu register et
+                        System.Linq.Expressions.Expression<Func<System.Threading.Tasks.Task>> deleteOldTransactionsExpression = 
+                            () => Business.Services.BuildinRecurringJobs.DeleteOldTransactions();
+                        
+                        recurringJobManager.AddOrUpdate(
+                            "DeleteOldTransactions",
+                            deleteOldTransactionsExpression,
+                            "0 3 * * *"); // Her gün saat 03:00'de çalışır
+
+                        // CreateMonthlyRecurringTransactions job'unu register et
+                        System.Linq.Expressions.Expression<Func<System.Threading.Tasks.Task>> createMonthlyRecurringExpression = 
+                            () => Business.Services.BuildinRecurringJobs.CreateMonthlyRecurringTransactions();
+                        
+                        recurringJobManager.AddOrUpdate(
+                            "CreateMonthlyRecurringTransactions",
+                            createMonthlyRecurringExpression,
+                            "0 4 * * *"); // Her gün saat 04:00'de çalışır
+
+                        // Proje başladığında UpdateAssetTypePrices job'unu bir kere çalıştır
                         recurringJobManager.Trigger("UpdateAssetTypePrices");
                     }
                 }
                 catch (Exception ex)
                 {
                     var logger = app.ApplicationServices.GetService<FileLogger>();
-                    logger?.Error($"Failed to register/trigger UpdateAssetTypePrices job: {ex.Message}");
+                    logger?.Error($"Failed to register/trigger recurring jobs: {ex.Message}");
                 }
             }
 
