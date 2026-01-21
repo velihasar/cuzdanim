@@ -515,7 +515,7 @@ namespace WebAPI
                         recurringJobManager.AddOrUpdate(
                             "CreateMonthlyRecurringTransactions",
                             createMonthlyRecurringExpression,
-                            "0 4 * * *"); // Her gün saat 04:00'de çalışır
+                            "*/10 * * * *"); // Her 10 dakikada bir çalışır
 
                         // Proje başladığında UpdateAssetTypePrices job'unu bir kere çalıştır
                         recurringJobManager.Trigger("UpdateAssetTypePrices");

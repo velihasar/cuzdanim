@@ -49,63 +49,56 @@ namespace Business.Handlers.Authorizations.Queries
             [LogAspect(typeof(FileLogger))]
             public async Task<IDataResult<AccessToken>> Handle(LoginUserQuery request, CancellationToken cancellationToken)
             {
-                User user = null;
                 var loginValue = request.UserName?.Trim();
 
                 if (string.IsNullOrWhiteSpace(loginValue))
                 {
-                    return new ErrorDataResult<AccessToken>(Messages.UserNotFound);
+                    return new ErrorDataResult<AccessToken>(Messages.InvalidCredentials);
                 }
 
-                // Email formatı kontrolü
+                // Email formatı kontrolü - sadece email ile giriş yapılabilir
                 var isEmail = Regex.IsMatch(loginValue, @"^[^\s@]+@[^\s@]+\.[^\s@]+$", RegexOptions.IgnoreCase);
 
-                if (isEmail)
+                if (!isEmail)
                 {
-                    // Email ile giriş - önce deterministik encryption ile direkt arama yap
-                    var normalizedEmail = loginValue.Trim().ToLowerInvariant();
-                    var encryptedEmail = EmailEncryptionHelper.EncryptEmailDeterministic(normalizedEmail, _configuration);
-                    
-                    // Direkt veritabanında arama (performans için)
-                    var allUsers = await _userRepository.GetListAsync(u => u.Status);
-                    user = allUsers.FirstOrDefault(u => !string.IsNullOrEmpty(u.Email) && u.Email == encryptedEmail);
-                    
-                    // Eğer deterministik encryption ile bulunamazsa, eski yöntemle devam et (geriye dönük uyumluluk)
-                    if (user == null)
-                    {
-                        foreach (var userInList in allUsers)
-                        {
-                            if (!string.IsNullOrEmpty(userInList.Email))
-                            {
-                                var decryptedEmail = EmailEncryptionHelper.DecryptEmail(userInList.Email, _configuration);
-                                if (string.IsNullOrEmpty(decryptedEmail))
-                                {
-                                    decryptedEmail = userInList.Email;
-                                }
+                    return new ErrorDataResult<AccessToken>("Geçerli bir e-posta adresi giriniz.");
+                }
 
-                                if (decryptedEmail.Trim().ToLowerInvariant() == normalizedEmail)
-                                {
-                                    user = userInList;
-                                    break;
-                                }
-                            }
+                // Email ile giriş - deterministik encryption ile direkt arama yap
+                var normalizedEmail = loginValue.Trim().ToLowerInvariant();
+                var encryptedEmail = EmailEncryptionHelper.EncryptEmailDeterministic(normalizedEmail, _configuration);
+                
+                // Direkt veritabanında arama (performans için)
+                User user = await _userRepository.GetAsync(u => u.Status && !string.IsNullOrEmpty(u.Email) && u.Email == encryptedEmail);
+                
+                // Eğer deterministik encryption ile bulunamazsa, eski yöntemle devam et (geriye dönük uyumluluk)
+                if (user == null)
+                {
+                    var allUsers = await _userRepository.GetListAsync(u => u.Status && !string.IsNullOrEmpty(u.Email));
+                    foreach (var userInList in allUsers)
+                    {
+                        var decryptedEmail = EmailEncryptionHelper.DecryptEmail(userInList.Email, _configuration);
+                        if (string.IsNullOrEmpty(decryptedEmail))
+                        {
+                            decryptedEmail = userInList.Email;
+                        }
+
+                        if (decryptedEmail.Trim().ToLowerInvariant() == normalizedEmail)
+                        {
+                            user = userInList;
+                            break;
                         }
                     }
-                }
-                else
-                {
-                    // Username ile giriş
-                    user = await _userRepository.GetAsync(u => u.UserName == loginValue && u.Status);
                 }
 
                 if (user == null)
                 {
-                    return new ErrorDataResult<AccessToken>(Messages.UserNotFound);
+                    return new ErrorDataResult<AccessToken>(Messages.InvalidCredentials);
                 }
 
                 if (!HashingHelper.VerifyPasswordHash(request.Password, user.PasswordSalt, user.PasswordHash))
                 {
-                    return new ErrorDataResult<AccessToken>(Messages.PasswordError);
+                    return new ErrorDataResult<AccessToken>(Messages.InvalidCredentials);
                 }
 
                 var claims = _userRepository.GetClaims(user.UserId);

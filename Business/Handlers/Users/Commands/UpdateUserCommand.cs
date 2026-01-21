@@ -53,15 +53,10 @@ namespace Business.Handlers.Users.Commands
                     return new ErrorResult(Messages.UserNotFound);
                 }
 
-                // UserName değiştiriliyorsa unique kontrolü yap
-                if (!string.IsNullOrWhiteSpace(request.UserName) && isThereAnyUser.UserName != request.UserName)
+                // Kullanıcı adı artık email'den otomatik oluşturuluyor, güncellenemez
+                if (!string.IsNullOrWhiteSpace(request.UserName))
                 {
-                    var existingUser = await _userRepository.GetAsync(u => u.UserName == request.UserName && u.UserId != request.UserId);
-                    if (existingUser != null)
-                    {
-                        return new ErrorResult("Bu kullanıcı adı zaten kullanılıyor.");
-                    }
-                    isThereAnyUser.UserName = request.UserName;
+                    return new ErrorResult("Kullanıcı adı değiştirilemez. Kullanıcı adı e-posta adresinizden otomatik oluşturulmaktadır.");
                 }
 
                 // Email değişikliği için ChangeEmailCommand kullanılmalı
