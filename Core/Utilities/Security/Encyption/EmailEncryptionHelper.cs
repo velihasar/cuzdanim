@@ -21,7 +21,20 @@ namespace Core.Utilities.Security.Encyption
             // Environment variable yoksa appsettings.json'dan dene
             if (string.IsNullOrWhiteSpace(key))
             {
-                key = configuration["EmailEncryption:Key"];
+                try
+                {
+                    // Configuration'dan güvenli şekilde oku
+                    var emailEncryptionSection = configuration.GetSection("EmailEncryption");
+                    if (emailEncryptionSection != null && emailEncryptionSection.Exists())
+                    {
+                        key = emailEncryptionSection["Key"];
+                    }
+                }
+                catch
+                {
+                    // Configuration okuma hatası durumunda devam et
+                    key = null;
+                }
             }
             
             // Hala yoksa default key kullan

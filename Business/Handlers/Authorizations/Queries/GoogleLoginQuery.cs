@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Business.Constants;
@@ -22,6 +23,9 @@ namespace Business.Handlers.Authorizations.Queries
     {
         public string IdToken { get; set; } // Google'dan gelen ID token (eski yöntem)
         public string AuthorizationCode { get; set; } // Google OAuth authorization code (yeni yöntem - standart OAuth flow)
+        
+        [JsonPropertyName("kvkkAccepted")]
+        public bool KvkkAccepted { get; set; } // KVKK Aydınlatma Metni onayı
     }
 
     public class GoogleLoginQueryHandler : IRequestHandler<GoogleLoginQuery, IDataResult<AccessToken>>
@@ -146,6 +150,12 @@ namespace Business.Handlers.Authorizations.Queries
             // Kullanıcı yoksa, yeni kullanıcı oluştur
             if (user == null)
             {
+                // Yeni kullanıcı için KVKK onayı kontrolü
+                if (!request.KvkkAccepted)
+                {
+                    return new ErrorDataResult<AccessToken>("KVKK Aydınlatma Metni'ni kabul etmelisiniz.");
+                }
+
                 // Username oluştur: email'in @ öncesi kısmı
                 var emailPrefix = googleUser.Email.Split('@')[0].ToLowerInvariant();
                 var baseUsername = emailPrefix;
