@@ -162,8 +162,8 @@ public class BuildinRecurringJobs
 
     // Her 10 dakikada bir çalışır
     // Cron expression: "*/10 * * * *" = Her 10 dakikada bir
-    // IsMonthlyRecurring olan transaction'lar için, DayOfMonth bugünün gününe eşitse yeni transaction oluşturur
-    // 31. gün sorunu: DayOfMonth 31 ise ve bugün ayın son günüyse (ay 31 gün çekmiyorsa) transaction oluşturur
+    // Geçmişte herhangi bir zamanda IsMonthlyRecurring=true olan transaction'ları kontrol eder
+    // Bu ay içinde bugüne kadar kaydedilmemiş olanları bugün verisi olarak kaydeder
     [RecurringJob("*/10 * * * *", RecurringJobId = "CreateMonthlyRecurringTransactions")]
     public static async Task CreateMonthlyRecurringTransactions()
     {
@@ -204,43 +204,48 @@ public class BuildinRecurringJobs
 
             var today = DateTime.UtcNow;
             var todayDay = today.Day;
-            var lastDayOfMonth = DateTime.DaysInMonth(today.Year, today.Month);
-            var monthStart = new DateTime(today.Year, today.Month, 1);
-            var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+            
+            // Bu ayın başlangıç ve bitiş tarihleri
+            var currentMonthStart = new DateTime(today.Year, today.Month, 1);
+            var currentMonthEnd = currentMonthStart.AddMonths(1).AddDays(-1);
 
             var dayMessage = $"CreateMonthlyRecurringTransactions: Starting for day {todayDay} (Date: {today:yyyy-MM-dd})";
             logger?.Info(dayMessage);
             Console.WriteLine(dayMessage);
             
-            var lastDayMessage = $"CreateMonthlyRecurringTransactions: Last day of month: {lastDayOfMonth}";
-            logger?.Info(lastDayMessage);
-            Console.WriteLine(lastDayMessage);
-            
-            var monthRangeMessage = $"CreateMonthlyRecurringTransactions: Month range: {monthStart:yyyy-MM-dd} to {monthEnd:yyyy-MM-dd}";
-            logger?.Info(monthRangeMessage);
-            Console.WriteLine(monthRangeMessage);
+            var currentMonthRangeMessage = $"CreateMonthlyRecurringTransactions: Current month range: {currentMonthStart:yyyy-MM-dd} to {currentMonthEnd:yyyy-MM-dd}";
+            logger?.Info(currentMonthRangeMessage);
+            Console.WriteLine(currentMonthRangeMessage);
 
-            // Veritabanı sorgusunda direkt olarak:
-            // 1. DayOfMonth bugün olan recurring transaction'ları çek
-            // 2. Kullanıcı, Type, IncomeCategoryId, ExpenseCategoryId'ye göre grupla
-            // 3. Her grup için en son tarihli recurring transaction'ı seç
-            // 4. Bu ay içinde aynı kategoride transaction olmayanları filtrele
-            
-            var recurringTransactionsQuery = transactionRepository.Query()
+            // Geçmişte herhangi bir zamanda IsMonthlyRecurring=true olan tüm transaction'ları bul
+            // Tarih kısıtlaması yok, sadece IsMonthlyRecurring=true ve IsActive!=false olanları alıyoruz
+            var allRecurringTransactions = await transactionRepository.Query()
                 .Where(x => x.IsMonthlyRecurring == true 
-                     && x.DayOfMonth.HasValue 
-                     && (
-                         // Normal durum: DayOfMonth bugünün gününe eşit
-                         (x.DayOfMonth.Value == todayDay) ||
-                         // 31. gün durumu: DayOfMonth 31 ise ve bugün ayın son günüyse (ay 31 gün çekmiyorsa)
-                         (x.DayOfMonth.Value == 31 && todayDay == lastDayOfMonth && lastDayOfMonth < 31)
-                     )
                      && x.IsActive != false
-                );
+                )
+                .ToListAsync();
+
+            if (allRecurringTransactions == null || !allRecurringTransactions.Any())
+            {
+                var noRecurringMessage = $"CreateMonthlyRecurringTransactions: No recurring transactions found";
+                logger?.Info(noRecurringMessage);
+                Console.WriteLine(noRecurringMessage);
+                
+                var jobEndedMessage = "CreateMonthlyRecurringTransactions: JOB ENDED - No recurring transactions found";
+                logger?.Info(jobEndedMessage);
+                Console.WriteLine(jobEndedMessage);
+                
+                logger?.Info(startMessage);
+                Console.WriteLine(startMessage);
+                return;
+            }
+
+            var foundRecurringMessage = $"CreateMonthlyRecurringTransactions: Found {allRecurringTransactions.Count} recurring transactions (from any time)";
+            logger?.Info(foundRecurringMessage);
+            Console.WriteLine(foundRecurringMessage);
 
             // Kullanıcı, Type, IncomeCategoryId, ExpenseCategoryId'ye göre grupla ve en son tarihli olanı seç
-            // ExpenseCategoryId null olabilir (gelirler için), bu yüzden null değerleri koruyoruz
-            var groupedRecurringTransactions = recurringTransactionsQuery
+            var groupedRecurringTransactions = allRecurringTransactions
                 .GroupBy(rt => new
                 {
                     rt.UserId,
@@ -248,28 +253,38 @@ public class BuildinRecurringJobs
                     IncomeCategoryId = rt.IncomeCategoryId,
                     ExpenseCategoryId = rt.ExpenseCategoryId
                 })
-                .Select(g => new
-                {
-                    GroupKey = g.Key,
-                    LatestRecurring = g.OrderByDescending(rt => rt.Date).First()
-                })
+                .Select(g => g.OrderByDescending(rt => rt.Date).First())
                 .ToList();
 
-            // Bu ay içinde aynı kategoride transaction olmayanları filtrele
+            var groupedMessage = $"CreateMonthlyRecurringTransactions: Grouped to {groupedRecurringTransactions.Count} unique recurring transactions";
+            logger?.Info(groupedMessage);
+            Console.WriteLine(groupedMessage);
+
+            // Bu ay içinde bugüne kadar kaydedilmemiş transaction'ları bul
             var transactionsToCreate = new List<Transaction>();
             
-            foreach (var group in groupedRecurringTransactions)
+            foreach (var recurringTransaction in groupedRecurringTransactions)
             {
-                var recurringTransaction = group.LatestRecurring;
-                var isIncome = recurringTransaction.IncomeCategoryId.HasValue && !recurringTransaction.ExpenseCategoryId.HasValue;
-                var isExpense = recurringTransaction.IncomeCategoryId.HasValue && recurringTransaction.ExpenseCategoryId.HasValue;
+                // Transaction tipini belirle
+                // Gelir: IncomeCategoryId dolu, ExpenseCategoryId boş, Type = 1 (Income)
+                // Gider: Her ikisi de dolu, Type = 2 (Expense)
+                var isIncome = recurringTransaction.IncomeCategoryId.HasValue && !recurringTransaction.ExpenseCategoryId.HasValue && recurringTransaction.Type == TransactionType.Income;
+                var isExpense = recurringTransaction.IncomeCategoryId.HasValue && recurringTransaction.ExpenseCategoryId.HasValue && recurringTransaction.Type == TransactionType.Expense;
                 
-                // Bu ay içinde aynı kategoride transaction var mı kontrol et
+                if (!isIncome && !isExpense)
+                {
+                    var skipMessage = $"CreateMonthlyRecurringTransactions: Skipping transaction - Invalid type configuration. UserId: {recurringTransaction.UserId}, Type: {recurringTransaction.Type}, IncomeCategoryId: {recurringTransaction.IncomeCategoryId}, ExpenseCategoryId: {recurringTransaction.ExpenseCategoryId}";
+                    logger?.Warn(skipMessage);
+                    Console.WriteLine(skipMessage);
+                    continue;
+                }
+                
+                // Bu ay içinde bugüne kadar aynı kategoride transaction var mı kontrol et
                 var hasExistingThisMonth = await transactionRepository.Query()
                     .AnyAsync(x => x.UserId == recurringTransaction.UserId
                          && x.Type == recurringTransaction.Type
-                         && x.Date >= monthStart
-                         && x.Date <= monthEnd
+                         && x.Date >= currentMonthStart
+                         && x.Date <= today // Bugüne kadar
                          && x.IsActive != false
                          && (
                              // Gelir kontrolü: IncomeCategoryId eşit olmalı, ExpenseCategoryId null olmalı
@@ -284,7 +299,7 @@ public class BuildinRecurringJobs
                 }
             }
 
-            var foundMessage = $"CreateMonthlyRecurringTransactions: Found {groupedRecurringTransactions.Count} grouped recurring transactions, {transactionsToCreate.Count} need to be created (no existing transaction this month)";
+            var foundMessage = $"CreateMonthlyRecurringTransactions: Found {groupedRecurringTransactions.Count} grouped recurring transactions, {transactionsToCreate.Count} need to be created (no existing transaction this month until today)";
             logger?.Info(foundMessage);
             Console.WriteLine(foundMessage);
 
@@ -316,21 +331,16 @@ public class BuildinRecurringJobs
                 try
                 {
                     // Transaction tipini belirle
-                    var isIncome = recurringTransaction.IncomeCategoryId.HasValue && !recurringTransaction.ExpenseCategoryId.HasValue;
-                    var isExpense = recurringTransaction.IncomeCategoryId.HasValue && recurringTransaction.ExpenseCategoryId.HasValue;
+                    var isIncome = recurringTransaction.IncomeCategoryId.HasValue && !recurringTransaction.ExpenseCategoryId.HasValue && recurringTransaction.Type == TransactionType.Income;
+                    var isExpense = recurringTransaction.IncomeCategoryId.HasValue && recurringTransaction.ExpenseCategoryId.HasValue && recurringTransaction.Type == TransactionType.Expense;
                     
                     var transactionTypeDescription = isIncome ? "Gelir" : (isExpense ? "Gider" : "Bilinmeyen");
-                    var processingTransactionMessage = $"CreateMonthlyRecurringTransactions: Processing transaction - UserId: {recurringTransaction.UserId}, Amount: {recurringTransaction.Amount}, Type: {recurringTransaction.Type} ({transactionTypeDescription}), DayOfMonth: {recurringTransaction.DayOfMonth}, IncomeCategoryId: {recurringTransaction.IncomeCategoryId}, ExpenseCategoryId: {recurringTransaction.ExpenseCategoryId}, Date: {recurringTransaction.Date:yyyy-MM-dd}";
+                    var processingTransactionMessage = $"CreateMonthlyRecurringTransactions: Processing transaction - UserId: {recurringTransaction.UserId}, Amount: {recurringTransaction.Amount}, Type: {recurringTransaction.Type} ({transactionTypeDescription}), DayOfMonth: {recurringTransaction.DayOfMonth}, IncomeCategoryId: {recurringTransaction.IncomeCategoryId}, ExpenseCategoryId: {recurringTransaction.ExpenseCategoryId}, Original Date: {recurringTransaction.Date:yyyy-MM-dd}";
                     logger?.Info(processingTransactionMessage);
                     Console.WriteLine(processingTransactionMessage);
 
-                    // Existing transaction kontrolü zaten sorgu seviyesinde yapıldı, buraya gelen transaction'lar oluşturulacak
-                    var creatingMessage = $"CreateMonthlyRecurringTransactions: Creating new transaction for this month...";
-                    logger?.Info(creatingMessage);
-                    Console.WriteLine(creatingMessage);
-
                     // Yeni transaction oluştur (bugünün tarihiyle, IsMonthlyRecurring=true)
-                    // En son tarihli recurring transaction'ın bilgilerini kullan
+                    // Geçen ayın recurring transaction'ının bilgilerini kullan
                     var newTransaction = new Core.Entities.Concrete.Transaction
                     {
                         UserId = recurringTransaction.UserId,
@@ -338,19 +348,19 @@ public class BuildinRecurringJobs
                         IncomeCategoryId = recurringTransaction.IncomeCategoryId,
                         ExpenseCategoryId = recurringTransaction.ExpenseCategoryId,
                         Amount = recurringTransaction.Amount,
-                        Date = today,
+                        Date = today, // Bugün verisi olarak kaydet
                         Description = recurringTransaction.Description,
                         Type = recurringTransaction.Type,
                         IsMonthlyRecurring = true, // Yeni oluşturulan transaction da recurring
                         IsBalanceCarriedOver = recurringTransaction.IsBalanceCarriedOver,
-                        DayOfMonth = todayDay, // Yeni transaction'da DayOfMonth bugünün günü
+                        DayOfMonth = recurringTransaction.DayOfMonth, // Orijinal DayOfMonth'u koru
                         IsActive = true
                     };
 
                     transactionRepository.Add(newTransaction);
                     createdCount++;
 
-                    var createdMessage = $"CreateMonthlyRecurringTransactions: Created new transaction for UserId {recurringTransaction.UserId}, Amount {recurringTransaction.Amount}, Type {recurringTransaction.Type}, Date: {today:yyyy-MM-dd}";
+                    var createdMessage = $"CreateMonthlyRecurringTransactions: Created new transaction for UserId {recurringTransaction.UserId}, Amount {recurringTransaction.Amount}, Type {recurringTransaction.Type} ({transactionTypeDescription}), Date: {today:yyyy-MM-dd}";
                     logger?.Info(createdMessage);
                     Console.WriteLine(createdMessage);
                 }
