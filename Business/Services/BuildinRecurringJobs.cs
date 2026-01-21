@@ -170,17 +170,32 @@ public class BuildinRecurringJobs
         var logger = serviceProvider?.GetService<FileLogger>();
         
         // Job başladı logu
-        logger?.Info("==========================================");
-        logger?.Info("CreateMonthlyRecurringTransactions: JOB STARTED");
-        logger?.Info($"CreateMonthlyRecurringTransactions: Current UTC Time: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}");
+        var startMessage = "==========================================";
+        logger?.Info(startMessage);
+        Console.WriteLine(startMessage);
+        
+        var jobStartedMessage = "CreateMonthlyRecurringTransactions: JOB STARTED";
+        logger?.Info(jobStartedMessage);
+        Console.WriteLine(jobStartedMessage);
+        
+        var timeMessage = $"CreateMonthlyRecurringTransactions: Current UTC Time: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}";
+        logger?.Info(timeMessage);
+        Console.WriteLine(timeMessage);
         
         try
         {
             if (transactionRepository == null)
             {
-                logger?.Error("CreateMonthlyRecurringTransactions: ITransactionRepository not found in DI container");
-                logger?.Info("CreateMonthlyRecurringTransactions: JOB ENDED - Repository not found");
-                logger?.Info("==========================================");
+                var errorMsg = "CreateMonthlyRecurringTransactions: ITransactionRepository not found in DI container";
+                logger?.Error(errorMsg);
+                Console.Error.WriteLine(errorMsg);
+                
+                var endMsg = "CreateMonthlyRecurringTransactions: JOB ENDED - Repository not found";
+                logger?.Info(endMsg);
+                Console.WriteLine(endMsg);
+                
+                logger?.Info(startMessage);
+                Console.WriteLine(startMessage);
                 return;
             }
 
@@ -190,9 +205,17 @@ public class BuildinRecurringJobs
             var monthStart = new DateTime(today.Year, today.Month, 1);
             var monthEnd = monthStart.AddMonths(1).AddDays(-1);
 
-            logger?.Info($"CreateMonthlyRecurringTransactions: Starting for day {todayDay} (Date: {today:yyyy-MM-dd})");
-            logger?.Info($"CreateMonthlyRecurringTransactions: Last day of month: {lastDayOfMonth}");
-            logger?.Info($"CreateMonthlyRecurringTransactions: Month range: {monthStart:yyyy-MM-dd} to {monthEnd:yyyy-MM-dd}");
+            var dayMessage = $"CreateMonthlyRecurringTransactions: Starting for day {todayDay} (Date: {today:yyyy-MM-dd})";
+            logger?.Info(dayMessage);
+            Console.WriteLine(dayMessage);
+            
+            var lastDayMessage = $"CreateMonthlyRecurringTransactions: Last day of month: {lastDayOfMonth}";
+            logger?.Info(lastDayMessage);
+            Console.WriteLine(lastDayMessage);
+            
+            var monthRangeMessage = $"CreateMonthlyRecurringTransactions: Month range: {monthStart:yyyy-MM-dd} to {monthEnd:yyyy-MM-dd}";
+            logger?.Info(monthRangeMessage);
+            Console.WriteLine(monthRangeMessage);
 
             // IsMonthlyRecurring == true ve DayOfMonth == bugünün günü OLAN VEYA
             // DayOfMonth == 31 ve bugün ayın son günüyse (ay 31 gün çekmiyorsa) transaction'ları bul
@@ -208,13 +231,22 @@ public class BuildinRecurringJobs
                      && x.IsActive != false
             );
 
-            logger?.Info($"CreateMonthlyRecurringTransactions: Found {recurringTransactions?.Count() ?? 0} recurring transactions for day {todayDay}");
+            var foundMessage = $"CreateMonthlyRecurringTransactions: Found {recurringTransactions?.Count() ?? 0} recurring transactions for day {todayDay}";
+            logger?.Info(foundMessage);
+            Console.WriteLine(foundMessage);
 
             if (recurringTransactions == null || !recurringTransactions.Any())
             {
-                logger?.Info($"CreateMonthlyRecurringTransactions: No recurring transactions found for day {todayDay}");
-                logger?.Info("CreateMonthlyRecurringTransactions: JOB ENDED - No transactions to process");
-                logger?.Info("==========================================");
+                var noTransactionsMessage = $"CreateMonthlyRecurringTransactions: No recurring transactions found for day {todayDay}";
+                logger?.Info(noTransactionsMessage);
+                Console.WriteLine(noTransactionsMessage);
+                
+                var jobEndedMessage = "CreateMonthlyRecurringTransactions: JOB ENDED - No transactions to process";
+                logger?.Info(jobEndedMessage);
+                Console.WriteLine(jobEndedMessage);
+                
+                logger?.Info(startMessage);
+                Console.WriteLine(startMessage);
                 return;
             }
 
@@ -222,13 +254,17 @@ public class BuildinRecurringJobs
             int skippedCount = 0;
             int errorCount = 0;
 
-            logger?.Info($"CreateMonthlyRecurringTransactions: Processing {recurringTransactions.Count()} recurring transactions...");
+            var processingMessage = $"CreateMonthlyRecurringTransactions: Processing {recurringTransactions.Count()} recurring transactions...";
+            logger?.Info(processingMessage);
+            Console.WriteLine(processingMessage);
 
             foreach (var recurringTransaction in recurringTransactions)
             {
                 try
                 {
-                    logger?.Info($"CreateMonthlyRecurringTransactions: Processing transaction - UserId: {recurringTransaction.UserId}, Amount: {recurringTransaction.Amount}, Type: {recurringTransaction.Type}, DayOfMonth: {recurringTransaction.DayOfMonth}");
+                    var processingTransactionMessage = $"CreateMonthlyRecurringTransactions: Processing transaction - UserId: {recurringTransaction.UserId}, Amount: {recurringTransaction.Amount}, Type: {recurringTransaction.Type}, DayOfMonth: {recurringTransaction.DayOfMonth}";
+                    logger?.Info(processingTransactionMessage);
+                    Console.WriteLine(processingTransactionMessage);
 
                     // Bu ay için bu recurring transaction'dan zaten bir transaction oluşturulmuş mu kontrol et
                     // Kullanıcı manuel olarak oluşturmuşsa (Description farklı olsa bile) otomatik oluşturma
@@ -249,13 +285,20 @@ public class BuildinRecurringJobs
 
                     if (existingTransaction != null)
                     {
-                        logger?.Info($"CreateMonthlyRecurringTransactions: Transaction already exists for UserId {recurringTransaction.UserId}, Amount {recurringTransaction.Amount}, Type {recurringTransaction.Type} (skipping - user may have created manually)");
-                        logger?.Info($"CreateMonthlyRecurringTransactions: Existing transaction Date: {existingTransaction.Date:yyyy-MM-dd}, Id: {existingTransaction.Id}");
+                        var existsMessage = $"CreateMonthlyRecurringTransactions: Transaction already exists for UserId {recurringTransaction.UserId}, Amount {recurringTransaction.Amount}, Type {recurringTransaction.Type} (skipping - user may have created manually)";
+                        logger?.Info(existsMessage);
+                        Console.WriteLine(existsMessage);
+                        
+                        var existingDetailsMessage = $"CreateMonthlyRecurringTransactions: Existing transaction Date: {existingTransaction.Date:yyyy-MM-dd}, Id: {existingTransaction.Id}";
+                        logger?.Info(existingDetailsMessage);
+                        Console.WriteLine(existingDetailsMessage);
                         skippedCount++;
                         continue;
                     }
 
-                    logger?.Info($"CreateMonthlyRecurringTransactions: No existing transaction found, creating new one...");
+                    var noExistingMessage = $"CreateMonthlyRecurringTransactions: No existing transaction found, creating new one...";
+                    logger?.Info(noExistingMessage);
+                    Console.WriteLine(noExistingMessage);
 
                     // Yeni transaction oluştur (bugünün tarihiyle, IsMonthlyRecurring=false)
                     var newTransaction = new Core.Entities.Concrete.Transaction
@@ -277,11 +320,15 @@ public class BuildinRecurringJobs
                     transactionRepository.Add(newTransaction);
                     createdCount++;
 
-                    logger?.Info($"CreateMonthlyRecurringTransactions: Created new transaction for UserId {recurringTransaction.UserId}, Amount {recurringTransaction.Amount}, Type {recurringTransaction.Type}, Date: {today:yyyy-MM-dd}");
+                    var createdMessage = $"CreateMonthlyRecurringTransactions: Created new transaction for UserId {recurringTransaction.UserId}, Amount {recurringTransaction.Amount}, Type {recurringTransaction.Type}, Date: {today:yyyy-MM-dd}";
+                    logger?.Info(createdMessage);
+                    Console.WriteLine(createdMessage);
                 }
                 catch (Exception ex)
                 {
-                    logger?.Error($"CreateMonthlyRecurringTransactions: Error creating transaction for UserId {recurringTransaction.UserId}. Exception: {ex.Message}, StackTrace: {ex.StackTrace}");
+                    var errorMessage = $"CreateMonthlyRecurringTransactions: Error creating transaction for UserId {recurringTransaction.UserId}. Exception: {ex.Message}, StackTrace: {ex.StackTrace}";
+                    logger?.Error(errorMessage);
+                    Console.Error.WriteLine(errorMessage);
                     errorCount++;
                 }
             }
@@ -289,25 +336,50 @@ public class BuildinRecurringJobs
             // Değişiklikleri kaydet
             if (createdCount > 0)
             {
-                logger?.Info($"CreateMonthlyRecurringTransactions: Saving {createdCount} new transactions to database...");
+                var savingMessage = $"CreateMonthlyRecurringTransactions: Saving {createdCount} new transactions to database...";
+                logger?.Info(savingMessage);
+                Console.WriteLine(savingMessage);
+                
                 await transactionRepository.SaveChangesAsync();
-                logger?.Info($"CreateMonthlyRecurringTransactions: Successfully saved {createdCount} transactions to database");
-                logger?.Info($"CreateMonthlyRecurringTransactions: Summary - Created: {createdCount}, Skipped: {skippedCount}, Errors: {errorCount}");
+                
+                var savedMessage = $"CreateMonthlyRecurringTransactions: Successfully saved {createdCount} transactions to database";
+                logger?.Info(savedMessage);
+                Console.WriteLine(savedMessage);
+                
+                var summaryMessage = $"CreateMonthlyRecurringTransactions: Summary - Created: {createdCount}, Skipped: {skippedCount}, Errors: {errorCount}";
+                logger?.Info(summaryMessage);
+                Console.WriteLine(summaryMessage);
             }
             else
             {
-                logger?.Info($"CreateMonthlyRecurringTransactions: No new transactions created. Skipped: {skippedCount}, Errors: {errorCount}");
+                var noNewTransactionsMessage = $"CreateMonthlyRecurringTransactions: No new transactions created. Skipped: {skippedCount}, Errors: {errorCount}";
+                logger?.Info(noNewTransactionsMessage);
+                Console.WriteLine(noNewTransactionsMessage);
             }
 
-            logger?.Info("CreateMonthlyRecurringTransactions: JOB COMPLETED SUCCESSFULLY");
-            logger?.Info("==========================================");
+            var completedMessage = "CreateMonthlyRecurringTransactions: JOB COMPLETED SUCCESSFULLY";
+            logger?.Info(completedMessage);
+            Console.WriteLine(completedMessage);
+            
+            logger?.Info(startMessage);
+            Console.WriteLine(startMessage);
         }
         catch (Exception ex)
         {
-            logger?.Error($"CreateMonthlyRecurringTransactions job error: {ex.Message}");
-            logger?.Error($"CreateMonthlyRecurringTransactions job StackTrace: {ex.StackTrace}");
-            logger?.Error($"CreateMonthlyRecurringTransactions: JOB ENDED WITH ERROR");
-            logger?.Info("==========================================");
+            var jobErrorMessage = $"CreateMonthlyRecurringTransactions job error: {ex.Message}";
+            logger?.Error(jobErrorMessage);
+            Console.Error.WriteLine(jobErrorMessage);
+            
+            var stackTraceMessage = $"CreateMonthlyRecurringTransactions job StackTrace: {ex.StackTrace}";
+            logger?.Error(stackTraceMessage);
+            Console.Error.WriteLine(stackTraceMessage);
+            
+            var jobEndedErrorMessage = "CreateMonthlyRecurringTransactions: JOB ENDED WITH ERROR";
+            logger?.Error(jobEndedErrorMessage);
+            Console.Error.WriteLine(jobEndedErrorMessage);
+            
+            logger?.Info(startMessage);
+            Console.WriteLine(startMessage);
             throw;
         }
     }
