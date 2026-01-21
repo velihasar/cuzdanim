@@ -88,12 +88,7 @@ namespace Business.Handlers.Authorizations.Commands
                         return new ErrorResult("Geçersiz istek. Lütfen tüm alanları doldurun.");
                     }
 
-                    _logger?.Info($"[RegisterUserCommand] Handle started - UserName: {request.UserName}, Email: {request.Email}, KvkkAccepted: {request.KvkkAccepted}");
-
-                    if (string.IsNullOrWhiteSpace(request.UserName))
-                    {
-                        return new ErrorResult("Kullanıcı adı zorunludur.");
-                    }
+                    _logger?.Info($"[RegisterUserCommand] Handle started - Email: {request.Email}, KvkkAccepted: {request.KvkkAccepted}");
 
                     if (string.IsNullOrWhiteSpace(request.Email))
                     {
@@ -117,27 +112,34 @@ namespace Business.Handlers.Authorizations.Commands
                         throw new Exception("Configuration is null");
                     }
 
-                    // 1. Username kontrolü
-                    var existingUserByUsername = await _userRepository.GetAsync(u => u.UserName == request.UserName);
+                    // Email'den otomatik kullanıcı adı oluştur
+                    var normalizedRequestEmail = request.Email.Trim().ToLowerInvariant();
+                    var emailPrefix = normalizedRequestEmail.Split('@')[0];
+                    var baseUsername = emailPrefix;
+                    
+                    // Username unique kontrolü ve çakışma çözümü
+                    string generatedUsername = baseUsername;
+                    var counter = 1;
+                    var existingUserByUsername = await _userRepository.GetAsync(u => u.UserName == generatedUsername);
+                    
+                    while (existingUserByUsername != null)
+                    {
+                        generatedUsername = $"{baseUsername}{counter}";
+                        counter++;
+                        existingUserByUsername = await _userRepository.GetAsync(u => u.UserName == generatedUsername);
+                        
+                        // Güvenlik için maksimum deneme sayısı
+                        if (counter > 1000)
+                        {
+                            return new ErrorResult("Kullanıcı adı oluşturulamadı. Lütfen destek ile iletişime geçin.");
+                        }
+                    }
                 
                 User existingUser = null;
                 bool isUpdating = false;
-                
-                if (existingUserByUsername != null)
-                {
-                    if (existingUserByUsername.Status == true)
-                    {
-                        // Doğrulanmış kullanıcı - hata ver
-                        return new ErrorResult(Messages.NameAlreadyExist);
-                    }
-                    // Doğrulanmamış kullanıcı - güncelleyeceğiz
-                    existingUser = existingUserByUsername;
-                    isUpdating = true;
-                }
 
                 // 2. Email unique kontrolü - tüm email'leri decrypt edip kontrol et
                 var allUsers = await _userRepository.GetListAsync();
-                var normalizedRequestEmail = request.Email.Trim().ToLowerInvariant();
                 
                 foreach (var userInList in allUsers)
                 {
@@ -186,13 +188,8 @@ namespace Business.Handlers.Authorizations.Commands
                             }
                             else if (existingUser.UserId != userInList.UserId)
                             {
-                                // Farklı kullanıcılar - username ve email çakışıyor
-                                return new ErrorResult("Bu kullanıcı adı ve e-posta adresi farklı hesaplara ait. Lütfen farklı bilgiler kullanın.");
-                            }
-                            // Eğer existingUser zaten varsa ve aynı kullanıcıysa, existingUserByUsername'i kullan (tracking sorununu önlemek için)
-                            else if (existingUserByUsername != null && existingUserByUsername.UserId == userInList.UserId)
-                            {
-                                // existingUserByUsername'i kullan (zaten set edilmiş)
+                                // Farklı kullanıcılar - email çakışıyor
+                                return new ErrorResult("Bu e-posta adresi zaten kullanılıyor.");
                             }
                         }
                     }
@@ -256,7 +253,7 @@ namespace Business.Handlers.Authorizations.Commands
                     // Yeni kullanıcı oluştur
                     user = new User
                     {
-                        UserName = request.UserName,
+                        UserName = generatedUsername, // Email'den otomatik oluşturulan kullanıcı adı
                         Email = encryptedEmail, // Şifrelenmiş email'i kaydet
                         FullName = string.IsNullOrWhiteSpace(request.FullName) ? null : request.FullName,
                         PasswordHash = passwordHash,
@@ -324,7 +321,7 @@ namespace Business.Handlers.Authorizations.Commands
             <h1>Cüzdanım'a Hoş Geldiniz!</h1>
         </div>
         <div class='content'>
-            <p>Merhaba {request.UserName},</p>
+            <p>Merhaba,</p>
             <p>Hesabınızı oluşturduğunuz için teşekkür ederiz. Hesabınızı aktifleştirmek için aşağıdaki doğrulama kodunu uygulamaya giriniz:</p>
             
             <div class='code-box'>
@@ -367,7 +364,7 @@ namespace Business.Handlers.Authorizations.Commands
 
                     var emailMessage = new EmailMessage
                     {
-                        ToAddresses = new List<EmailAddress> { new EmailAddress { Name = request.UserName, Address = request.Email } },
+                        ToAddresses = new List<EmailAddress> { new EmailAddress { Name = generatedUsername, Address = request.Email } },
                         FromAddresses = new List<EmailAddress> { new EmailAddress { Name = senderName, Address = senderEmail } },
                         Subject = "Cüzdanım - E-posta Doğrulama",
                         Content = emailContent
@@ -376,7 +373,7 @@ namespace Business.Handlers.Authorizations.Commands
                     await _mailService.SendAsync(emailMessage);
 
                     // Email gönderme başarılı - logla
-                    var successLog = $"[RegisterUserCommand] Email gönderildi - Email: {request.Email}, UserName: {request.UserName}, VerificationToken: {verificationToken}";
+                    var successLog = $"[RegisterUserCommand] Email gönderildi - Email: {request.Email}, UserName: {generatedUsername}, VerificationToken: {verificationToken}";
                     _logger?.Info(successLog);
                     Console.WriteLine(successLog);
 
@@ -386,7 +383,7 @@ namespace Business.Handlers.Authorizations.Commands
                 catch (Exception ex)
                 {
                     // Email gönderme hatası - hem FileLogger hem Console'a logla
-                    var errorDetails = $"[RegisterUserCommand] Mail gönderme hatası - Email: {request.Email}, UserName: {request.UserName}, " +
+                    var errorDetails = $"[RegisterUserCommand] Mail gönderme hatası - Email: {request.Email}, UserName: {generatedUsername}, " +
                                      $"Exception Type: {ex.GetType().Name}, Message: {ex.Message}, " +
                                      $"StackTrace: {ex.StackTrace}, " +
                                      $"InnerException: {(ex.InnerException != null ? ex.InnerException.Message : "Yok")}";
@@ -418,7 +415,6 @@ namespace Business.Handlers.Authorizations.Commands
                                 $"Message: {ex.Message}, " +
                                 $"StackTrace: {ex.StackTrace}, " +
                                 $"InnerException: {(ex.InnerException != null ? ex.InnerException.Message : "None")}, " +
-                                $"UserName: {request?.UserName}, " +
                                 $"Email: {request?.Email}");
                     
                     // Exception'ı tekrar fırlat - ExceptionMiddleware yakalayacak
