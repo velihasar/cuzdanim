@@ -71,7 +71,7 @@ namespace Business.Handlers.Authorizations.Queries
                 }
 
                 // Email ile giriş - deterministik encryption ile direkt arama yap
-                var normalizedEmail = loginValue.Trim().ToLowerInvariant();
+                    var normalizedEmail = loginValue.Trim().ToLowerInvariant();
                 
                 try
                 {
@@ -90,44 +90,44 @@ namespace Business.Handlers.Authorizations.Queries
                     {
                         var allUsers = await _userRepository.GetListAsync(u => u.Status && !string.IsNullOrEmpty(u.Email));
                         foreach (var userInList in allUsers)
-                        {
-                            var decryptedEmail = EmailEncryptionHelper.DecryptEmail(userInList.Email, _configuration);
-                            if (string.IsNullOrEmpty(decryptedEmail))
                             {
-                                decryptedEmail = userInList.Email;
+                                var decryptedEmail = EmailEncryptionHelper.DecryptEmail(userInList.Email, _configuration);
+                                if (string.IsNullOrEmpty(decryptedEmail))
+                                {
+                                    decryptedEmail = userInList.Email;
+                                }
+
+                                if (decryptedEmail.Trim().ToLowerInvariant() == normalizedEmail)
+                                {
+                                    user = userInList;
+                                    break;
+                                }
                             }
+                }
 
-                            if (decryptedEmail.Trim().ToLowerInvariant() == normalizedEmail)
-                            {
-                                user = userInList;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (user == null)
-                    {
+                if (user == null)
+                {
                         return new ErrorDataResult<AccessToken>(Messages.InvalidCredentials);
-                    }
+                }
 
-                    if (!HashingHelper.VerifyPasswordHash(request.Password, user.PasswordSalt, user.PasswordHash))
-                    {
+                if (!HashingHelper.VerifyPasswordHash(request.Password, user.PasswordSalt, user.PasswordHash))
+                {
                         return new ErrorDataResult<AccessToken>(Messages.InvalidCredentials);
-                    }
+                }
 
-                    var claims = _userRepository.GetClaims(user.UserId);
+                var claims = _userRepository.GetClaims(user.UserId);
 
-                    var accessToken = _tokenHelper.CreateToken<DArchToken>(user);
-                    accessToken.Claims = claims.Select(x => x.Name).ToList();
+                var accessToken = _tokenHelper.CreateToken<DArchToken>(user);
+                accessToken.Claims = claims.Select(x => x.Name).ToList();
 
-                    user.RefreshToken = accessToken.RefreshToken;
-                    user.LastLoginDate = DateTime.Now;
-                    _userRepository.Update(user);
-                    await _userRepository.SaveChangesAsync();
+                user.RefreshToken = accessToken.RefreshToken;
+                user.LastLoginDate = DateTime.Now;
+                _userRepository.Update(user);
+                await _userRepository.SaveChangesAsync();
 
-                    _cacheManager.Add($"{CacheKeys.UserIdForClaim}={user.UserId}", claims.Select(x => x.Name));
+                _cacheManager.Add($"{CacheKeys.UserIdForClaim}={user.UserId}", claims.Select(x => x.Name));
 
-                    return new SuccessDataResult<AccessToken>(accessToken, Messages.SuccessfulLogin);
+                return new SuccessDataResult<AccessToken>(accessToken, Messages.SuccessfulLogin);
                 }
                 catch (Exception ex)
                 {
