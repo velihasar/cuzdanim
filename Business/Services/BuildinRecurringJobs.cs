@@ -288,6 +288,7 @@ public class BuildinRecurringJobs
                              && x.Date >= monthStart
                              && x.Date <= monthEnd
                              && x.IsActive != false
+                             && x.Id != recurringTransaction.Id  // Recurring transaction'ın kendisini hariç tut
                              && (
                                  // Gelir kontrolü: IncomeCategoryId eşit olmalı, ExpenseCategoryId null olmalı
                                  (isIncome && x.IncomeCategoryId == recurringTransaction.IncomeCategoryId && !x.ExpenseCategoryId.HasValue) ||
