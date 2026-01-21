@@ -262,34 +262,47 @@ public class BuildinRecurringJobs
             {
                 try
                 {
-                    var processingTransactionMessage = $"CreateMonthlyRecurringTransactions: Processing transaction - UserId: {recurringTransaction.UserId}, Amount: {recurringTransaction.Amount}, Type: {recurringTransaction.Type}, DayOfMonth: {recurringTransaction.DayOfMonth}";
+                    // Transaction tipini belirle
+                    // Mantık:
+                    // - Gelir: IncomeCategoryId dolu, ExpenseCategoryId null → Kontrol: IncomeCategoryId eşit, ExpenseCategoryId null
+                    // - Gider: Hem IncomeCategoryId hem ExpenseCategoryId dolu → Kontrol: Hem IncomeCategoryId hem ExpenseCategoryId eşit
+                    var isIncome = recurringTransaction.IncomeCategoryId.HasValue && !recurringTransaction.ExpenseCategoryId.HasValue;
+                    var isExpense = recurringTransaction.IncomeCategoryId.HasValue && recurringTransaction.ExpenseCategoryId.HasValue;
+                    
+                    var transactionTypeDescription = isIncome ? "Gelir" : (isExpense ? "Gider" : "Bilinmeyen");
+                    var processingTransactionMessage = $"CreateMonthlyRecurringTransactions: Processing transaction - UserId: {recurringTransaction.UserId}, Amount: {recurringTransaction.Amount}, Type: {recurringTransaction.Type} ({transactionTypeDescription}), DayOfMonth: {recurringTransaction.DayOfMonth}, IncomeCategoryId: {recurringTransaction.IncomeCategoryId}, ExpenseCategoryId: {recurringTransaction.ExpenseCategoryId}";
                     logger?.Info(processingTransactionMessage);
                     Console.WriteLine(processingTransactionMessage);
 
                     // Bu ay için bu recurring transaction'dan zaten bir transaction oluşturulmuş mu kontrol et
                     // Kullanıcı manuel olarak oluşturmuşsa (Description farklı olsa bile) otomatik oluşturma
+                    // Kontrol mantığı:
+                    // - Gelirler için: IncomeCategoryId eşit olmalı, ExpenseCategoryId null olmalı
+                    // - Giderler için: Hem IncomeCategoryId hem ExpenseCategoryId eşit olmalı
+                    
                     var existingTransaction = await transactionRepository.GetAsync(
                         x => x.UserId == recurringTransaction.UserId
                              && x.Amount == recurringTransaction.Amount
                              && x.Type == recurringTransaction.Type
-                             && ((recurringTransaction.IncomeCategoryId.HasValue && x.IncomeCategoryId == recurringTransaction.IncomeCategoryId)
-                                 || (!recurringTransaction.IncomeCategoryId.HasValue && !x.IncomeCategoryId.HasValue))
-                             && ((recurringTransaction.ExpenseCategoryId.HasValue && x.ExpenseCategoryId == recurringTransaction.ExpenseCategoryId)
-                                 || (!recurringTransaction.ExpenseCategoryId.HasValue && !x.ExpenseCategoryId.HasValue))
                              && x.AssetId == recurringTransaction.AssetId
-                             // Description kontrolünü kaldırdık - kullanıcı manuel oluşturmuşsa Description farklı olabilir
                              && x.Date >= monthStart
                              && x.Date <= monthEnd
                              && x.IsActive != false
+                             && (
+                                 // Gelir kontrolü: IncomeCategoryId eşit olmalı, ExpenseCategoryId null olmalı
+                                 (isIncome && x.IncomeCategoryId == recurringTransaction.IncomeCategoryId && !x.ExpenseCategoryId.HasValue) ||
+                                 // Gider kontrolü: Hem IncomeCategoryId hem ExpenseCategoryId eşit olmalı
+                                 (isExpense && x.IncomeCategoryId == recurringTransaction.IncomeCategoryId && x.ExpenseCategoryId == recurringTransaction.ExpenseCategoryId)
+                             )
                     );
 
                     if (existingTransaction != null)
                     {
-                        var existsMessage = $"CreateMonthlyRecurringTransactions: Transaction already exists for UserId {recurringTransaction.UserId}, Amount {recurringTransaction.Amount}, Type {recurringTransaction.Type} (skipping - user may have created manually)";
+                        var existsMessage = $"CreateMonthlyRecurringTransactions: Transaction already exists for UserId {recurringTransaction.UserId}, Amount {recurringTransaction.Amount}, Type {recurringTransaction.Type} ({transactionTypeDescription}) (skipping - user may have created manually)";
                         logger?.Info(existsMessage);
                         Console.WriteLine(existsMessage);
                         
-                        var existingDetailsMessage = $"CreateMonthlyRecurringTransactions: Existing transaction Date: {existingTransaction.Date:yyyy-MM-dd}, Id: {existingTransaction.Id}";
+                        var existingDetailsMessage = $"CreateMonthlyRecurringTransactions: Existing transaction Date: {existingTransaction.Date:yyyy-MM-dd}, Id: {existingTransaction.Id}, IncomeCategoryId: {existingTransaction.IncomeCategoryId}, ExpenseCategoryId: {existingTransaction.ExpenseCategoryId}";
                         logger?.Info(existingDetailsMessage);
                         Console.WriteLine(existingDetailsMessage);
                         skippedCount++;
