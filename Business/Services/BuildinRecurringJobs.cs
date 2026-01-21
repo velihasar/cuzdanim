@@ -202,12 +202,13 @@ public class BuildinRecurringJobs
                 return;
             }
 
-            var today = DateTime.UtcNow;
+            var today = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
             var todayDay = today.Day;
             
             // Bu ayın başlangıç ve bitiş tarihleri
-            var currentMonthStart = new DateTime(today.Year, today.Month, 1);
-            var currentMonthEnd = currentMonthStart.AddMonths(1).AddDays(-1);
+            var currentMonthStart = new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Unspecified);
+            var lastDayOfMonth = DateTime.DaysInMonth(today.Year, today.Month);
+            var currentMonthEnd = new DateTime(today.Year, today.Month, lastDayOfMonth, 23, 59, 59, DateTimeKind.Unspecified);
 
             var dayMessage = $"CreateMonthlyRecurringTransactions: Starting for day {todayDay} (Date: {today:yyyy-MM-dd})";
             logger?.Info(dayMessage);
