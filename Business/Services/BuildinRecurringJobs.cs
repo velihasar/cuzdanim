@@ -165,7 +165,7 @@ public class BuildinRecurringJobs
     // Cron expression: "*/10 * * * *" = Her 10 dakikada bir
     // Geçmişte herhangi bir zamanda IsMonthlyRecurring=true olan transaction'ları kontrol eder
     // Bu ay içinde bugüne kadar kaydedilmemiş olanlar için push notification gönderir
-    [RecurringJob("*/10 * * * *", RecurringJobId = "CreateMonthlyRecurringTransactions")]
+    [RecurringJob("*/2 * * * *", RecurringJobId = "CreateMonthlyRecurringTransactions")]
     public static async Task CreateMonthlyRecurringTransactions()
     {
         var serviceProvider = ServiceTool.ServiceProvider;
@@ -226,13 +226,15 @@ public class BuildinRecurringJobs
                     x.UserId,
                     x.Type,
                     x.IncomeCategoryId,
-                    x.ExpenseCategoryId
+                    x.ExpenseCategoryId,
+                    x.DayOfMonth
                 })
                 .ToListAsync();
 
             // 5. Mevcut transaction'ları hash set'e çevir (hızlı lookup için)
+            // DayOfMonth'u da dahil et - aynı kategoride farklı DayOfMonth değerleri ayrı işlenmeli
             var existingTransactionsSet = existingTransactionsThisMonth
-                .Select(x => $"{x.UserId}_{x.Type}_{x.IncomeCategoryId}_{x.ExpenseCategoryId}")
+                .Select(x => $"{x.UserId}_{x.Type}_{x.IncomeCategoryId}_{x.ExpenseCategoryId}_{x.DayOfMonth}")
                 .ToHashSet();
 
             // 6. Notification gönderilecek transaction'ları grupla
@@ -242,7 +244,8 @@ public class BuildinRecurringJobs
                     rt.UserId,
                     rt.Type,
                     IncomeCategoryId = rt.IncomeCategoryId,
-                    ExpenseCategoryId = rt.ExpenseCategoryId
+                    ExpenseCategoryId = rt.ExpenseCategoryId,
+                    rt.DayOfMonth
                 })
                 .Select(g => g.OrderByDescending(rt => rt.Date).First())
                 .Where(rt =>
@@ -257,8 +260,14 @@ public class BuildinRecurringJobs
                     if (!isIncome && !isExpense)
                         return false;
 
+                    // DayOfMonth kontrolü: Sadece bugünün günü DayOfMonth'a eşit veya geçtiğinde bildirim gönder
+                    // Örnek: DayOfMonth=21 ise, sadece ayın 21'inde veya sonrasında bildirim gönder
+                    if (rt.DayOfMonth.HasValue && today.Day < rt.DayOfMonth.Value)
+                        return false;
+
                     // Bu ay için transaction var mı? (in-memory check)
-                    var key = $"{rt.UserId}_{rt.Type}_{rt.IncomeCategoryId}_{rt.ExpenseCategoryId}";
+                    // DayOfMonth'u da kontrol et - aynı kategoride farklı DayOfMonth değerleri ayrı işlenmeli
+                    var key = $"{rt.UserId}_{rt.Type}_{rt.IncomeCategoryId}_{rt.ExpenseCategoryId}_{rt.DayOfMonth}";
                     return !existingTransactionsSet.Contains(key);
                 })
                 .ToList();
