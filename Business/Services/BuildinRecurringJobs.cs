@@ -161,8 +161,8 @@ public class BuildinRecurringJobs
         }
     }
 
-    // Her 10 dakikada bir çalışır
-    // Cron expression: "*/10 * * * *" = Her 10 dakikada bir
+    // Her 2 dakikada bir çalışır
+    // Cron expression: "*/2 * * * *" = Her 2 dakikada bir
     // Geçmişte herhangi bir zamanda IsMonthlyRecurring=true olan transaction'ları kontrol eder
     // Bu ay içinde bugüne kadar kaydedilmemiş olanlar için push notification gönderir
     [RecurringJob("*/2 * * * *", RecurringJobId = "CreateMonthlyRecurringTransactions")]
