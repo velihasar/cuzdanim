@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace Business.Services
 {
@@ -58,6 +59,63 @@ namespace Business.Services
                                 if (jsonContent.Length > 50)
                                 {
                                     Console.WriteLine($"JSON starts with: {jsonContent.Substring(0, 50)}");
+                                }
+                                
+                                // JSON'u parse et ve private_key'deki escape karakterlerini düzelt
+                                try
+                                {
+                                    using (var jsonDoc = JsonDocument.Parse(jsonContent))
+                                    {
+                                        var root = jsonDoc.RootElement;
+                                        var jsonDict = new System.Collections.Generic.Dictionary<string, object>();
+                                        
+                                        foreach (var prop in root.EnumerateObject())
+                                        {
+                                            if (prop.Name == "private_key")
+                                            {
+                                                // private_key'deki \n karakterlerini gerçek newline'lara çevir
+                                                var privateKey = prop.Value.GetString();
+                                                if (!string.IsNullOrEmpty(privateKey))
+                                                {
+                                                    // JSON'da escape edilmiş \n'leri gerçek newline'lara çevir
+                                                    privateKey = privateKey.Replace("\\n", "\n");
+                                                    jsonDict[prop.Name] = privateKey;
+                                                }
+                                                else
+                                                {
+                                                    jsonDict[prop.Name] = prop.Value.GetString();
+                                                }
+                                            }
+                                            else if (prop.Value.ValueKind == JsonValueKind.String)
+                                            {
+                                                jsonDict[prop.Name] = prop.Value.GetString();
+                                            }
+                                            else if (prop.Value.ValueKind == JsonValueKind.Number)
+                                            {
+                                                jsonDict[prop.Name] = prop.Value.GetRawText();
+                                            }
+                                            else if (prop.Value.ValueKind == JsonValueKind.True || prop.Value.ValueKind == JsonValueKind.False)
+                                            {
+                                                jsonDict[prop.Name] = prop.Value.GetBoolean();
+                                            }
+                                            else
+                                            {
+                                                jsonDict[prop.Name] = prop.Value.GetRawText();
+                                            }
+                                        }
+                                        
+                                        // JSON'u yeniden serialize et
+                                        var options = new JsonSerializerOptions { WriteIndented = false };
+                                        jsonContent = JsonSerializer.Serialize(jsonDict, options);
+                                        Console.WriteLine("JSON private_key fixed and re-serialized");
+                                    }
+                                }
+                                catch (Exception jsonEx)
+                                {
+                                    Console.WriteLine($"Warning: Could not parse JSON to fix private_key. Error: {jsonEx.Message}");
+                                    Console.WriteLine($"Stack trace: {jsonEx.StackTrace}");
+                                    // JSON parse edilemezse, exception'ı yukarı fırlat
+                                    throw new Exception($"Failed to parse and fix JSON private_key: {jsonEx.Message}", jsonEx);
                                 }
                                 
                                 credential = GoogleCredential.FromJson(jsonContent);
