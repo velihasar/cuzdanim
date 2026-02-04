@@ -468,9 +468,20 @@ namespace WebAPI
 
             var taskSchedulerConfig = Configuration.GetSection("TaskSchedulerOptions").Get<TaskSchedulerConfig>();
             
-            if (taskSchedulerConfig.Enabled)
+            var logger = app.ApplicationServices.GetService<FileLogger>();
+            if (taskSchedulerConfig == null)
             {
-                app.UseHangfireDashboard(taskSchedulerConfig.Path, new DashboardOptions
+                logger?.Error("TaskSchedulerConfig is null! Hangfire configuration not found.");
+            }
+            else
+            {
+                logger?.Info($"TaskSchedulerConfig found. Enabled: {taskSchedulerConfig.Enabled}");
+                
+                if (taskSchedulerConfig.Enabled)
+                {
+                    logger?.Info("Hangfire is enabled, setting up dashboard and jobs...");
+                    
+                    app.UseHangfireDashboard(taskSchedulerConfig.Path, new DashboardOptions
                 {
                     DashboardTitle = taskSchedulerConfig.Title,
                     Authorization = new[]
@@ -483,11 +494,10 @@ namespace WebAPI
                     }
                 });
 
-                // Recurring job'ları manuel olarak register et
-                try
-                {
-                    var logger = app.ApplicationServices.GetService<FileLogger>();
-                    logger?.Info("Starting Hangfire recurring job registration...");
+                    // Recurring job'ları manuel olarak register et
+                    try
+                    {
+                        logger?.Info("Starting Hangfire recurring job registration...");
                     
                     var recurringJobManager = app.ApplicationServices.GetService<Hangfire.IRecurringJobManager>();
                     if (recurringJobManager != null)
@@ -542,8 +552,13 @@ namespace WebAPI
                 catch (Exception ex)
                 {
                     var logger = app.ApplicationServices.GetService<FileLogger>();
-                    logger?.Error($"Failed to register/trigger recurring jobs: {ex.Message}");
-                    logger?.Error($"Stack trace: {ex.StackTrace}");
+                        logger?.Error($"Failed to register/trigger recurring jobs: {ex.Message}");
+                        logger?.Error($"Stack trace: {ex.StackTrace}");
+                    }
+                }
+                else
+                {
+                    logger?.Warn("TaskSchedulerOptions.Enabled is false! Hangfire jobs will not be registered.");
                 }
             }
 
