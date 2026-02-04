@@ -180,6 +180,7 @@ public class BuildinRecurringJobs
             return;
         }
         
+        Console.WriteLine("Getting services...");
         var transactionRepository = serviceProvider?.GetService<ITransactionRepository>();
         var userRepository = serviceProvider?.GetService<IUserRepository>();
         var firebaseNotificationService = serviceProvider?.GetService<IFirebaseNotificationService>();
@@ -197,24 +198,31 @@ public class BuildinRecurringJobs
 
             if (transactionRepository == null || userRepository == null || firebaseNotificationService == null)
             {
+                Console.WriteLine("ERROR: Required services not found!");
                 logger?.Error("CreateMonthlyRecurringTransactions: Required services not found");
                 return;
             }
+            
+            Console.WriteLine("All services found, continuing...");
 
             var today = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
             var currentMonthStart = new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Unspecified);
+            Console.WriteLine($"Today: {today:yyyy-MM-dd}, Current month start: {currentMonthStart:yyyy-MM-dd}");
 
             // 1. Tüm recurring transaction'ları bir kerede çek
+            Console.WriteLine("Fetching recurring transactions...");
             var allRecurringTransactions = await transactionRepository.Query()
                 .Where(x => x.IsMonthlyRecurring == true && x.IsActive != false)
                 .ToListAsync();
 
             if (allRecurringTransactions == null || !allRecurringTransactions.Any())
             {
+                Console.WriteLine("No recurring transactions found");
                 logger?.Info("CreateMonthlyRecurringTransactions: No recurring transactions found");
                 return;
             }
 
+            Console.WriteLine($"Found {allRecurringTransactions.Count} recurring transactions");
             logger?.Info($"CreateMonthlyRecurringTransactions: Found {allRecurringTransactions.Count} recurring transactions");
 
             // 2. İlgili kullanıcı ID'lerini topla
@@ -231,10 +239,12 @@ public class BuildinRecurringJobs
 
             if (usersWithTokens == null || !usersWithTokens.Any())
             {
+                Console.WriteLine("No users with FCM tokens found");
                 logger?.Info("CreateMonthlyRecurringTransactions: No users with FCM tokens found");
                 return;
             }
 
+            Console.WriteLine($"Found {usersWithTokens.Count} users with FCM tokens");
             logger?.Info($"CreateMonthlyRecurringTransactions: Found {usersWithTokens.Count} users with FCM tokens");
 
             var userTokenDict = usersWithTokens.ToDictionary(u => u.UserId, u => u.FcmToken);
@@ -299,10 +309,12 @@ public class BuildinRecurringJobs
 
             if (!groupedRecurringTransactions.Any())
             {
+                Console.WriteLine("No transactions to notify (all already created or DayOfMonth not reached)");
                 logger?.Info("CreateMonthlyRecurringTransactions: No transactions to notify (all already created or DayOfMonth not reached)");
                 return;
             }
 
+            Console.WriteLine($"{groupedRecurringTransactions.Count} transactions eligible for notification");
             logger?.Info($"CreateMonthlyRecurringTransactions: {groupedRecurringTransactions.Count} transactions eligible for notification");
 
             // 7. Notification'ları gönder (her kullanıcı için ayrı - çünkü farklı deep link'ler olabilir)
@@ -388,13 +400,24 @@ public class BuildinRecurringJobs
                 }
             }
 
+            Console.WriteLine($"CreateMonthlyRecurringTransactions: Sent {totalSent} notifications, Failed: {totalFailed}");
             logger?.Info($"CreateMonthlyRecurringTransactions: Sent {totalSent} notifications, Failed: {totalFailed}");
         }
         catch (Exception ex)
         {
             Console.WriteLine($"CreateMonthlyRecurringTransactions: Exception - {ex.Message}");
             Console.WriteLine($"Stack trace: {ex.StackTrace}");
-            logger?.Error($"CreateMonthlyRecurringTransactions job error: {ex.Message}");
+            // Logger might be null, so try to get it again
+            try
+            {
+                var errorLogger = ServiceTool.ServiceProvider?.GetService<FileLogger>();
+                errorLogger?.Error($"CreateMonthlyRecurringTransactions job error: {ex.Message}");
+                errorLogger?.Error($"Stack trace: {ex.StackTrace}");
+            }
+            catch (Exception logEx)
+            {
+                Console.WriteLine($"Failed to log error: {logEx.Message}");
+            }
             throw;
         }
     }
