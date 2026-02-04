@@ -168,15 +168,32 @@ public class BuildinRecurringJobs
     [RecurringJob("*/2 * * * *", RecurringJobId = "CreateMonthlyRecurringTransactions")]
     public static async Task CreateMonthlyRecurringTransactions()
     {
+        // Console'a da yaz (debug için)
+        Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] CreateMonthlyRecurringTransactions: Job started");
+        
         var serviceProvider = ServiceTool.ServiceProvider;
+        Console.WriteLine($"ServiceProvider is null: {serviceProvider == null}");
+        
+        if (serviceProvider == null)
+        {
+            Console.WriteLine("ERROR: ServiceProvider is null!");
+            return;
+        }
+        
         var transactionRepository = serviceProvider?.GetService<ITransactionRepository>();
         var userRepository = serviceProvider?.GetService<IUserRepository>();
         var firebaseNotificationService = serviceProvider?.GetService<IFirebaseNotificationService>();
         var logger = serviceProvider?.GetService<FileLogger>();
         
+        Console.WriteLine($"TransactionRepository is null: {transactionRepository == null}");
+        Console.WriteLine($"UserRepository is null: {userRepository == null}");
+        Console.WriteLine($"FirebaseNotificationService is null: {firebaseNotificationService == null}");
+        Console.WriteLine($"Logger is null: {logger == null}");
+        
         try
         {
             logger?.Info("CreateMonthlyRecurringTransactions: Job started");
+            Console.WriteLine("CreateMonthlyRecurringTransactions: Job started (logged)");
 
             if (transactionRepository == null || userRepository == null || firebaseNotificationService == null)
             {
@@ -375,6 +392,8 @@ public class BuildinRecurringJobs
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"CreateMonthlyRecurringTransactions: Exception - {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
             logger?.Error($"CreateMonthlyRecurringTransactions job error: {ex.Message}");
             throw;
         }
