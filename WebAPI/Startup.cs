@@ -468,7 +468,16 @@ namespace WebAPI
 
             var taskSchedulerConfig = Configuration.GetSection("TaskSchedulerOptions").Get<TaskSchedulerConfig>();
             
-            var logger = app.ApplicationServices.GetService<FileLogger>();
+            FileLogger logger = null;
+            try
+            {
+                logger = app.ApplicationServices.GetService<FileLogger>();
+            }
+            catch
+            {
+                // Logger alınamazsa devam et
+            }
+            
             if (taskSchedulerConfig == null)
             {
                 logger?.Error("TaskSchedulerConfig is null! Hangfire configuration not found.");
@@ -551,10 +560,9 @@ namespace WebAPI
                 }
                 catch (Exception ex)
                 {
-                    var logger = app.ApplicationServices.GetService<FileLogger>();
-                        logger?.Error($"Failed to register/trigger recurring jobs: {ex.Message}");
-                        logger?.Error($"Stack trace: {ex.StackTrace}");
-                    }
+                    logger?.Error($"Failed to register/trigger recurring jobs: {ex.Message}");
+                    logger?.Error($"Stack trace: {ex.StackTrace}");
+                }
                 }
                 else
                 {
