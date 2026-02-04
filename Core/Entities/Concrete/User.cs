@@ -47,6 +47,9 @@ namespace Core.Entities.Concrete
         // Google Sign-In için alanlar
         public string GoogleId { get; set; } // Google kullanıcı ID'si (sub claim)
 
+        // Firebase Cloud Messaging için alanlar
+        public string FcmToken { get; set; } // Firebase Cloud Messaging device token
+
         /// <summary>
         /// This is required when encoding token. Not in db. The default is Person.
         /// </summary>
