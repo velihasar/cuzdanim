@@ -94,6 +94,9 @@ namespace Business
             services.AddTransient<IMessageBrokerHelper, MqQueueHelper>();
             services.AddTransient<IMessageConsumer, MqConsumerHelper>();
 
+            // Firebase Notification Service
+            services.AddSingleton<Business.Services.IFirebaseNotificationService, Business.Services.FirebaseNotificationService>();
+
             var taskSchedulerConfig = Configuration.GetSection("TaskSchedulerOptions").Get<TaskSchedulerConfig>();
 
             if (taskSchedulerConfig.Enabled)
