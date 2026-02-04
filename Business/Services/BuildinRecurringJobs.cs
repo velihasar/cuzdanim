@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using Core.Entities.Concrete;
+using Business.Services;
 
 namespace Business.Services;
 
@@ -163,31 +164,30 @@ public class BuildinRecurringJobs
     // Her 10 dakikada bir çalışır
     // Cron expression: "*/10 * * * *" = Her 10 dakikada bir
     // Geçmişte herhangi bir zamanda IsMonthlyRecurring=true olan transaction'ları kontrol eder
-    // Bu ay içinde bugüne kadar kaydedilmemiş olanları bugün verisi olarak kaydeder
+    // Bu ay içinde bugüne kadar kaydedilmemiş olanlar için push notification gönderir
     [RecurringJob("*/10 * * * *", RecurringJobId = "CreateMonthlyRecurringTransactions")]
     public static async Task CreateMonthlyRecurringTransactions()
     {
         var serviceProvider = ServiceTool.ServiceProvider;
         var transactionRepository = serviceProvider?.GetService<ITransactionRepository>();
+        var userRepository = serviceProvider?.GetService<IUserRepository>();
+        var firebaseNotificationService = serviceProvider?.GetService<IFirebaseNotificationService>();
+        var logger = serviceProvider?.GetService<FileLogger>();
         
         try
         {
-            if (transactionRepository == null)
+            if (transactionRepository == null || userRepository == null || firebaseNotificationService == null)
             {
+                logger?.Error("CreateMonthlyRecurringTransactions: Required services not found");
                 return;
             }
 
             var today = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
-            var todayDay = today.Day;
-            
             var currentMonthStart = new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Unspecified);
-            var lastDayOfMonth = DateTime.DaysInMonth(today.Year, today.Month);
-            var currentMonthEnd = new DateTime(today.Year, today.Month, lastDayOfMonth, 23, 59, 59, DateTimeKind.Unspecified);
 
+            // 1. Tüm recurring transaction'ları bir kerede çek
             var allRecurringTransactions = await transactionRepository.Query()
-                .Where(x => x.IsMonthlyRecurring == true 
-                     && x.IsActive != false
-                )
+                .Where(x => x.IsMonthlyRecurring == true && x.IsActive != false)
                 .ToListAsync();
 
             if (allRecurringTransactions == null || !allRecurringTransactions.Any())
@@ -195,6 +195,47 @@ public class BuildinRecurringJobs
                 return;
             }
 
+            // 2. İlgili kullanıcı ID'lerini topla
+            var userIds = allRecurringTransactions
+                .Select(rt => rt.UserId)
+                .Distinct()
+                .ToList();
+
+            // 3. FCM token'ı olan kullanıcıları bir kerede çek
+            var usersWithTokens = await userRepository.Query()
+                .Where(u => userIds.Contains(u.UserId) && !string.IsNullOrWhiteSpace(u.FcmToken) && u.Status)
+                .Select(u => new { u.UserId, u.FcmToken })
+                .ToListAsync();
+
+            if (usersWithTokens == null || !usersWithTokens.Any())
+            {
+                return;
+            }
+
+            var userTokenDict = usersWithTokens.ToDictionary(u => u.UserId, u => u.FcmToken);
+
+            // 4. Bu ay için mevcut transaction'ları bir kerede çek (bulk check)
+            var existingTransactionsThisMonth = await transactionRepository.Query()
+                .Where(x => userIds.Contains(x.UserId)
+                    && x.Date >= currentMonthStart
+                    && x.Date <= today
+                    && x.IsActive != false
+                    && x.IsMonthlyRecurring == true)
+                .Select(x => new
+                {
+                    x.UserId,
+                    x.Type,
+                    x.IncomeCategoryId,
+                    x.ExpenseCategoryId
+                })
+                .ToListAsync();
+
+            // 5. Mevcut transaction'ları hash set'e çevir (hızlı lookup için)
+            var existingTransactionsSet = existingTransactionsThisMonth
+                .Select(x => $"{x.UserId}_{x.Type}_{x.IncomeCategoryId}_{x.ExpenseCategoryId}")
+                .ToHashSet();
+
+            // 6. Notification gönderilecek transaction'ları grupla
             var groupedRecurringTransactions = allRecurringTransactions
                 .GroupBy(rt => new
                 {
@@ -204,78 +245,118 @@ public class BuildinRecurringJobs
                     ExpenseCategoryId = rt.ExpenseCategoryId
                 })
                 .Select(g => g.OrderByDescending(rt => rt.Date).First())
+                .Where(rt =>
+                {
+                    // Kullanıcının FCM token'ı var mı?
+                    if (!userTokenDict.ContainsKey(rt.UserId))
+                        return false;
+
+                    var isIncome = rt.IncomeCategoryId.HasValue && !rt.ExpenseCategoryId.HasValue && rt.Type == TransactionType.Income;
+                    var isExpense = rt.IncomeCategoryId.HasValue && rt.ExpenseCategoryId.HasValue && rt.Type == TransactionType.Expense;
+
+                    if (!isIncome && !isExpense)
+                        return false;
+
+                    // Bu ay için transaction var mı? (in-memory check)
+                    var key = $"{rt.UserId}_{rt.Type}_{rt.IncomeCategoryId}_{rt.ExpenseCategoryId}";
+                    return !existingTransactionsSet.Contains(key);
+                })
                 .ToList();
 
-            var transactionsToCreate = new List<Transaction>();
-            
-            foreach (var recurringTransaction in groupedRecurringTransactions)
-            {
-                var isIncome = recurringTransaction.IncomeCategoryId.HasValue && !recurringTransaction.ExpenseCategoryId.HasValue && recurringTransaction.Type == TransactionType.Income;
-                var isExpense = recurringTransaction.IncomeCategoryId.HasValue && recurringTransaction.ExpenseCategoryId.HasValue && recurringTransaction.Type == TransactionType.Expense;
-                
-                if (!isIncome && !isExpense)
-                {
-                    continue;
-                }
-                
-                var hasExistingThisMonth = await transactionRepository.Query()
-                    .AnyAsync(x => x.UserId == recurringTransaction.UserId
-                         && x.Type == recurringTransaction.Type
-                         && x.Date >= currentMonthStart
-                         && x.Date <= today
-                         && x.IsActive != false
-                         && (
-                             (isIncome && x.IncomeCategoryId == recurringTransaction.IncomeCategoryId && !x.ExpenseCategoryId.HasValue) ||
-                             (isExpense && x.IncomeCategoryId == recurringTransaction.IncomeCategoryId && x.ExpenseCategoryId == recurringTransaction.ExpenseCategoryId)
-                         ));
-
-                if (!hasExistingThisMonth)
-                {
-                    transactionsToCreate.Add(recurringTransaction);
-                }
-            }
-
-            if (transactionsToCreate == null || !transactionsToCreate.Any())
+            if (!groupedRecurringTransactions.Any())
             {
                 return;
             }
 
-            foreach (var recurringTransaction in transactionsToCreate)
+            // 7. Notification'ları gönder (her kullanıcı için ayrı - çünkü farklı deep link'ler olabilir)
+            // Firebase rate limit'i için batch'ler halinde gönder (200'lük gruplar)
+            const int batchSize = 200;
+            var batches = groupedRecurringTransactions
+                .Select((rt, index) => new { rt, index })
+                .GroupBy(x => x.index / batchSize)
+                .Select(g => g.Select(x => x.rt).ToList())
+                .ToList();
+
+            int totalSent = 0;
+            int totalFailed = 0;
+
+            foreach (var batch in batches)
             {
-                try
+                var notificationTasks = batch.Select(async rt =>
                 {
-                    var newTransaction = new Core.Entities.Concrete.Transaction
+                    try
                     {
-                        UserId = recurringTransaction.UserId,
-                        AssetId = recurringTransaction.AssetId,
-                        IncomeCategoryId = recurringTransaction.IncomeCategoryId,
-                        ExpenseCategoryId = recurringTransaction.ExpenseCategoryId,
-                        Amount = recurringTransaction.Amount,
-                        Date = today,
-                        Description = recurringTransaction.Description,
-                        Type = recurringTransaction.Type,
-                        IsMonthlyRecurring = true,
-                        IsBalanceCarriedOver = recurringTransaction.IsBalanceCarriedOver,
-                        DayOfMonth = recurringTransaction.DayOfMonth,
-                        IsActive = true
-                    };
+                        if (!userTokenDict.TryGetValue(rt.UserId, out var fcmToken))
+                            return false;
 
-                    transactionRepository.Add(newTransaction);
-                }
-                catch (Exception)
+                        var transactionType = rt.Type == TransactionType.Income ? "income" : "expense";
+                        var title = rt.Type == TransactionType.Income ? "Aylık Gelir Hatırlatması" : "Aylık Gider Hatırlatması";
+                        var body = rt.Type == TransactionType.Income
+                            ? $"Bu ayın {rt.DayOfMonth ?? today.Day}. günü için gelir kaydı eklemeniz gerekiyor."
+                            : $"Bu ayın {rt.DayOfMonth ?? today.Day}. günü için gider kaydı eklemeniz gerekiyor.";
+
+                        // Deep link URL'i oluştur
+                        var deepLink = $"cuzdanim:///(tabs)/add-transaction?type={transactionType}";
+                        if (rt.IncomeCategoryId.HasValue)
+                        {
+                            deepLink += $"&incomeCategoryId={rt.IncomeCategoryId.Value}";
+                        }
+                        if (rt.ExpenseCategoryId.HasValue)
+                        {
+                            deepLink += $"&expenseCategoryId={rt.ExpenseCategoryId.Value}";
+                        }
+                        if (rt.Amount > 0)
+                        {
+                            deepLink += $"&amount={rt.Amount}";
+                        }
+                        if (!string.IsNullOrWhiteSpace(rt.Description))
+                        {
+                            deepLink += $"&description={Uri.EscapeDataString(rt.Description)}";
+                        }
+
+                        var notificationData = new
+                        {
+                            type = "recurring_transaction",
+                            deepLink = deepLink,
+                            transactionType = transactionType,
+                            incomeCategoryId = rt.IncomeCategoryId?.ToString() ?? "",
+                            expenseCategoryId = rt.ExpenseCategoryId?.ToString() ?? "",
+                            amount = rt.Amount.ToString(),
+                            description = rt.Description ?? "",
+                            dayOfMonth = rt.DayOfMonth?.ToString() ?? ""
+                        };
+
+                        return await firebaseNotificationService.SendNotificationAsync(
+                            fcmToken,
+                            title,
+                            body,
+                            notificationData
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        logger?.Error($"CreateMonthlyRecurringTransactions: Error sending notification to user {rt.UserId}. {ex.Message}");
+                        return false;
+                    }
+                });
+
+                var results = await Task.WhenAll(notificationTasks);
+                totalSent += results.Count(r => r);
+                totalFailed += results.Count(r => !r);
+
+                // Rate limit için bekleme (her batch arasında)
+                if (batches.Count > 1)
                 {
-                    // Hata durumunda sessizce devam et
+                    await Task.Delay(1500); // 1.5 saniye bekleme
                 }
             }
 
-            if (transactionsToCreate.Any())
-            {
-                await transactionRepository.SaveChangesAsync();
-            }
+            logger?.Info($"CreateMonthlyRecurringTransactions: Sent {totalSent} notifications, Failed: {totalFailed}");
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Hata durumunda sessizce devam et
+            logger?.Error($"CreateMonthlyRecurringTransactions job error: {ex.Message}");
+            throw;
         }
     }
 }
