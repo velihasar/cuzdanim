@@ -486,9 +486,14 @@ namespace WebAPI
                 // Recurring job'ları manuel olarak register et
                 try
                 {
+                    var logger = app.ApplicationServices.GetService<FileLogger>();
+                    logger?.Info("Starting Hangfire recurring job registration...");
+                    
                     var recurringJobManager = app.ApplicationServices.GetService<Hangfire.IRecurringJobManager>();
                     if (recurringJobManager != null)
                     {
+                        logger?.Info("RecurringJobManager found, registering jobs...");
+                        
                         // UpdateAssetTypePrices job'unu register et
                         // async Task method için Expression<Func<Task>> kullan
                         System.Linq.Expressions.Expression<Func<System.Threading.Tasks.Task>> updatePricesExpression = 
@@ -498,6 +503,7 @@ namespace WebAPI
                             "UpdateAssetTypePrices",
                             updatePricesExpression,
                             "*/30 * * * *"); // Her 30 dakikada bir çalışır
+                        logger?.Info("UpdateAssetTypePrices job registered");
 
                         // DeleteOldTransactions job'unu register et
                         System.Linq.Expressions.Expression<Func<System.Threading.Tasks.Task>> deleteOldTransactionsExpression = 
@@ -507,6 +513,7 @@ namespace WebAPI
                             "DeleteOldTransactions",
                             deleteOldTransactionsExpression,
                             "0 3 * * *"); // Her gün saat 03:00'de çalışır
+                        logger?.Info("DeleteOldTransactions job registered");
 
                         // CreateMonthlyRecurringTransactions job'unu register et
                         System.Linq.Expressions.Expression<Func<System.Threading.Tasks.Task>> createMonthlyRecurringExpression = 
@@ -516,15 +523,27 @@ namespace WebAPI
                             "CreateMonthlyRecurringTransactions",
                             createMonthlyRecurringExpression,
                             "*/2 * * * *"); // Her 2 dakikada bir çalışır
+                        logger?.Info("CreateMonthlyRecurringTransactions job registered");
 
                         // Proje başladığında UpdateAssetTypePrices job'unu bir kere çalıştır
                         recurringJobManager.Trigger("UpdateAssetTypePrices");
+                        
+                        // Test için CreateMonthlyRecurringTransactions job'unu da bir kere çalıştır
+                        recurringJobManager.Trigger("CreateMonthlyRecurringTransactions");
+                        logger?.Info("CreateMonthlyRecurringTransactions job triggered manually for testing");
+                        
+                        logger?.Info("All recurring jobs registered successfully");
+                    }
+                    else
+                    {
+                        logger?.Error("RecurringJobManager is null! Hangfire may not be properly configured.");
                     }
                 }
                 catch (Exception ex)
                 {
                     var logger = app.ApplicationServices.GetService<FileLogger>();
                     logger?.Error($"Failed to register/trigger recurring jobs: {ex.Message}");
+                    logger?.Error($"Stack trace: {ex.StackTrace}");
                 }
             }
 
