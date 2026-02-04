@@ -46,14 +46,30 @@ namespace Business.Services
                             Console.WriteLine("Using FIREBASE_ADMIN_JSON_CONTENT from environment variable");
                             try
                             {
-                                var jsonBytes = Convert.FromBase64String(firebaseJsonContent);
+                                // Base64 string'deki whitespace'leri temizle (newline, space, tab vs.)
+                                var cleanedBase64 = firebaseJsonContent.Replace("\n", "").Replace("\r", "").Replace(" ", "").Replace("\t", "");
+                                Console.WriteLine($"Base64 string length: {cleanedBase64.Length}");
+                                
+                                var jsonBytes = Convert.FromBase64String(cleanedBase64);
                                 var jsonContent = System.Text.Encoding.UTF8.GetString(jsonBytes);
+                                
+                                // JSON içeriğini kontrol et (debug için)
+                                Console.WriteLine($"JSON content length: {jsonContent.Length}");
+                                if (jsonContent.Length > 50)
+                                {
+                                    Console.WriteLine($"JSON starts with: {jsonContent.Substring(0, 50)}");
+                                }
+                                
                                 credential = GoogleCredential.FromJson(jsonContent);
                                 Console.WriteLine("Firebase credential loaded from environment variable (base64)");
                             }
                             catch (Exception ex)
                             {
                                 Console.WriteLine($"Error parsing FIREBASE_ADMIN_JSON_CONTENT: {ex.Message}");
+                                if (ex.InnerException != null)
+                                {
+                                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                                }
                                 throw;
                             }
                         }
