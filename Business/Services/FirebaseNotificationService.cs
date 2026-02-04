@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Text.Json;
+using System.Text.Encodings.Web;
 
 namespace Business.Services
 {
@@ -61,65 +62,81 @@ namespace Business.Services
                                     Console.WriteLine($"JSON starts with: {jsonContent.Substring(0, 50)}");
                                 }
                                 
-                                // Orijinal JSON string'ini direkt kullan (parse etmeden)
-                                // Base64'ten decode edilen JSON zaten doğru formatta olmalı
-                                // Eğer private_key'de gerçek newline karakterleri varsa, bunları \n escape karakterlerine çevir
-                                // Ama önce JSON'u parse edip kontrol edelim
+                                // JSON'u parse et ve private_key'deki gerçek newline karakterlerini düzelt
                                 try
                                 {
-                                    // JSON'u parse edip private_key'in durumunu kontrol et
                                     using (var jsonDoc = JsonDocument.Parse(jsonContent))
                                     {
                                         var root = jsonDoc.RootElement;
-                                        if (root.TryGetProperty("private_key", out var pkElement))
+                                        
+                                        // JSON'u Dictionary'ye çevir
+                                        var jsonDict = new System.Collections.Generic.Dictionary<string, object>();
+                                        
+                                        foreach (var prop in root.EnumerateObject())
                                         {
-                                            var privateKey = pkElement.GetString();
-                                            Console.WriteLine($"Private key length: {privateKey?.Length ?? 0}");
-                                            Console.WriteLine($"Private key starts with: {privateKey?.Substring(0, Math.Min(50, privateKey?.Length ?? 0))}");
-                                            
-                                            // Eğer private_key'de gerçek newline karakterleri varsa (JSON parse edildiğinde oluşmuşsa)
-                                            // Orijinal JSON string'inde private_key alanını bulup düzelt
-                                            if (privateKey != null && privateKey.Contains("\n"))
+                                            if (prop.Name == "private_key")
                                             {
-                                                Console.WriteLine("Private key contains real newlines, fixing in original JSON string...");
-                                                
-                                                // Orijinal JSON string'inde private_key alanını bul
-                                                var pkStartIndex = jsonContent.IndexOf("\"private_key\"");
-                                                if (pkStartIndex >= 0)
+                                                // private_key'deki gerçek newline karakterlerini al
+                                                var privateKey = prop.Value.GetString();
+                                                if (!string.IsNullOrEmpty(privateKey))
                                                 {
-                                                    var pkValueStart = jsonContent.IndexOf("\"", pkStartIndex + 13) + 1;
-                                                    var pkValueEnd = jsonContent.IndexOf("\"", pkValueStart);
-                                                    
-                                                    if (pkValueEnd > pkValueStart)
-                                                    {
-                                                        // Private key değerini al ve newline'ları \n escape karakterlerine çevir
-                                                        var originalPkValue = jsonContent.Substring(pkValueStart, pkValueEnd - pkValueStart);
-                                                        var fixedPkValue = originalPkValue
-                                                            .Replace("\\", "\\\\")  // Önce mevcut escape'leri koru
-                                                            .Replace("\"", "\\\"")
-                                                            .Replace("\n", "\\n")    // Gerçek newline'ları \n escape'ine çevir
-                                                            .Replace("\r", "\\r")
-                                                            .Replace("\t", "\\t");
-                                                        
-                                                        // JSON string'ini düzelt
-                                                        jsonContent = jsonContent.Substring(0, pkValueStart) + 
-                                                                     fixedPkValue + 
-                                                                     jsonContent.Substring(pkValueEnd);
-                                                        Console.WriteLine("Fixed private_key in JSON string");
-                                                    }
+                                                    // Gerçek newline karakterleri zaten var (JSON parse edildiğinde oluştu)
+                                                    // JsonSerializer bunları otomatik olarak \n escape'ine çevirecek
+                                                    jsonDict[prop.Name] = privateKey;
+                                                    Console.WriteLine($"Private key length: {privateKey.Length}");
+                                                    Console.WriteLine($"Private key starts with: {privateKey.Substring(0, Math.Min(50, privateKey.Length))}");
                                                 }
+                                                else
+                                                {
+                                                    jsonDict[prop.Name] = prop.Value.GetString();
+                                                }
+                                            }
+                                            else if (prop.Value.ValueKind == JsonValueKind.String)
+                                            {
+                                                jsonDict[prop.Name] = prop.Value.GetString();
+                                            }
+                                            else if (prop.Value.ValueKind == JsonValueKind.Number)
+                                            {
+                                                // Number'ı string olarak al ve parse et
+                                                if (prop.Value.TryGetInt64(out var intVal))
+                                                {
+                                                    jsonDict[prop.Name] = intVal;
+                                                }
+                                                else if (prop.Value.TryGetDouble(out var doubleVal))
+                                                {
+                                                    jsonDict[prop.Name] = doubleVal;
+                                                }
+                                                else
+                                                {
+                                                    jsonDict[prop.Name] = prop.Value.GetRawText();
+                                                }
+                                            }
+                                            else if (prop.Value.ValueKind == JsonValueKind.True || prop.Value.ValueKind == JsonValueKind.False)
+                                            {
+                                                jsonDict[prop.Name] = prop.Value.GetBoolean();
                                             }
                                             else
                                             {
-                                                Console.WriteLine("Private key format looks correct (no real newlines found)");
+                                                jsonDict[prop.Name] = prop.Value.GetRawText();
                                             }
                                         }
+                                        
+                                        // JSON'u serialize et - JsonSerializer otomatik olarak newline'ları \n escape'ine çevirir
+                                        var options = new JsonSerializerOptions 
+                                        { 
+                                            WriteIndented = false,
+                                            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping // Newline'ları \n olarak escape et
+                                        };
+                                        jsonContent = JsonSerializer.Serialize(jsonDict, options);
+                                        Console.WriteLine("JSON private_key fixed and re-serialized using JsonSerializer");
                                     }
                                 }
                                 catch (Exception jsonEx)
                                 {
-                                    Console.WriteLine($"Warning: Could not parse JSON to check private_key. Error: {jsonEx.Message}");
-                                    Console.WriteLine("Using original JSON string as-is...");
+                                    Console.WriteLine($"Warning: Could not parse JSON to fix private_key. Error: {jsonEx.Message}");
+                                    Console.WriteLine($"Stack trace: {jsonEx.StackTrace}");
+                                    // JSON parse edilemezse, exception'ı yukarı fırlat
+                                    throw new Exception($"Failed to parse and fix JSON private_key: {jsonEx.Message}", jsonEx);
                                 }
                                 
                                 credential = GoogleCredential.FromJson(jsonContent);
