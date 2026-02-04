@@ -176,6 +176,8 @@ public class BuildinRecurringJobs
         
         try
         {
+            logger?.Info("CreateMonthlyRecurringTransactions: Job started");
+
             if (transactionRepository == null || userRepository == null || firebaseNotificationService == null)
             {
                 logger?.Error("CreateMonthlyRecurringTransactions: Required services not found");
@@ -192,8 +194,11 @@ public class BuildinRecurringJobs
 
             if (allRecurringTransactions == null || !allRecurringTransactions.Any())
             {
+                logger?.Info("CreateMonthlyRecurringTransactions: No recurring transactions found");
                 return;
             }
+
+            logger?.Info($"CreateMonthlyRecurringTransactions: Found {allRecurringTransactions.Count} recurring transactions");
 
             // 2. İlgili kullanıcı ID'lerini topla
             var userIds = allRecurringTransactions
@@ -209,8 +214,11 @@ public class BuildinRecurringJobs
 
             if (usersWithTokens == null || !usersWithTokens.Any())
             {
+                logger?.Info("CreateMonthlyRecurringTransactions: No users with FCM tokens found");
                 return;
             }
+
+            logger?.Info($"CreateMonthlyRecurringTransactions: Found {usersWithTokens.Count} users with FCM tokens");
 
             var userTokenDict = usersWithTokens.ToDictionary(u => u.UserId, u => u.FcmToken);
 
@@ -274,8 +282,11 @@ public class BuildinRecurringJobs
 
             if (!groupedRecurringTransactions.Any())
             {
+                logger?.Info("CreateMonthlyRecurringTransactions: No transactions to notify (all already created or DayOfMonth not reached)");
                 return;
             }
+
+            logger?.Info($"CreateMonthlyRecurringTransactions: {groupedRecurringTransactions.Count} transactions eligible for notification");
 
             // 7. Notification'ları gönder (her kullanıcı için ayrı - çünkü farklı deep link'ler olabilir)
             // Firebase rate limit'i için batch'ler halinde gönder (200'lük gruplar)
