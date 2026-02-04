@@ -129,6 +129,27 @@ namespace Business.Services
                                         };
                                         jsonContent = JsonSerializer.Serialize(jsonDict, options);
                                         Console.WriteLine("JSON private_key fixed and re-serialized using JsonSerializer");
+                                        
+                                        // Debug: Serialize edilen JSON'da private_key'i kontrol et
+                                        try
+                                        {
+                                            using (var checkDoc = JsonDocument.Parse(jsonContent))
+                                            {
+                                                if (checkDoc.RootElement.TryGetProperty("private_key", out var checkPk))
+                                                {
+                                                    var serializedPk = checkPk.GetString();
+                                                    Console.WriteLine($"Serialized private_key length: {serializedPk?.Length ?? 0}");
+                                                    Console.WriteLine($"Serialized private_key starts with: {serializedPk?.Substring(0, Math.Min(80, serializedPk?.Length ?? 0))}");
+                                                    Console.WriteLine($"Serialized private_key ends with: {serializedPk?.Substring(Math.Max(0, (serializedPk?.Length ?? 0) - 50))}");
+                                                    Console.WriteLine($"Serialized private_key contains BEGIN: {serializedPk?.Contains("-----BEGIN PRIVATE KEY-----")}");
+                                                    Console.WriteLine($"Serialized private_key contains END: {serializedPk?.Contains("-----END PRIVATE KEY-----")}");
+                                                }
+                                            }
+                                        }
+                                        catch (Exception debugEx)
+                                        {
+                                            Console.WriteLine($"Debug: Could not parse serialized JSON: {debugEx.Message}");
+                                        }
                                     }
                                 }
                                 catch (Exception jsonEx)
