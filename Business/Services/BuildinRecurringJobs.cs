@@ -181,10 +181,55 @@ public class BuildinRecurringJobs
         }
         
         Console.WriteLine("Getting services...");
-        var transactionRepository = serviceProvider?.GetService<ITransactionRepository>();
-        var userRepository = serviceProvider?.GetService<IUserRepository>();
-        var firebaseNotificationService = serviceProvider?.GetService<IFirebaseNotificationService>();
-        var logger = serviceProvider?.GetService<FileLogger>();
+        
+        ITransactionRepository transactionRepository = null;
+        IUserRepository userRepository = null;
+        IFirebaseNotificationService firebaseNotificationService = null;
+        FileLogger logger = null;
+        
+        try
+        {
+            Console.WriteLine("Getting TransactionRepository...");
+            transactionRepository = serviceProvider?.GetService<ITransactionRepository>();
+            Console.WriteLine($"TransactionRepository obtained: {transactionRepository != null}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error getting TransactionRepository: {ex.Message}");
+        }
+        
+        try
+        {
+            Console.WriteLine("Getting UserRepository...");
+            userRepository = serviceProvider?.GetService<IUserRepository>();
+            Console.WriteLine($"UserRepository obtained: {userRepository != null}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error getting UserRepository: {ex.Message}");
+        }
+        
+        try
+        {
+            Console.WriteLine("Getting FirebaseNotificationService...");
+            firebaseNotificationService = serviceProvider?.GetService<IFirebaseNotificationService>();
+            Console.WriteLine($"FirebaseNotificationService obtained: {firebaseNotificationService != null}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error getting FirebaseNotificationService: {ex.Message}");
+        }
+        
+        try
+        {
+            Console.WriteLine("Getting FileLogger...");
+            logger = serviceProvider?.GetService<FileLogger>();
+            Console.WriteLine($"FileLogger obtained: {logger != null}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error getting FileLogger: {ex.Message}");
+        }
         
         Console.WriteLine($"TransactionRepository is null: {transactionRepository == null}");
         Console.WriteLine($"UserRepository is null: {userRepository == null}");
