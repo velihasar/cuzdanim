@@ -468,4 +468,8 @@ fabric.properties
 .history/
 .idea/*
 UiPreparation/.DS_Store
-cuzdanim-firebase-admin.json
+
+# Firebase service account keys (use environment variables instead)
+WebAPI/keys/
+**/keys/**
+*.firebase-admin.json
