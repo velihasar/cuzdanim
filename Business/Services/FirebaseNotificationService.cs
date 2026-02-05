@@ -17,7 +17,8 @@ namespace Business.Services
         public FirebaseNotificationService(IConfiguration configuration)
         {
             _configuration = configuration;
-            InitializeFirebase();
+            // Lazy initialization - Firebase sadece notification gönderilirken initialize edilecek
+            // Bu sayede Firebase hatası olsa bile API ayağa kalkabilir
         }
 
         private void InitializeFirebase()
@@ -145,7 +146,9 @@ namespace Business.Services
                         Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
                     }
                     Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                    throw new Exception($"Firebase Admin SDK initialize edilemedi: {ex.Message}", ex);
+                    // Exception fırlatma - sadece logla
+                    // Bu sayede Firebase hatası olsa bile API ayağa kalkabilir
+                    // _isInitialized false kalacak, notification gönderilemeyecek ama API çalışacak
                 }
             }
         }
@@ -154,6 +157,27 @@ namespace Business.Services
         {
             if (string.IsNullOrWhiteSpace(fcmToken))
             {
+                return false;
+            }
+
+            // Lazy initialization - Firebase sadece ilk kullanımda initialize edilir
+            if (!_isInitialized)
+            {
+                try
+                {
+                    InitializeFirebase();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Firebase init failed in SendNotificationAsync: {ex.Message}");
+                    return false; // API çalışsın, sadece push notification düşsün
+                }
+            }
+
+            // Firebase initialize edilemediyse, notification gönderilemez
+            if (!_isInitialized || FirebaseApp.DefaultInstance == null)
+            {
+                Console.WriteLine("Firebase not initialized, cannot send notification");
                 return false;
             }
 
@@ -218,6 +242,27 @@ namespace Business.Services
         {
             if (fcmTokens == null || fcmTokens.Length == 0)
             {
+                return false;
+            }
+
+            // Lazy initialization - Firebase sadece ilk kullanımda initialize edilir
+            if (!_isInitialized)
+            {
+                try
+                {
+                    InitializeFirebase();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Firebase init failed in SendNotificationToMultipleAsync: {ex.Message}");
+                    return false; // API çalışsın, sadece push notification düşsün
+                }
+            }
+
+            // Firebase initialize edilemediyse, notification gönderilemez
+            if (!_isInitialized || FirebaseApp.DefaultInstance == null)
+            {
+                Console.WriteLine("Firebase not initialized, cannot send notification");
                 return false;
             }
 
