@@ -167,7 +167,13 @@ namespace Business.Services
                                         catch (Exception fallbackEx)
                                         {
                                             Console.WriteLine($"Failed to load credential from original JSON: {fallbackEx.Message}");
-                                            throw new Exception($"Failed to load Firebase credential from both fixed and original JSON. Fixed JSON error: {credEx.Message}. Original JSON error: {fallbackEx.Message}. The private key in FIREBASE_ADMIN_JSON_CONTENT may be corrupted. Please regenerate your Firebase service account key.", credEx);
+                                            Console.WriteLine($"ERROR: Failed to load Firebase credential from both fixed and original JSON.");
+                                            Console.WriteLine($"Fixed JSON error: {credEx.Message}");
+                                            Console.WriteLine($"Original JSON error: {fallbackEx.Message}");
+                                            Console.WriteLine($"The private key in FIREBASE_ADMIN_JSON_CONTENT may be corrupted. Please regenerate your Firebase service account key.");
+                                            Console.WriteLine($"Firebase will not be initialized. Push notifications will be disabled, but the application will continue to run.");
+                                            // Exception fırlatma - sadece logla ve devam et
+                                            return;
                                         }
                                     }
                                 }
@@ -180,7 +186,9 @@ namespace Business.Services
                                     Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
                                 }
                                 Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                                throw;
+                                Console.WriteLine($"Firebase initialization failed. Push notifications will be disabled, but the application will continue to run.");
+                                // Exception fırlatma - sadece logla ve devam et
+                                return;
                             }
                         }
                         // Sonra environment variable'dan dosya yolunu kontrol et
@@ -227,21 +235,51 @@ namespace Business.Services
                             {
                                 var errorMsg = $"Firebase Admin JSON dosyası bulunamadı. Aranan yollar:\n1. {Path.Combine(currentDir, "cuzdanim-firebase-admin.json")}\n2. {Path.Combine(Directory.GetParent(currentDir)?.FullName ?? "", "cuzdanim-firebase-admin.json")}\n3. {Path.Combine(currentDir, "..", "cuzdanim-firebase-admin.json")}\n\nEnvironment variable kullanımı:\n- FIREBASE_ADMIN_JSON_PATH: Dosya yolu\n- FIREBASE_ADMIN_JSON_CONTENT: Base64 encoded JSON içeriği";
                                 Console.WriteLine($"ERROR: {errorMsg}");
-                                throw new FileNotFoundException(errorMsg);
+                                Console.WriteLine($"Firebase will not be initialized. Push notifications will be disabled, but the application will continue to run.");
+                                return;
                             }
 
                             Console.WriteLine($"Firebase config file found at: {firebaseConfigPath}");
-                            credential = GoogleCredential.FromFile(firebaseConfigPath);
+                            try
+                            {
+                                credential = GoogleCredential.FromFile(firebaseConfigPath);
+                            }
+                            catch (Exception fileEx)
+                            {
+                                Console.WriteLine($"ERROR: Failed to load credential from file: {fileEx.Message}");
+                                Console.WriteLine($"Firebase will not be initialized. Push notifications will be disabled, but the application will continue to run.");
+                                return;
+                            }
                         }
 
-                        FirebaseApp.Create(new AppOptions()
+                        // Credential null kontrolü
+                        if (credential == null)
                         {
-                            Credential = credential
-                        });
-                        Console.WriteLine("Firebase Admin SDK initialized successfully");
-                    }
+                            Console.WriteLine($"ERROR: Firebase credential is null. Firebase will not be initialized.");
+                            return;
+                        }
 
-                    _isInitialized = true;
+                        try
+                        {
+                            FirebaseApp.Create(new AppOptions()
+                            {
+                                Credential = credential
+                            });
+                            Console.WriteLine("Firebase Admin SDK initialized successfully");
+                            _isInitialized = true;
+                        }
+                        catch (Exception createEx)
+                        {
+                            Console.WriteLine($"ERROR: Failed to create FirebaseApp: {createEx.Message}");
+                            Console.WriteLine($"Firebase will not be initialized. Push notifications will be disabled, but the application will continue to run.");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        // Firebase zaten initialize edilmiş
+                        _isInitialized = true;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -251,6 +289,7 @@ namespace Business.Services
                         Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
                     }
                     Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                    Console.WriteLine($"Firebase will not be initialized. Push notifications will be disabled, but the application will continue to run.");
                     // Exception fırlatma - sadece logla
                     // Bu sayede Firebase hatası olsa bile API ayağa kalkabilir
                     // _isInitialized false kalacak, notification gönderilemeyecek ama API çalışacak
