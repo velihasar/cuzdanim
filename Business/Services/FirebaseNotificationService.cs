@@ -52,14 +52,33 @@ namespace Business.Services
                                 // Base64 string'deki tüm whitespace ve geçersiz karakterleri temizle
                                 // Base64 sadece A-Z, a-z, 0-9, +, / ve = karakterlerini içerebilir
                                 var cleanedBase64 = new System.Text.StringBuilder();
+                                int paddingCount = 0;
+                                bool foundPadding = false;
+                                
                                 foreach (char c in firebaseJsonContent)
                                 {
                                     // Base64 geçerli karakterler: A-Z, a-z, 0-9, +, /, =
                                     if ((c >= 'A' && c <= 'Z') || 
                                         (c >= 'a' && c <= 'z') || 
                                         (c >= '0' && c <= '9') || 
-                                        c == '+' || c == '/' || c == '=')
+                                        c == '+' || c == '/')
                                     {
+                                        if (foundPadding)
+                                        {
+                                            Console.WriteLine($"WARNING: Found data character after padding, this is invalid Base64");
+                                        }
+                                        cleanedBase64.Append(c);
+                                    }
+                                    else if (c == '=')
+                                    {
+                                        // Padding karakteri - sadece sonda olabilir
+                                        foundPadding = true;
+                                        paddingCount++;
+                                        if (paddingCount > 2)
+                                        {
+                                            Console.WriteLine($"WARNING: More than 2 padding characters found, removing excess");
+                                            continue; // Sadece ilk 2 padding'i kabul et
+                                        }
                                         cleanedBase64.Append(c);
                                     }
                                     // Whitespace karakterlerini (space, newline, tab vs.) atla
@@ -75,7 +94,7 @@ namespace Business.Services
                                 }
                                 
                                 var cleanedBase64String = cleanedBase64.ToString();
-                                Console.WriteLine($"Base64 string length after cleaning: {cleanedBase64String.Length} (original: {firebaseJsonContent.Length})");
+                                Console.WriteLine($"Base64 string length after cleaning: {cleanedBase64String.Length} (original: {firebaseJsonContent.Length}, padding chars: {paddingCount})");
                                 
                                 // Base64 string uzunluğu kontrolü
                                 if (cleanedBase64String.Length == 0)
@@ -85,16 +104,31 @@ namespace Business.Services
                                     return;
                                 }
                                 
+                                // Base64 string uzunluğu 4'ün katı olmalı (padding hariç)
+                                // Eğer değilse, padding ekle
+                                int dataLength = cleanedBase64String.Length - paddingCount;
+                                int remainder = dataLength % 4;
+                                if (remainder != 0)
+                                {
+                                    int neededPadding = 4 - remainder;
+                                    Console.WriteLine($"Base64 data length is not multiple of 4 (remainder: {remainder}), adding {neededPadding} padding character(s)");
+                                    cleanedBase64String = cleanedBase64String.TrimEnd('=');
+                                    cleanedBase64String += new string('=', neededPadding);
+                                    Console.WriteLine($"Base64 string length after padding fix: {cleanedBase64String.Length}");
+                                }
+                                
                                 // Base64'ten JSON'a decode et
                                 byte[] jsonBytes;
                                 try
                                 {
                                     jsonBytes = Convert.FromBase64String(cleanedBase64String);
+                                    Console.WriteLine($"Base64 decode successful, decoded {jsonBytes.Length} bytes");
                                 }
                                 catch (FormatException ex)
                                 {
                                     Console.WriteLine($"ERROR: Invalid base64 string after cleaning: {ex.Message}");
                                     Console.WriteLine($"Base64 string preview (first 100 chars): {cleanedBase64String.Substring(0, Math.Min(100, cleanedBase64String.Length))}");
+                                    Console.WriteLine($"Base64 string preview (last 50 chars): {cleanedBase64String.Substring(Math.Max(0, cleanedBase64String.Length - 50))}");
                                     Console.WriteLine($"Firebase will not be initialized. Push notifications will be disabled, but the application will continue to run.");
                                     return;
                                 }
