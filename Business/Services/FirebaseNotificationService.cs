@@ -3,7 +3,9 @@ using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Business.Services
@@ -62,10 +64,75 @@ namespace Business.Services
                                     Console.WriteLine($"JSON starts with: {jsonContent.Substring(0, 50)}");
                                 }
                                 
-                                // JSON'u HİÇ değiştirmeden doğrudan GoogleCredential'a ver
-                                // Base64'ten decode edilen JSON zaten doğru formatta olmalı
-                                credential = GoogleCredential.FromJson(jsonContent);
-                                Console.WriteLine("Firebase credential loaded from FIREBASE_ADMIN_JSON_CONTENT");
+                                // Parse JSON ve private_key alanındaki newline'ları düzelt
+                                using (JsonDocument doc = JsonDocument.Parse(jsonContent))
+                                {
+                                    var root = doc.RootElement;
+                                    var jsonObject = new Dictionary<string, object>();
+                                    
+                                    // Tüm property'leri kopyala
+                                    foreach (var prop in root.EnumerateObject())
+                                    {
+                                        if (prop.Name == "private_key")
+                                        {
+                                            // private_key alanını al
+                                            var privateKeyValue = prop.Value.GetString();
+                                            if (!string.IsNullOrEmpty(privateKeyValue))
+                                            {
+                                                // Private key'in başlangıcını kontrol et
+                                                var trimmedKey = privateKeyValue.Trim();
+                                                if (!trimmedKey.StartsWith("-----BEGIN PRIVATE KEY-----"))
+                                                {
+                                                    Console.WriteLine($"WARNING: Private key does not start with expected header. Starts with: {trimmedKey.Substring(0, Math.Min(50, trimmedKey.Length))}");
+                                                }
+                                                
+                                                // JSON parse edildiğinde, escaped \n'ler gerçek newline karakterlerine dönüşür
+                                                // JsonSerializer, string'deki gerçek newline'ları otomatik olarak \n olarak escape eder
+                                                // Bu yüzden gerçek newline karakterlerini koruyoruz
+                                                // Eğer newline yoksa, bu bir sorun olabilir (key formatı yanlış olabilir)
+                                                if (!privateKeyValue.Contains("\n") && !privateKeyValue.Contains("\r"))
+                                                {
+                                                    Console.WriteLine($"WARNING: Private key has no newlines - this might indicate a formatting issue");
+                                                }
+                                                else
+                                                {
+                                                    // Normalize newlines to \n (Unix style)
+                                                    privateKeyValue = privateKeyValue
+                                                        .Replace("\r\n", "\n")
+                                                        .Replace("\r", "\n");
+                                                    Console.WriteLine($"Private key normalized (key length: {privateKeyValue.Length})");
+                                                }
+                                                
+                                                jsonObject[prop.Name] = privateKeyValue;
+                                            }
+                                            else
+                                            {
+                                                Console.WriteLine("ERROR: private_key field is null or empty!");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            // Diğer property'leri olduğu gibi kopyala
+                                            jsonObject[prop.Name] = prop.Value.ValueKind switch
+                                            {
+                                                JsonValueKind.String => prop.Value.GetString(),
+                                                JsonValueKind.Number => prop.Value.GetRawText(),
+                                                JsonValueKind.True => true,
+                                                JsonValueKind.False => false,
+                                                JsonValueKind.Null => null,
+                                                _ => prop.Value.GetRawText()
+                                            };
+                                        }
+                                    }
+                                    
+                                    // JSON'u tekrar serialize et
+                                    var fixedJsonContent = JsonSerializer.Serialize(jsonObject);
+                                    Console.WriteLine("Fixed JSON content prepared");
+                                    
+                                    // Düzeltilmiş JSON'u kullan
+                                    credential = GoogleCredential.FromJson(fixedJsonContent);
+                                    Console.WriteLine("Firebase credential loaded from FIREBASE_ADMIN_JSON_CONTENT");
+                                }
                             }
                             catch (Exception ex)
                             {
