@@ -49,20 +49,54 @@ namespace Business.Services
                             Console.WriteLine("Using FIREBASE_ADMIN_JSON_CONTENT from environment variable");
                             try
                             {
-                                // Base64 string'deki whitespace'leri temizle (newline, space, tab vs.)
-                                var cleanedBase64 = firebaseJsonContent.Trim().Replace("\n", "").Replace("\r", "").Replace(" ", "").Replace("\t", "");
-                                Console.WriteLine($"Base64 string length: {cleanedBase64.Length}");
+                                // Base64 string'deki tüm whitespace ve geçersiz karakterleri temizle
+                                // Base64 sadece A-Z, a-z, 0-9, +, / ve = karakterlerini içerebilir
+                                var cleanedBase64 = new System.Text.StringBuilder();
+                                foreach (char c in firebaseJsonContent)
+                                {
+                                    // Base64 geçerli karakterler: A-Z, a-z, 0-9, +, /, =
+                                    if ((c >= 'A' && c <= 'Z') || 
+                                        (c >= 'a' && c <= 'z') || 
+                                        (c >= '0' && c <= '9') || 
+                                        c == '+' || c == '/' || c == '=')
+                                    {
+                                        cleanedBase64.Append(c);
+                                    }
+                                    // Whitespace karakterlerini (space, newline, tab vs.) atla
+                                    else if (char.IsWhiteSpace(c))
+                                    {
+                                        continue;
+                                    }
+                                    // Diğer karakterler için uyarı ver ama atla
+                                    else
+                                    {
+                                        Console.WriteLine($"WARNING: Skipping invalid base64 character: '{c}' (ASCII: {(int)c})");
+                                    }
+                                }
+                                
+                                var cleanedBase64String = cleanedBase64.ToString();
+                                Console.WriteLine($"Base64 string length after cleaning: {cleanedBase64String.Length} (original: {firebaseJsonContent.Length})");
+                                
+                                // Base64 string uzunluğu kontrolü
+                                if (cleanedBase64String.Length == 0)
+                                {
+                                    Console.WriteLine($"ERROR: Base64 string is empty after cleaning");
+                                    Console.WriteLine($"Firebase will not be initialized. Push notifications will be disabled, but the application will continue to run.");
+                                    return;
+                                }
                                 
                                 // Base64'ten JSON'a decode et
                                 byte[] jsonBytes;
                                 try
                                 {
-                                    jsonBytes = Convert.FromBase64String(cleanedBase64);
+                                    jsonBytes = Convert.FromBase64String(cleanedBase64String);
                                 }
                                 catch (FormatException ex)
                                 {
-                                    Console.WriteLine($"ERROR: Invalid base64 string: {ex.Message}");
-                                    throw new Exception($"FIREBASE_ADMIN_JSON_CONTENT contains invalid base64 data: {ex.Message}", ex);
+                                    Console.WriteLine($"ERROR: Invalid base64 string after cleaning: {ex.Message}");
+                                    Console.WriteLine($"Base64 string preview (first 100 chars): {cleanedBase64String.Substring(0, Math.Min(100, cleanedBase64String.Length))}");
+                                    Console.WriteLine($"Firebase will not be initialized. Push notifications will be disabled, but the application will continue to run.");
+                                    return;
                                 }
                                 
                                 var jsonContent = System.Text.Encoding.UTF8.GetString(jsonBytes);
