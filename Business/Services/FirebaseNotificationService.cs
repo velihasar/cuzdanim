@@ -42,98 +42,104 @@ namespace Business.Services
                         var currentDir = Directory.GetCurrentDirectory();
                         Console.WriteLine($"Firebase initialization - Current directory: {currentDir}");
 
-                        // Önce environment variable'dan base64 encoded içeriği kontrol et
+                        // Önce environment variable'dan JSON içeriğini kontrol et
                         var firebaseJsonContent = Environment.GetEnvironmentVariable("FIREBASE_ADMIN_JSON_CONTENT");
                         if (!string.IsNullOrWhiteSpace(firebaseJsonContent))
                         {
                             Console.WriteLine("Using FIREBASE_ADMIN_JSON_CONTENT from environment variable");
                             try
                             {
-                                // Base64 string'deki tüm whitespace ve geçersiz karakterleri temizle
-                                // Base64 sadece A-Z, a-z, 0-9, +, / ve = karakterlerini içerebilir
-                                var cleanedBase64 = new System.Text.StringBuilder();
-                                int paddingCount = 0;
-                                bool foundPadding = false;
+                                string jsonContent;
                                 
-                                foreach (char c in firebaseJsonContent)
+                                // Eğer string JSON formatında başlıyorsa (direkt JSON), base64 decode etme
+                                // Eğer base64 formatında ise decode et
+                                var trimmedContent = firebaseJsonContent.Trim();
+                                if (trimmedContent.StartsWith("{") || trimmedContent.StartsWith("["))
                                 {
-                                    // Base64 geçerli karakterler: A-Z, a-z, 0-9, +, /, =
-                                    if ((c >= 'A' && c <= 'Z') || 
-                                        (c >= 'a' && c <= 'z') || 
-                                        (c >= '0' && c <= '9') || 
-                                        c == '+' || c == '/')
+                                    // Direkt JSON string - decode etme
+                                    Console.WriteLine("Detected direct JSON format (not base64)");
+                                    jsonContent = firebaseJsonContent;
+                                }
+                                else
+                                {
+                                    // Base64 formatında - decode et
+                                    Console.WriteLine("Detected base64 format, decoding...");
+                                    
+                                    // Base64 string'deki tüm whitespace ve geçersiz karakterleri temizle
+                                    var cleanedBase64 = new System.Text.StringBuilder();
+                                    int paddingCount = 0;
+                                    bool foundPadding = false;
+                                    
+                                    foreach (char c in firebaseJsonContent)
                                     {
-                                        if (foundPadding)
+                                        if ((c >= 'A' && c <= 'Z') || 
+                                            (c >= 'a' && c <= 'z') || 
+                                            (c >= '0' && c <= '9') || 
+                                            c == '+' || c == '/')
                                         {
-                                            Console.WriteLine($"WARNING: Found data character after padding, this is invalid Base64");
+                                            if (foundPadding)
+                                            {
+                                                Console.WriteLine($"WARNING: Found data character after padding, this is invalid Base64");
+                                            }
+                                            cleanedBase64.Append(c);
                                         }
-                                        cleanedBase64.Append(c);
-                                    }
-                                    else if (c == '=')
-                                    {
-                                        // Padding karakteri - sadece sonda olabilir
-                                        foundPadding = true;
-                                        paddingCount++;
-                                        if (paddingCount > 2)
+                                        else if (c == '=')
                                         {
-                                            Console.WriteLine($"WARNING: More than 2 padding characters found, removing excess");
-                                            continue; // Sadece ilk 2 padding'i kabul et
+                                            foundPadding = true;
+                                            paddingCount++;
+                                            if (paddingCount > 2)
+                                            {
+                                                Console.WriteLine($"WARNING: More than 2 padding characters found, removing excess");
+                                                continue;
+                                            }
+                                            cleanedBase64.Append(c);
                                         }
-                                        cleanedBase64.Append(c);
+                                        else if (char.IsWhiteSpace(c))
+                                        {
+                                            continue;
+                                        }
+                                        else
+                                        {
+                                            Console.WriteLine($"WARNING: Skipping invalid base64 character: '{c}' (ASCII: {(int)c})");
+                                        }
                                     }
-                                    // Whitespace karakterlerini (space, newline, tab vs.) atla
-                                    else if (char.IsWhiteSpace(c))
+                                    
+                                    var cleanedBase64String = cleanedBase64.ToString();
+                                    
+                                    if (cleanedBase64String.Length == 0)
                                     {
-                                        continue;
+                                        Console.WriteLine($"ERROR: Base64 string is empty after cleaning");
+                                        Console.WriteLine($"Firebase will not be initialized. Push notifications will be disabled, but the application will continue to run.");
+                                        return;
                                     }
-                                    // Diğer karakterler için uyarı ver ama atla
-                                    else
+                                    
+                                    // Base64 string uzunluğu 4'ün katı olmalı
+                                    int dataLength = cleanedBase64String.Length - paddingCount;
+                                    int remainder = dataLength % 4;
+                                    if (remainder != 0)
                                     {
-                                        Console.WriteLine($"WARNING: Skipping invalid base64 character: '{c}' (ASCII: {(int)c})");
+                                        int neededPadding = 4 - remainder;
+                                        Console.WriteLine($"Base64 data length is not multiple of 4 (remainder: {remainder}), adding {neededPadding} padding character(s)");
+                                        cleanedBase64String = cleanedBase64String.TrimEnd('=');
+                                        cleanedBase64String += new string('=', neededPadding);
                                     }
+                                    
+                                    // Base64'ten JSON'a decode et
+                                    byte[] jsonBytes;
+                                    try
+                                    {
+                                        jsonBytes = Convert.FromBase64String(cleanedBase64String);
+                                        Console.WriteLine($"Base64 decode successful, decoded {jsonBytes.Length} bytes");
+                                    }
+                                    catch (FormatException ex)
+                                    {
+                                        Console.WriteLine($"ERROR: Invalid base64 string after cleaning: {ex.Message}");
+                                        Console.WriteLine($"Firebase will not be initialized. Push notifications will be disabled, but the application will continue to run.");
+                                        return;
+                                    }
+                                    
+                                    jsonContent = System.Text.Encoding.UTF8.GetString(jsonBytes);
                                 }
-                                
-                                var cleanedBase64String = cleanedBase64.ToString();
-                                Console.WriteLine($"Base64 string length after cleaning: {cleanedBase64String.Length} (original: {firebaseJsonContent.Length}, padding chars: {paddingCount})");
-                                
-                                // Base64 string uzunluğu kontrolü
-                                if (cleanedBase64String.Length == 0)
-                                {
-                                    Console.WriteLine($"ERROR: Base64 string is empty after cleaning");
-                                    Console.WriteLine($"Firebase will not be initialized. Push notifications will be disabled, but the application will continue to run.");
-                                    return;
-                                }
-                                
-                                // Base64 string uzunluğu 4'ün katı olmalı (padding hariç)
-                                // Eğer değilse, padding ekle
-                                int dataLength = cleanedBase64String.Length - paddingCount;
-                                int remainder = dataLength % 4;
-                                if (remainder != 0)
-                                {
-                                    int neededPadding = 4 - remainder;
-                                    Console.WriteLine($"Base64 data length is not multiple of 4 (remainder: {remainder}), adding {neededPadding} padding character(s)");
-                                    cleanedBase64String = cleanedBase64String.TrimEnd('=');
-                                    cleanedBase64String += new string('=', neededPadding);
-                                    Console.WriteLine($"Base64 string length after padding fix: {cleanedBase64String.Length}");
-                                }
-                                
-                                // Base64'ten JSON'a decode et
-                                byte[] jsonBytes;
-                                try
-                                {
-                                    jsonBytes = Convert.FromBase64String(cleanedBase64String);
-                                    Console.WriteLine($"Base64 decode successful, decoded {jsonBytes.Length} bytes");
-                                }
-                                catch (FormatException ex)
-                                {
-                                    Console.WriteLine($"ERROR: Invalid base64 string after cleaning: {ex.Message}");
-                                    Console.WriteLine($"Base64 string preview (first 100 chars): {cleanedBase64String.Substring(0, Math.Min(100, cleanedBase64String.Length))}");
-                                    Console.WriteLine($"Base64 string preview (last 50 chars): {cleanedBase64String.Substring(Math.Max(0, cleanedBase64String.Length - 50))}");
-                                    Console.WriteLine($"Firebase will not be initialized. Push notifications will be disabled, but the application will continue to run.");
-                                    return;
-                                }
-                                
-                                var jsonContent = System.Text.Encoding.UTF8.GetString(jsonBytes);
                                 
                                 // JSON içeriğini kontrol et (debug için)
                                 Console.WriteLine($"JSON content length: {jsonContent.Length}");
@@ -219,7 +225,7 @@ namespace Business.Services
                                     try
                                     {
                                         credential = GoogleCredential.FromJson(fixedJsonContent);
-                                        Console.WriteLine("Firebase credential loaded successfully from FIREBASE_ADMIN_JSON_CONTENT (using fixed JSON)");
+                                        Console.WriteLine("Firebase credential loaded successfully from FIREBASE_ADMIN_JSON_CONTENT");
                                     }
                                     catch (Exception credEx)
                                     {
@@ -301,7 +307,7 @@ namespace Business.Services
 
                             if (!File.Exists(firebaseConfigPath))
                             {
-                                var errorMsg = $"Firebase Admin JSON dosyası bulunamadı. Aranan yollar:\n1. {Path.Combine(currentDir, "cuzdanim-firebase-admin.json")}\n2. {Path.Combine(Directory.GetParent(currentDir)?.FullName ?? "", "cuzdanim-firebase-admin.json")}\n3. {Path.Combine(currentDir, "..", "cuzdanim-firebase-admin.json")}\n\nEnvironment variable kullanımı:\n- FIREBASE_ADMIN_JSON_PATH: Dosya yolu\n- FIREBASE_ADMIN_JSON_CONTENT: Base64 encoded JSON içeriği";
+                                var errorMsg = $"Firebase Admin JSON dosyası bulunamadı. Aranan yollar:\n1. {Path.Combine(currentDir, "cuzdanim-firebase-admin.json")}\n2. {Path.Combine(Directory.GetParent(currentDir)?.FullName ?? "", "cuzdanim-firebase-admin.json")}\n3. {Path.Combine(currentDir, "..", "cuzdanim-firebase-admin.json")}\n\nEnvironment variable kullanımı:\n- FIREBASE_ADMIN_JSON_PATH: Dosya yolu\n- FIREBASE_ADMIN_JSON_CONTENT: JSON içeriği (direkt JSON string veya base64 encoded)";
                                 Console.WriteLine($"ERROR: {errorMsg}");
                                 Console.WriteLine($"Firebase will not be initialized. Push notifications will be disabled, but the application will continue to run.");
                                 return;
