@@ -472,30 +472,21 @@ namespace WebAPI
             try
             {
                 logger = app.ApplicationServices.GetService<FileLogger>();
-                Console.WriteLine($"Logger obtained: {logger != null}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Logger exception: {ex.Message}");
             }
-            
-            // Console'a da yaz (logger çalışmıyorsa)
-            Console.WriteLine("=== Hangfire Job Registration Debug ===");
-            Console.WriteLine($"TaskSchedulerConfig is null: {taskSchedulerConfig == null}");
             
             if (taskSchedulerConfig == null)
             {
-                Console.WriteLine("ERROR: TaskSchedulerConfig is null! Hangfire configuration not found.");
                 logger?.Error("TaskSchedulerConfig is null! Hangfire configuration not found.");
             }
             else
             {
-                Console.WriteLine($"TaskSchedulerConfig found. Enabled: {taskSchedulerConfig.Enabled}");
                 logger?.Info($"TaskSchedulerConfig found. Enabled: {taskSchedulerConfig.Enabled}");
                 
                 if (taskSchedulerConfig.Enabled)
                 {
-                    Console.WriteLine("Hangfire is enabled, setting up dashboard and jobs...");
                     logger?.Info("Hangfire is enabled, setting up dashboard and jobs...");
                     
                     app.UseHangfireDashboard(taskSchedulerConfig.Path, new DashboardOptions
@@ -514,15 +505,12 @@ namespace WebAPI
                     // Recurring job'ları manuel olarak register et
                     try
                     {
-                        Console.WriteLine("Starting Hangfire recurring job registration...");
                         logger?.Info("Starting Hangfire recurring job registration...");
                     
                         var recurringJobManager = app.ApplicationServices.GetService<Hangfire.IRecurringJobManager>();
-                        Console.WriteLine($"RecurringJobManager is null: {recurringJobManager == null}");
                         
                         if (recurringJobManager != null)
                         {
-                            Console.WriteLine("RecurringJobManager found, registering jobs...");
                             logger?.Info("RecurringJobManager found, registering jobs...");
                         
                         // UpdateAssetTypePrices job'unu register et
@@ -553,38 +541,26 @@ namespace WebAPI
                         recurringJobManager.AddOrUpdate(
                             "CreateMonthlyRecurringTransactions",
                             createMonthlyRecurringExpression,
-                            "*/2 * * * *"); // Her 2 dakikada bir çalışır
-                        Console.WriteLine("CreateMonthlyRecurringTransactions job registered");
-                        logger?.Info("CreateMonthlyRecurringTransactions job registered");
+                            "0 9 * * *"); // Her gün sabah saat 09:00'da çalışır
 
                         // Proje başladığında UpdateAssetTypePrices job'unu bir kere çalıştır
                         recurringJobManager.Trigger("UpdateAssetTypePrices");
                         
-                        // Test için CreateMonthlyRecurringTransactions job'unu da bir kere çalıştır
-                        recurringJobManager.Trigger("CreateMonthlyRecurringTransactions");
-                        Console.WriteLine("CreateMonthlyRecurringTransactions job triggered manually");
-                        logger?.Info("CreateMonthlyRecurringTransactions job triggered manually for testing");
-                        
-                        Console.WriteLine("All recurring jobs registered successfully");
                         logger?.Info("All recurring jobs registered successfully");
                     }
                     else
                     {
-                        Console.WriteLine("ERROR: RecurringJobManager is null!");
                         logger?.Error("RecurringJobManager is null! Hangfire may not be properly configured.");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Exception in job registration: {ex.Message}");
-                    Console.WriteLine($"Stack trace: {ex.StackTrace}");
                     logger?.Error($"Failed to register/trigger recurring jobs: {ex.Message}");
                     logger?.Error($"Stack trace: {ex.StackTrace}");
                 }
                 }
                 else
                 {
-                    Console.WriteLine("WARNING: TaskSchedulerOptions.Enabled is false!");
                     logger?.Warn("TaskSchedulerOptions.Enabled is false! Hangfire jobs will not be registered.");
                 }
             }

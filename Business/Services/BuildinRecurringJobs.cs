@@ -185,22 +185,17 @@ public class BuildinRecurringJobs
         }
     }
 
-    // Her 2 dakikada bir çalışır
-    // Cron expression: "*/2 * * * *" = Her 2 dakikada bir
+    // Her gün sabah saat 9'da çalışır
+    // Cron expression: "0 9 * * *" = Her gün saat 09:00'da
     // Geçmişte herhangi bir zamanda IsMonthlyRecurring=true olan transaction'ları kontrol eder
     // Bu ay içinde bugüne kadar kaydedilmemiş olanlar için push notification gönderir
-    [RecurringJob("*/2 * * * *", RecurringJobId = "CreateMonthlyRecurringTransactions")]
+    [RecurringJob("0 9 * * *", RecurringJobId = "CreateMonthlyRecurringTransactions")]
     public static async Task CreateMonthlyRecurringTransactions()
     {
-        // Console'a da yaz (debug için)
-        Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] CreateMonthlyRecurringTransactions: Job started");
-        
         var serviceProvider = ServiceTool.ServiceProvider;
-        Console.WriteLine($"ServiceProvider is null: {serviceProvider == null}");
         
         if (serviceProvider == null)
         {
-            Console.WriteLine("ERROR: ServiceProvider is null!");
             return;
         }
         
@@ -209,119 +204,71 @@ public class BuildinRecurringJobs
         {
             var scopedServiceProvider = scope.ServiceProvider;
             
-            Console.WriteLine("Getting services from scoped provider...");
-            
             ITransactionRepository transactionRepository = null;
             IUserRepository userRepository = null;
             IIncomeCategoryRepository incomeCategoryRepository = null;
             IExpenseCategoryRepository expenseCategoryRepository = null;
             IFirebaseNotificationService firebaseNotificationService = null;
-            FileLogger logger = null;
             
             try
             {
-                Console.WriteLine("Getting TransactionRepository...");
                 transactionRepository = scopedServiceProvider?.GetService<ITransactionRepository>();
-                Console.WriteLine($"TransactionRepository obtained: {transactionRepository != null}");
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"Error getting TransactionRepository: {ex.Message}");
             }
             
             try
             {
-                Console.WriteLine("Getting UserRepository...");
                 userRepository = scopedServiceProvider?.GetService<IUserRepository>();
-                Console.WriteLine($"UserRepository obtained: {userRepository != null}");
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"Error getting UserRepository: {ex.Message}");
             }
             
             try
             {
-                Console.WriteLine("Getting IncomeCategoryRepository...");
                 incomeCategoryRepository = scopedServiceProvider?.GetService<IIncomeCategoryRepository>();
-                Console.WriteLine($"IncomeCategoryRepository obtained: {incomeCategoryRepository != null}");
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"Error getting IncomeCategoryRepository: {ex.Message}");
             }
             
             try
             {
-                Console.WriteLine("Getting ExpenseCategoryRepository...");
                 expenseCategoryRepository = scopedServiceProvider?.GetService<IExpenseCategoryRepository>();
-                Console.WriteLine($"ExpenseCategoryRepository obtained: {expenseCategoryRepository != null}");
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"Error getting ExpenseCategoryRepository: {ex.Message}");
             }
             
             try
             {
-                Console.WriteLine("Getting FirebaseNotificationService...");
                 firebaseNotificationService = scopedServiceProvider?.GetService<IFirebaseNotificationService>();
-                Console.WriteLine($"FirebaseNotificationService obtained: {firebaseNotificationService != null}");
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"Error getting FirebaseNotificationService: {ex.Message}");
             }
             
             try
             {
-                Console.WriteLine("Getting FileLogger...");
-                logger = scopedServiceProvider?.GetService<FileLogger>();
-                Console.WriteLine($"FileLogger obtained: {logger != null}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error getting FileLogger: {ex.Message}");
-            }
-            
-            Console.WriteLine($"TransactionRepository is null: {transactionRepository == null}");
-            Console.WriteLine($"UserRepository is null: {userRepository == null}");
-            Console.WriteLine($"FirebaseNotificationService is null: {firebaseNotificationService == null}");
-            Console.WriteLine($"Logger is null: {logger == null}");
-            
-            try
-            {
-            logger?.Info("CreateMonthlyRecurringTransactions: Job started");
-            Console.WriteLine("CreateMonthlyRecurringTransactions: Job started (logged)");
-
             if (transactionRepository == null || userRepository == null || incomeCategoryRepository == null || expenseCategoryRepository == null || firebaseNotificationService == null)
             {
-                Console.WriteLine("ERROR: Required services not found!");
-                logger?.Error("CreateMonthlyRecurringTransactions: Required services not found");
                 return;
             }
-            
-            Console.WriteLine("All services found, continuing...");
 
             var today = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
             var currentMonthStart = new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Unspecified);
-            Console.WriteLine($"Today: {today:yyyy-MM-dd}, Current month start: {currentMonthStart:yyyy-MM-dd}");
 
             // 1. Tüm recurring transaction'ları bir kerede çek
-            Console.WriteLine("Fetching recurring transactions...");
             var allRecurringTransactions = await transactionRepository.Query()
                 .Where(x => x.IsMonthlyRecurring == true && x.IsActive != false)
                 .ToListAsync();
 
             if (allRecurringTransactions == null || !allRecurringTransactions.Any())
             {
-                Console.WriteLine("No recurring transactions found");
-                logger?.Info("CreateMonthlyRecurringTransactions: No recurring transactions found");
                 return;
             }
-
-            Console.WriteLine($"Found {allRecurringTransactions.Count} recurring transactions");
-            logger?.Info($"CreateMonthlyRecurringTransactions: Found {allRecurringTransactions.Count} recurring transactions");
 
             // 2. İlgili kullanıcı ID'lerini topla
             var userIds = allRecurringTransactions
@@ -337,13 +284,8 @@ public class BuildinRecurringJobs
 
             if (usersWithTokens == null || !usersWithTokens.Any())
             {
-                Console.WriteLine("No users with FCM tokens found");
-                logger?.Info("CreateMonthlyRecurringTransactions: No users with FCM tokens found");
                 return;
             }
-
-            Console.WriteLine($"Found {usersWithTokens.Count} users with FCM tokens");
-            logger?.Info($"CreateMonthlyRecurringTransactions: Found {usersWithTokens.Count} users with FCM tokens");
 
             var userTokenDict = usersWithTokens.ToDictionary(u => u.UserId, u => u.FcmToken);
 
@@ -440,13 +382,8 @@ public class BuildinRecurringJobs
 
             if (!groupedRecurringTransactions.Any())
             {
-                Console.WriteLine("No transactions to notify (all already created or DayOfMonth not reached)");
-                logger?.Info("CreateMonthlyRecurringTransactions: No transactions to notify (all already created or DayOfMonth not reached)");
                 return;
             }
-
-            Console.WriteLine($"{groupedRecurringTransactions.Count} transactions eligible for notification");
-            logger?.Info($"CreateMonthlyRecurringTransactions: {groupedRecurringTransactions.Count} transactions eligible for notification");
 
             // 8. Kullanıcı bazında grupla ve tek bildirim gönder
             var userNotifications = groupedRecurringTransactions
@@ -524,18 +461,10 @@ public class BuildinRecurringJobs
 
             if (!userNotifications.Any())
             {
-                Console.WriteLine("No users to notify");
-                logger?.Info("CreateMonthlyRecurringTransactions: No users to notify");
                 return;
             }
 
-            Console.WriteLine($"{userNotifications.Count} users to notify");
-            logger?.Info($"CreateMonthlyRecurringTransactions: {userNotifications.Count} users to notify");
-
             // 9. Her kullanıcı için tek bildirim gönder
-            int totalSent = 0;
-            int totalFailed = 0;
-
             var notificationTasks = userNotifications.Select(async notification =>
             {
                 try
@@ -559,35 +488,16 @@ public class BuildinRecurringJobs
 
                     return success;
                 }
-                catch (Exception ex)
+                catch
                 {
-                    logger?.Error($"CreateMonthlyRecurringTransactions: Error sending notification to user {notification.UserId}. {ex.Message}");
                     return false;
                 }
             });
 
-            var results = await Task.WhenAll(notificationTasks);
-            totalSent = results.Count(r => r);
-            totalFailed = results.Count(r => !r);
-
-            Console.WriteLine($"CreateMonthlyRecurringTransactions: Sent {totalSent} notifications, Failed: {totalFailed}");
-            logger?.Info($"CreateMonthlyRecurringTransactions: Sent {totalSent} notifications, Failed: {totalFailed}");
+            await Task.WhenAll(notificationTasks);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"CreateMonthlyRecurringTransactions: Exception - {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                // Logger might be null, so try to get it again
-                try
-                {
-                    var errorLogger = scopedServiceProvider?.GetService<FileLogger>();
-                    errorLogger?.Error($"CreateMonthlyRecurringTransactions job error: {ex.Message}");
-                    errorLogger?.Error($"Stack trace: {ex.StackTrace}");
-                }
-                catch (Exception logEx)
-                {
-                    Console.WriteLine($"Failed to log error: {logEx.Message}");
-                }
                 throw;
             }
         }
