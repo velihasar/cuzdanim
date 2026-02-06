@@ -448,86 +448,127 @@ public class BuildinRecurringJobs
             Console.WriteLine($"{groupedRecurringTransactions.Count} transactions eligible for notification");
             logger?.Info($"CreateMonthlyRecurringTransactions: {groupedRecurringTransactions.Count} transactions eligible for notification");
 
-            // 8. Notification'ları gönder
-            // Firebase rate limit'i için batch'ler halinde gönder (200'lük gruplar)
-            const int batchSize = 200;
-            var batches = groupedRecurringTransactions
-                .Select((rt, index) => new { rt, index })
-                .GroupBy(x => x.index / batchSize)
-                .Select(g => g.Select(x => x.rt).ToList())
-                .ToList();
-
-            int totalSent = 0;
-            int totalFailed = 0;
-
-            foreach (var batch in batches)
-            {
-                var notificationTasks = batch.Select(async rt =>
+            // 8. Kullanıcı bazında grupla ve tek bildirim gönder
+            var userNotifications = groupedRecurringTransactions
+                .GroupBy(rt => rt.UserId)
+                .Select(userGroup =>
                 {
-                    try
+                    var userId = userGroup.Key;
+                    var transactions = userGroup.ToList();
+                    
+                    // Gelir ve gider transaction'larını ayır
+                    var incomeTransactions = transactions.Where(t => t.Type == TransactionType.Income).ToList();
+                    var expenseTransactions = transactions.Where(t => t.Type == TransactionType.Expense).ToList();
+                    
+                    // Mesaj oluştur
+                    string title = "Aylık İşlem Hatırlatması";
+                    string body = "";
+                    
+                    if (incomeTransactions.Count == 1 && expenseTransactions.Count == 0)
                     {
-                        if (!userTokenDict.TryGetValue(rt.UserId, out var fcmToken))
-                            return false;
-
-                        var transactionType = rt.Type == TransactionType.Income ? "income" : "expense";
-                        var title = rt.Type == TransactionType.Income ? "Aylık Gelir Hatırlatması" : "Aylık Gider Hatırlatması";
-                        
-                        // Kategori ismini al
+                        // Tek gelir
+                        var rt = incomeTransactions.First();
                         string categoryName = "";
-                        if (rt.Type == TransactionType.Income && rt.IncomeCategoryId.HasValue)
+                        if (rt.IncomeCategoryId.HasValue)
                         {
                             categoryName = incomeCategoryDict.TryGetValue(rt.IncomeCategoryId.Value, out var incName) ? incName : "";
                         }
-                        else if (rt.Type == TransactionType.Expense && rt.ExpenseCategoryId.HasValue)
+                        body = !string.IsNullOrEmpty(categoryName)
+                            ? $"{categoryName} gelir kaydı eklemeniz gerekiyor."
+                            : "Gelir kaydı eklemeniz gerekiyor.";
+                    }
+                    else if (expenseTransactions.Count == 1 && incomeTransactions.Count == 0)
+                    {
+                        // Tek gider
+                        var rt = expenseTransactions.First();
+                        string categoryName = "";
+                        if (rt.ExpenseCategoryId.HasValue)
                         {
                             categoryName = expenseCategoryDict.TryGetValue(rt.ExpenseCategoryId.Value, out var expName) ? expName : "";
                         }
-                        
-                        // Body mesajını oluştur - gün bilgisi yok, sadece kategori adı
-                        var body = rt.Type == TransactionType.Income
-                            ? (!string.IsNullOrEmpty(categoryName) 
-                                ? $"{categoryName} gelir kaydı eklemeniz gerekiyor."
-                                : "Gelir kaydı eklemeniz gerekiyor.")
-                            : (!string.IsNullOrEmpty(categoryName)
-                                ? $"{categoryName} gider kaydı eklemeniz gerekiyor."
-                                : "Gider kaydı eklemeniz gerekiyor.");
-
-                        // Notification data - deep link kaldırıldı, sadece bilgi amaçlı data gönderiliyor
-                        var notificationData = new
-                        {
-                            type = "recurring_transaction",
-                            transactionType = transactionType,
-                            incomeCategoryId = rt.IncomeCategoryId?.ToString() ?? "",
-                            expenseCategoryId = rt.ExpenseCategoryId?.ToString() ?? "",
-                            amount = rt.Amount.ToString(),
-                            description = rt.Description ?? "",
-                            dayOfMonth = rt.DayOfMonth?.ToString() ?? ""
-                        };
-
-                        return await firebaseNotificationService.SendNotificationAsync(
-                            fcmToken,
-                            title,
-                            body,
-                            notificationData
-                        );
+                        body = !string.IsNullOrEmpty(categoryName)
+                            ? $"{categoryName} gider kaydı eklemeniz gerekiyor."
+                            : "Gider kaydı eklemeniz gerekiyor.";
                     }
-                    catch (Exception ex)
+                    else if (incomeTransactions.Count > 1 && expenseTransactions.Count == 0)
                     {
-                        logger?.Error($"CreateMonthlyRecurringTransactions: Error sending notification to user {rt.UserId}. {ex.Message}");
-                        return false;
+                        // Birden fazla gelir
+                        body = "Eklemeniz gereken gelirler var.";
                     }
-                });
+                    else if (expenseTransactions.Count > 1 && incomeTransactions.Count == 0)
+                    {
+                        // Birden fazla gider
+                        body = "Eklemeniz gereken giderler var.";
+                    }
+                    else if (incomeTransactions.Count > 0 && expenseTransactions.Count > 0)
+                    {
+                        // Hem gelir hem gider
+                        body = "Eklemeniz gereken gelirler ve giderler var.";
+                    }
+                    else
+                    {
+                        // Fallback (olması gerekmeyen durum)
+                        body = "Eklemeniz gereken işlemler var.";
+                    }
+                    
+                    return new
+                    {
+                        UserId = userId,
+                        Title = title,
+                        Body = body,
+                        IncomeCount = incomeTransactions.Count,
+                        ExpenseCount = expenseTransactions.Count
+                    };
+                })
+                .ToList();
 
-                var results = await Task.WhenAll(notificationTasks);
-                totalSent += results.Count(r => r);
-                totalFailed += results.Count(r => !r);
-
-                // Rate limit için bekleme (her batch arasında)
-                if (batches.Count > 1)
-                {
-                    await Task.Delay(1500); // 1.5 saniye bekleme
-                }
+            if (!userNotifications.Any())
+            {
+                Console.WriteLine("No users to notify");
+                logger?.Info("CreateMonthlyRecurringTransactions: No users to notify");
+                return;
             }
+
+            Console.WriteLine($"{userNotifications.Count} users to notify");
+            logger?.Info($"CreateMonthlyRecurringTransactions: {userNotifications.Count} users to notify");
+
+            // 9. Her kullanıcı için tek bildirim gönder
+            int totalSent = 0;
+            int totalFailed = 0;
+
+            var notificationTasks = userNotifications.Select(async notification =>
+            {
+                try
+                {
+                    if (!userTokenDict.TryGetValue(notification.UserId, out var fcmToken))
+                        return false;
+
+                    var notificationData = new
+                    {
+                        type = "recurring_transaction",
+                        incomeCount = notification.IncomeCount,
+                        expenseCount = notification.ExpenseCount
+                    };
+
+                    var success = await firebaseNotificationService.SendNotificationAsync(
+                        fcmToken,
+                        notification.Title,
+                        notification.Body,
+                        notificationData
+                    );
+
+                    return success;
+                }
+                catch (Exception ex)
+                {
+                    logger?.Error($"CreateMonthlyRecurringTransactions: Error sending notification to user {notification.UserId}. {ex.Message}");
+                    return false;
+                }
+            });
+
+            var results = await Task.WhenAll(notificationTasks);
+            totalSent = results.Count(r => r);
+            totalFailed = results.Count(r => !r);
 
             Console.WriteLine($"CreateMonthlyRecurringTransactions: Sent {totalSent} notifications, Failed: {totalFailed}");
             logger?.Info($"CreateMonthlyRecurringTransactions: Sent {totalSent} notifications, Failed: {totalFailed}");
