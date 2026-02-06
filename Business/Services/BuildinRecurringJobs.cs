@@ -213,6 +213,8 @@ public class BuildinRecurringJobs
             
             ITransactionRepository transactionRepository = null;
             IUserRepository userRepository = null;
+            IIncomeCategoryRepository incomeCategoryRepository = null;
+            IExpenseCategoryRepository expenseCategoryRepository = null;
             IFirebaseNotificationService firebaseNotificationService = null;
             FileLogger logger = null;
             
@@ -236,6 +238,28 @@ public class BuildinRecurringJobs
             catch (Exception ex)
             {
                 Console.WriteLine($"Error getting UserRepository: {ex.Message}");
+            }
+            
+            try
+            {
+                Console.WriteLine("Getting IncomeCategoryRepository...");
+                incomeCategoryRepository = scopedServiceProvider?.GetService<IIncomeCategoryRepository>();
+                Console.WriteLine($"IncomeCategoryRepository obtained: {incomeCategoryRepository != null}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting IncomeCategoryRepository: {ex.Message}");
+            }
+            
+            try
+            {
+                Console.WriteLine("Getting ExpenseCategoryRepository...");
+                expenseCategoryRepository = scopedServiceProvider?.GetService<IExpenseCategoryRepository>();
+                Console.WriteLine($"ExpenseCategoryRepository obtained: {expenseCategoryRepository != null}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting ExpenseCategoryRepository: {ex.Message}");
             }
             
             try
@@ -270,7 +294,7 @@ public class BuildinRecurringJobs
             logger?.Info("CreateMonthlyRecurringTransactions: Job started");
             Console.WriteLine("CreateMonthlyRecurringTransactions: Job started (logged)");
 
-            if (transactionRepository == null || userRepository == null || firebaseNotificationService == null)
+            if (transactionRepository == null || userRepository == null || incomeCategoryRepository == null || expenseCategoryRepository == null || firebaseNotificationService == null)
             {
                 Console.WriteLine("ERROR: Required services not found!");
                 logger?.Error("CreateMonthlyRecurringTransactions: Required services not found");
@@ -323,7 +347,21 @@ public class BuildinRecurringJobs
 
             var userTokenDict = usersWithTokens.ToDictionary(u => u.UserId, u => u.FcmToken);
 
-            // 4. Bu ay için mevcut transaction'ları bir kerede çek (bulk check)
+            // 4. Tüm gelir ve gider kategorilerini bir kerede çek (kategori isimleri için)
+            var allIncomeCategories = await incomeCategoryRepository.Query()
+                .Where(c => userIds.Contains(c.UserId ?? 0) && c.IsActive != false)
+                .Select(c => new { c.Id, c.Name })
+                .ToListAsync();
+            
+            var allExpenseCategories = await expenseCategoryRepository.Query()
+                .Where(c => userIds.Contains(c.UserId ?? 0) && c.IsActive != false)
+                .Select(c => new { c.Id, c.Name })
+                .ToListAsync();
+            
+            var incomeCategoryDict = allIncomeCategories.ToDictionary(c => c.Id, c => c.Name ?? "");
+            var expenseCategoryDict = allExpenseCategories.ToDictionary(c => c.Id, c => c.Name ?? "");
+
+            // 5. Bu ay için mevcut transaction'ları bir kerede çek (bulk check)
             var existingTransactionsThisMonth = await transactionRepository.Query()
                 .Where(x => userIds.Contains(x.UserId)
                     && x.Date >= currentMonthStart
@@ -340,13 +378,13 @@ public class BuildinRecurringJobs
                 })
                 .ToListAsync();
 
-            // 5. Mevcut transaction'ları hash set'e çevir (hızlı lookup için)
+            // 6. Mevcut transaction'ları hash set'e çevir (hızlı lookup için)
             // DayOfMonth'u da dahil et - aynı kategoride farklı DayOfMonth değerleri ayrı işlenmeli
             var existingTransactionsSet = existingTransactionsThisMonth
                 .Select(x => $"{x.UserId}_{x.Type}_{x.IncomeCategoryId}_{x.ExpenseCategoryId}_{x.DayOfMonth}")
                 .ToHashSet();
 
-            // 6. Notification gönderilecek transaction'ları grupla
+            // 7. Notification gönderilecek transaction'ları grupla
             var groupedRecurringTransactions = allRecurringTransactions
                 .GroupBy(rt => new
                 {
@@ -391,7 +429,7 @@ public class BuildinRecurringJobs
             Console.WriteLine($"{groupedRecurringTransactions.Count} transactions eligible for notification");
             logger?.Info($"CreateMonthlyRecurringTransactions: {groupedRecurringTransactions.Count} transactions eligible for notification");
 
-            // 7. Notification'ları gönder (her kullanıcı için ayrı - çünkü farklı deep link'ler olabilir)
+            // 8. Notification'ları gönder
             // Firebase rate limit'i için batch'ler halinde gönder (200'lük gruplar)
             const int batchSize = 200;
             var batches = groupedRecurringTransactions
@@ -414,33 +452,31 @@ public class BuildinRecurringJobs
 
                         var transactionType = rt.Type == TransactionType.Income ? "income" : "expense";
                         var title = rt.Type == TransactionType.Income ? "Aylık Gelir Hatırlatması" : "Aylık Gider Hatırlatması";
+                        
+                        // Kategori ismini al
+                        string categoryName = "";
+                        if (rt.Type == TransactionType.Income && rt.IncomeCategoryId.HasValue)
+                        {
+                            categoryName = incomeCategoryDict.TryGetValue(rt.IncomeCategoryId.Value, out var incName) ? incName : "";
+                        }
+                        else if (rt.Type == TransactionType.Expense && rt.ExpenseCategoryId.HasValue)
+                        {
+                            categoryName = expenseCategoryDict.TryGetValue(rt.ExpenseCategoryId.Value, out var expName) ? expName : "";
+                        }
+                        
+                        // Body mesajını oluştur - gün bilgisi yok, sadece kategori adı
                         var body = rt.Type == TransactionType.Income
-                            ? $"Bu ayın {rt.DayOfMonth ?? today.Day}. günü için gelir kaydı eklemeniz gerekiyor."
-                            : $"Bu ayın {rt.DayOfMonth ?? today.Day}. günü için gider kaydı eklemeniz gerekiyor.";
+                            ? (!string.IsNullOrEmpty(categoryName) 
+                                ? $"{categoryName} gelir kaydı eklemeniz gerekiyor."
+                                : "Gelir kaydı eklemeniz gerekiyor.")
+                            : (!string.IsNullOrEmpty(categoryName)
+                                ? $"{categoryName} gider kaydı eklemeniz gerekiyor."
+                                : "Gider kaydı eklemeniz gerekiyor.");
 
-                        // Deep link URL'i oluştur
-                        var deepLink = $"cuzdanim:///(tabs)/add-transaction?type={transactionType}";
-                        if (rt.IncomeCategoryId.HasValue)
-                        {
-                            deepLink += $"&incomeCategoryId={rt.IncomeCategoryId.Value}";
-                        }
-                        if (rt.ExpenseCategoryId.HasValue)
-                        {
-                            deepLink += $"&expenseCategoryId={rt.ExpenseCategoryId.Value}";
-                        }
-                        if (rt.Amount > 0)
-                        {
-                            deepLink += $"&amount={rt.Amount}";
-                        }
-                        if (!string.IsNullOrWhiteSpace(rt.Description))
-                        {
-                            deepLink += $"&description={Uri.EscapeDataString(rt.Description)}";
-                        }
-
+                        // Notification data - deep link kaldırıldı, sadece bilgi amaçlı data gönderiliyor
                         var notificationData = new
                         {
                             type = "recurring_transaction",
-                            deepLink = deepLink,
                             transactionType = transactionType,
                             incomeCategoryId = rt.IncomeCategoryId?.ToString() ?? "",
                             expenseCategoryId = rt.ExpenseCategoryId?.ToString() ?? "",
