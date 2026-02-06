@@ -407,10 +407,29 @@ public class BuildinRecurringJobs
                     if (!isIncome && !isExpense)
                         return false;
 
-                    // DayOfMonth kontrolü: Sadece bugünün günü DayOfMonth'a eşit veya geçtiğinde bildirim gönder
-                    // Örnek: DayOfMonth=21 ise, sadece ayın 21'inde veya sonrasında bildirim gönder
-                    if (rt.DayOfMonth.HasValue && today.Day < rt.DayOfMonth.Value)
-                        return false;
+                    // DayOfMonth kontrolü: Sadece bugünün gününe eşit olanlar için bildirim gönder
+                    // Eğer ay 31'den az gün çekiyorsa (29-30 günlük aylar) ve DayOfMonth > ayın son günü ise,
+                    // ayın son gününde bildirim gönder
+                    if (rt.DayOfMonth.HasValue)
+                    {
+                        var todayDay = today.Day;
+                        var dayOfMonth = rt.DayOfMonth.Value;
+                        var lastDayOfMonth = DateTime.DaysInMonth(today.Year, today.Month);
+                        
+                        // Eğer DayOfMonth > ayın son günü ise, sadece ayın son gününde bildirim gönder
+                        if (dayOfMonth > lastDayOfMonth)
+                        {
+                            // Sadece bugün ayın son günüyse bildirim gönder
+                            if (todayDay != lastDayOfMonth)
+                                return false;
+                        }
+                        else
+                        {
+                            // DayOfMonth <= ayın son günü ise, sadece bugün DayOfMonth'a eşitse bildirim gönder
+                            if (todayDay != dayOfMonth)
+                                return false;
+                        }
+                    }
 
                     // Bu ay için transaction var mı? (in-memory check)
                     // DayOfMonth'u da kontrol et - aynı kategoride farklı DayOfMonth değerleri ayrı işlenmeli
