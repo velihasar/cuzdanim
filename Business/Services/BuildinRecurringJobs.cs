@@ -24,12 +24,23 @@ public class BuildinRecurringJobs
     {
         // ServiceProvider'dan dependency'leri resolve et
         var serviceProvider = ServiceTool.ServiceProvider;
-        var assetTypeRepository = serviceProvider?.GetService<IAssetTypeRepository>();
-        var assetTypePriceService = serviceProvider?.GetService<IAssetTypePriceService>();
-        var logger = serviceProvider?.GetService<FileLogger>();
         
-        try
+        if (serviceProvider == null)
         {
+            Console.WriteLine("ERROR: ServiceProvider is null!");
+            return;
+        }
+        
+        // Her job için yeni bir scope oluştur (DbContext concurrency sorununu çözmek için)
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var scopedServiceProvider = scope.ServiceProvider;
+            var assetTypeRepository = scopedServiceProvider?.GetService<IAssetTypeRepository>();
+            var assetTypePriceService = scopedServiceProvider?.GetService<IAssetTypePriceService>();
+            var logger = scopedServiceProvider?.GetService<FileLogger>();
+            
+            try
+            {
             if (assetTypeRepository == null || assetTypePriceService == null)
             {
                 logger?.Error("UpdateAssetTypePrices: Required services not found in DI container");
@@ -82,10 +93,11 @@ public class BuildinRecurringJobs
                 }
             }
         }
-        catch (Exception ex)
-        {
-            logger?.Error($"UpdateAssetTypePrices job error: {ex.Message}");
-            throw;
+            catch (Exception ex)
+            {
+                logger?.Error($"UpdateAssetTypePrices job error: {ex.Message}");
+                throw;
+            }
         }
     }
 
@@ -97,11 +109,22 @@ public class BuildinRecurringJobs
     {
         // ServiceProvider'dan dependency'leri resolve et
         var serviceProvider = ServiceTool.ServiceProvider;
-        var transactionRepository = serviceProvider?.GetService<ITransactionRepository>();
-        var logger = serviceProvider?.GetService<FileLogger>();
         
-        try
+        if (serviceProvider == null)
         {
+            Console.WriteLine("ERROR: ServiceProvider is null!");
+            return;
+        }
+        
+        // Her job için yeni bir scope oluştur (DbContext concurrency sorununu çözmek için)
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var scopedServiceProvider = scope.ServiceProvider;
+            var transactionRepository = scopedServiceProvider?.GetService<ITransactionRepository>();
+            var logger = scopedServiceProvider?.GetService<FileLogger>();
+            
+            try
+            {
             if (transactionRepository == null)
             {
                 logger?.Error("DeleteOldTransactions: ITransactionRepository not found in DI container");
@@ -154,10 +177,11 @@ public class BuildinRecurringJobs
                 logger?.Warn($"DeleteOldTransactions: No transactions were deleted. Errors: {errorCount}");
             }
         }
-        catch (Exception ex)
-        {
-            logger?.Error($"DeleteOldTransactions job error: {ex.Message}");
-            throw;
+            catch (Exception ex)
+            {
+                logger?.Error($"DeleteOldTransactions job error: {ex.Message}");
+                throw;
+            }
         }
     }
 
@@ -180,64 +204,69 @@ public class BuildinRecurringJobs
             return;
         }
         
-        Console.WriteLine("Getting services...");
-        
-        ITransactionRepository transactionRepository = null;
-        IUserRepository userRepository = null;
-        IFirebaseNotificationService firebaseNotificationService = null;
-        FileLogger logger = null;
-        
-        try
+        // Her job için yeni bir scope oluştur (DbContext concurrency sorununu çözmek için)
+        using (var scope = serviceProvider.CreateScope())
         {
-            Console.WriteLine("Getting TransactionRepository...");
-            transactionRepository = serviceProvider?.GetService<ITransactionRepository>();
-            Console.WriteLine($"TransactionRepository obtained: {transactionRepository != null}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error getting TransactionRepository: {ex.Message}");
-        }
-        
-        try
-        {
-            Console.WriteLine("Getting UserRepository...");
-            userRepository = serviceProvider?.GetService<IUserRepository>();
-            Console.WriteLine($"UserRepository obtained: {userRepository != null}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error getting UserRepository: {ex.Message}");
-        }
-        
-        try
-        {
-            Console.WriteLine("Getting FirebaseNotificationService...");
-            firebaseNotificationService = serviceProvider?.GetService<IFirebaseNotificationService>();
-            Console.WriteLine($"FirebaseNotificationService obtained: {firebaseNotificationService != null}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error getting FirebaseNotificationService: {ex.Message}");
-        }
-        
-        try
-        {
-            Console.WriteLine("Getting FileLogger...");
-            logger = serviceProvider?.GetService<FileLogger>();
-            Console.WriteLine($"FileLogger obtained: {logger != null}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error getting FileLogger: {ex.Message}");
-        }
-        
-        Console.WriteLine($"TransactionRepository is null: {transactionRepository == null}");
-        Console.WriteLine($"UserRepository is null: {userRepository == null}");
-        Console.WriteLine($"FirebaseNotificationService is null: {firebaseNotificationService == null}");
-        Console.WriteLine($"Logger is null: {logger == null}");
-        
-        try
-        {
+            var scopedServiceProvider = scope.ServiceProvider;
+            
+            Console.WriteLine("Getting services from scoped provider...");
+            
+            ITransactionRepository transactionRepository = null;
+            IUserRepository userRepository = null;
+            IFirebaseNotificationService firebaseNotificationService = null;
+            FileLogger logger = null;
+            
+            try
+            {
+                Console.WriteLine("Getting TransactionRepository...");
+                transactionRepository = scopedServiceProvider?.GetService<ITransactionRepository>();
+                Console.WriteLine($"TransactionRepository obtained: {transactionRepository != null}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting TransactionRepository: {ex.Message}");
+            }
+            
+            try
+            {
+                Console.WriteLine("Getting UserRepository...");
+                userRepository = scopedServiceProvider?.GetService<IUserRepository>();
+                Console.WriteLine($"UserRepository obtained: {userRepository != null}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting UserRepository: {ex.Message}");
+            }
+            
+            try
+            {
+                Console.WriteLine("Getting FirebaseNotificationService...");
+                firebaseNotificationService = scopedServiceProvider?.GetService<IFirebaseNotificationService>();
+                Console.WriteLine($"FirebaseNotificationService obtained: {firebaseNotificationService != null}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting FirebaseNotificationService: {ex.Message}");
+            }
+            
+            try
+            {
+                Console.WriteLine("Getting FileLogger...");
+                logger = scopedServiceProvider?.GetService<FileLogger>();
+                Console.WriteLine($"FileLogger obtained: {logger != null}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting FileLogger: {ex.Message}");
+            }
+            
+            Console.WriteLine($"TransactionRepository is null: {transactionRepository == null}");
+            Console.WriteLine($"UserRepository is null: {userRepository == null}");
+            Console.WriteLine($"FirebaseNotificationService is null: {firebaseNotificationService == null}");
+            Console.WriteLine($"Logger is null: {logger == null}");
+            
+            try
+            {
             logger?.Info("CreateMonthlyRecurringTransactions: Job started");
             Console.WriteLine("CreateMonthlyRecurringTransactions: Job started (logged)");
 
@@ -447,23 +476,24 @@ public class BuildinRecurringJobs
 
             Console.WriteLine($"CreateMonthlyRecurringTransactions: Sent {totalSent} notifications, Failed: {totalFailed}");
             logger?.Info($"CreateMonthlyRecurringTransactions: Sent {totalSent} notifications, Failed: {totalFailed}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"CreateMonthlyRecurringTransactions: Exception - {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
-            // Logger might be null, so try to get it again
-            try
-            {
-                var errorLogger = ServiceTool.ServiceProvider?.GetService<FileLogger>();
-                errorLogger?.Error($"CreateMonthlyRecurringTransactions job error: {ex.Message}");
-                errorLogger?.Error($"Stack trace: {ex.StackTrace}");
             }
-            catch (Exception logEx)
+            catch (Exception ex)
             {
-                Console.WriteLine($"Failed to log error: {logEx.Message}");
+                Console.WriteLine($"CreateMonthlyRecurringTransactions: Exception - {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                // Logger might be null, so try to get it again
+                try
+                {
+                    var errorLogger = scopedServiceProvider?.GetService<FileLogger>();
+                    errorLogger?.Error($"CreateMonthlyRecurringTransactions job error: {ex.Message}");
+                    errorLogger?.Error($"Stack trace: {ex.StackTrace}");
+                }
+                catch (Exception logEx)
+                {
+                    Console.WriteLine($"Failed to log error: {logEx.Message}");
+                }
+                throw;
             }
-            throw;
         }
     }
 }
