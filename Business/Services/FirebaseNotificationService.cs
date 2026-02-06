@@ -58,7 +58,53 @@ namespace Business.Services
                                 {
                                     // Direkt JSON string - decode etme
                                     Console.WriteLine("Detected direct JSON format (not base64)");
-                                    jsonContent = firebaseJsonContent;
+                                    
+                                    // Eğer JSON escape edilmiş karakterler içeriyorsa (örn: \"), bunları düzelt
+                                    if (trimmedContent.Contains("\\\""))
+                                    {
+                                        Console.WriteLine("Detected escaped JSON format, attempting to unescape...");
+                                        try
+                                        {
+                                            // JSON string'ini bir JSON string literal olarak parse et
+                                            // Önce tırnak içine alıp JSON string olarak parse edelim
+                                            var jsonStringBytes = System.Text.Encoding.UTF8.GetBytes(firebaseJsonContent);
+                                            var wrappedJsonBytes = new byte[jsonStringBytes.Length + 2];
+                                            wrappedJsonBytes[0] = (byte)'"';
+                                            Array.Copy(jsonStringBytes, 0, wrappedJsonBytes, 1, jsonStringBytes.Length);
+                                            wrappedJsonBytes[wrappedJsonBytes.Length - 1] = (byte)'"';
+                                            
+                                            var unescapedJson = System.Text.Json.JsonSerializer.Deserialize<string>(wrappedJsonBytes);
+                                            if (!string.IsNullOrEmpty(unescapedJson))
+                                            {
+                                                jsonContent = unescapedJson;
+                                                Console.WriteLine("Successfully unescaped JSON string using JsonSerializer");
+                                            }
+                                            else
+                                            {
+                                                throw new Exception("Unescaped JSON is empty");
+                                            }
+                                        }
+                                        catch (Exception unescapeEx)
+                                        {
+                                            Console.WriteLine($"Failed to unescape JSON string using JsonSerializer: {unescapeEx.Message}");
+                                            Console.WriteLine("Trying manual escape replacement...");
+                                            
+                                            // Fallback: Manuel olarak escape karakterlerini düzelt
+                                            // Dikkat: Bu yöntem JSON içindeki gerçek escape karakterlerini de değiştirebilir
+                                            // Ama environment variable'dan gelen escape edilmiş JSON için çalışmalı
+                                            jsonContent = firebaseJsonContent
+                                                .Replace("\\\"", "\"")
+                                                .Replace("\\\\", "\\")
+                                                .Replace("\\n", "\n")
+                                                .Replace("\\r", "\r")
+                                                .Replace("\\t", "\t");
+                                            Console.WriteLine("Used manual escape replacement as fallback");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        jsonContent = firebaseJsonContent;
+                                    }
                                 }
                                 else
                                 {
