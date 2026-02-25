@@ -98,7 +98,6 @@ namespace WebAPI.Controllers
                     logger.Info($"[AuthController.Register] Register request received - " +
                               $"UserName: {createUser.UserName}, " +
                               $"Email: {createUser.Email}, " +
-                              $"FullName: {createUser.FullName}, " +
                               $"KvkkAccepted: {createUser.KvkkAccepted}, " +
                               $"Password: {(string.IsNullOrEmpty(createUser.Password) ? "Empty" : "***")}");
                 }

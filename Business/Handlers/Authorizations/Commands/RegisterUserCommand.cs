@@ -38,9 +38,6 @@ namespace Business.Handlers.Authorizations.Commands
         [JsonPropertyName("email")]
         public string Email { get; set; }
         
-        [JsonPropertyName("fullName")]
-        public string? FullName { get; set; }
-        
         [JsonPropertyName("kvkkAccepted")]
         public bool KvkkAccepted { get; set; }
 
@@ -236,7 +233,6 @@ namespace Business.Handlers.Authorizations.Commands
                     }
                     
                     userToUpdate.Email = encryptedEmail;
-                    userToUpdate.FullName = string.IsNullOrWhiteSpace(request.FullName) ? userToUpdate.FullName : request.FullName;
                     userToUpdate.PasswordHash = passwordHash;
                     userToUpdate.PasswordSalt = passwordSalt;
                     userToUpdate.EmailVerificationToken = verificationToken;
@@ -255,7 +251,6 @@ namespace Business.Handlers.Authorizations.Commands
                     {
                         UserName = generatedUsername, // Email'den otomatik oluşturulan kullanıcı adı
                         Email = encryptedEmail, // Şifrelenmiş email'i kaydet
-                        FullName = string.IsNullOrWhiteSpace(request.FullName) ? null : request.FullName,
                         PasswordHash = passwordHash,
                         PasswordSalt = passwordSalt,
                         Status = false, // Email doğrulanana kadar false

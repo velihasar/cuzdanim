@@ -183,7 +183,6 @@ namespace Business.Handlers.Authorizations.Queries
                 {
                     UserName = username,
                     Email = encryptedEmail,
-                    FullName = googleUser.Name ?? $"{googleUser.GivenName} {googleUser.FamilyName}".Trim(),
                     GoogleId = googleUser.GoogleId,
                     Status = true, // Google ile giriş yapan kullanıcılar otomatik doğrulanmış
                     PasswordHash = null, // Google ile giriş yapan kullanıcıların şifresi yok
@@ -216,12 +215,6 @@ namespace Business.Handlers.Authorizations.Queries
                 if (string.IsNullOrEmpty(user.GoogleId) && !string.IsNullOrEmpty(googleUser.GoogleId))
                 {
                     user.GoogleId = googleUser.GoogleId;
-                }
-                
-                // FullName güncellenmiş olabilir
-                if (string.IsNullOrWhiteSpace(user.FullName) && !string.IsNullOrWhiteSpace(googleUser.Name))
-                {
-                    user.FullName = googleUser.Name;
                 }
                 
                 _userRepository.Update(user);

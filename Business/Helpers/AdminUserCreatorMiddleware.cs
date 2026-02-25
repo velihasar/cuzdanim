@@ -30,13 +30,11 @@ namespace Business.Helpers
             var adminEmail = configuration["AdminSettings:Email"];
             var adminUserName = configuration["AdminSettings:UserName"];
             var adminPassword = configuration["AdminSettings:Password"];
-            var adminFullName = configuration["AdminSettings:FullName"] ?? "System Administrator";
 
             // Environment variable'dan gelen değerleri kontrol et (${VAR} formatından geliyorsa null olabilir)
             var isPasswordFromEnv = !string.IsNullOrWhiteSpace(adminPassword) && !adminPassword.StartsWith("${");
             var isUserNameFromEnv = !string.IsNullOrWhiteSpace(adminUserName) && !adminUserName.StartsWith("${");
             var isEmailFromEnv = !string.IsNullOrWhiteSpace(adminEmail) && !adminEmail.StartsWith("${");
-            var isFullNameFromEnv = !string.IsNullOrWhiteSpace(adminFullName) && !adminFullName.StartsWith("${");
 
             // Eğer appsettings'te admin ayarları yoksa, default değerleri kullan
             if (string.IsNullOrWhiteSpace(adminEmail) || !isEmailFromEnv)
@@ -73,7 +71,6 @@ namespace Business.Helpers
                 {
                     UserName = adminUserName,
                     Email = adminEmail,
-                    FullName = adminFullName,
                     PasswordHash = passwordHash,
                     PasswordSalt = passwordSalt,
                     Status = true,
@@ -157,13 +154,6 @@ namespace Business.Helpers
                         existingAdmin.UserName = adminUserName;
                         shouldUpdate = true;
                     }
-                }
-
-                // FullName güncelleme
-                if (!string.IsNullOrWhiteSpace(adminFullName) && existingAdmin.FullName != adminFullName)
-                {
-                    existingAdmin.FullName = adminFullName;
-                    shouldUpdate = true;
                 }
 
                 // Password güncelleme (environment variable'dan geliyorsa veya default değilse)
