@@ -66,10 +66,6 @@ namespace Business.Handlers.Users.Commands
                 }
 
                 // Diğer alanları güncelle (null gönderilirse null yap, boş string gönderilirse boş string yap)
-                if (request.FullName != null)
-                {
-                    isThereAnyUser.FullName = request.FullName;
-                }
                 if (request.MobilePhones != null)
                 {
                     isThereAnyUser.MobilePhones = request.MobilePhones;

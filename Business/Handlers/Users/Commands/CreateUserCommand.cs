@@ -21,7 +21,6 @@ namespace Business.Handlers.Users.Commands
     public class CreateUserCommand : IRequest<IResult>
     {
         public int UserId { get; set; }
-        public string FullName { get; set; }
         public string Email { get; set; }
         public string MobilePhones { get; set; }
         public bool Status { get; set; }
@@ -81,7 +80,6 @@ namespace Business.Handlers.Users.Commands
                 var user = new User
                 {
                     Email = encryptedEmail, // Şifrelenmiş email'i kaydet
-                    FullName = request.FullName,
                     Status = true,
                     Address = request.Address,
                     BirthDate = request.BirthDate,
