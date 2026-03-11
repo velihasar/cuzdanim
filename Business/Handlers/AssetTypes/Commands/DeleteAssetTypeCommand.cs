@@ -1,4 +1,4 @@
-﻿
+
 using Business.Constants;
 using Core.Aspects.Autofac.Caching;
 using Business.BusinessAspects;
@@ -44,6 +44,12 @@ namespace Business.Handlers.AssetTypes.Commands
                 if (assetTypeToDelete == null)
                 {
                     return new ErrorResult("Varlık türü bulunamadı.");
+                }
+
+                var userId = Core.Extensions.UserInfoExtensions.GetUserId();
+                if (assetTypeToDelete.UserId != userId)
+                {
+                    return new ErrorResult("Sistem varlık türlerini silmeye yetkiniz yoktur.");
                 }
 
                 // Sadece Diger (99) olan varlık türleri silinebilir

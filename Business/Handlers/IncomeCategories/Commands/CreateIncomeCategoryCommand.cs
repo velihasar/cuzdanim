@@ -1,4 +1,4 @@
-﻿
+
 using Business.BusinessAspects;
 using Business.Constants;
 using Business.Handlers.IncomeCategories.ValidationRules;
@@ -46,7 +46,7 @@ namespace Business.Handlers.IncomeCategories.Commands
             {
                 var userId = UserInfoExtensions.GetUserId();
                 var result = await _incomeCategoryRepository.GetListAsync(u => u.UserId == userId);
-                if (result.Count() == 10)
+                if (result.Count() >= 5)
                 {
                     return new ErrorResult(Messages.RecordLimitExceeded);
                 }

@@ -1,4 +1,4 @@
-﻿
+
 using Business.BusinessAspects;
 using Business.Constants;
 using Business.Handlers.ExpenseCategories.ValidationRules;
@@ -44,9 +44,14 @@ namespace Business.Handlers.ExpenseCategories.Commands
             public async Task<IResult> Handle(UpdateExpenseCategoryCommand request, CancellationToken cancellationToken)
             {
                 var isThereExpenseCategoryRecord = await _expenseCategoryRepository.GetAsync(u => u.Id == request.Id);
+                var userId = UserInfoExtensions.GetUserId();
 
+                if (isThereExpenseCategoryRecord.UserId != userId)
+                {
+                    return new ErrorResult("Sistem kategorilerini güncelleyemezsiniz.");
+                }
 
-                isThereExpenseCategoryRecord.UserId = UserInfoExtensions.GetUserId();
+                isThereExpenseCategoryRecord.UserId = userId;
                 isThereExpenseCategoryRecord.Name = request.Name;
                 isThereExpenseCategoryRecord.IsActive = true;
                 isThereExpenseCategoryRecord.UpdatedBy = UserInfoExtensions.GetUserId();

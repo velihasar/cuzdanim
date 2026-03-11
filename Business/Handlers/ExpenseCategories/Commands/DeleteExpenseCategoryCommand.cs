@@ -1,4 +1,4 @@
-﻿
+
 using Business.Constants;
 using Core.Aspects.Autofac.Caching;
 using Business.BusinessAspects;
@@ -43,6 +43,12 @@ namespace Business.Handlers.ExpenseCategories.Commands
                 if (expenseCategoryToDelete == null)
                 {
                     return new ErrorResult("Gider kategorisi bulunamadı.");
+                }
+
+                var userId = Core.Extensions.UserInfoExtensions.GetUserId();
+                if (expenseCategoryToDelete.UserId != userId)
+                {
+                    return new ErrorResult("Sistem kategorilerini silmeye yetkiniz yoktur.");
                 }
 
                 // Bağlı Transaction kayıtları var mı kontrol et

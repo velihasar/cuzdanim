@@ -1,4 +1,4 @@
-﻿
+
 using Business.BusinessAspects;
 using Business.Constants;
 using Business.Handlers.ExpenseCategories.ValidationRules;
@@ -45,7 +45,7 @@ namespace Business.Handlers.ExpenseCategories.Commands
             {
                 var userId = UserInfoExtensions.GetUserId();
                 var result = await _expenseCategoryRepository.GetListAsync(u => u.UserId == userId);
-                if (result.Count() == 10)
+                if (result.Count() >= 5)
                 {
                     return new ErrorResult(Messages.RecordLimitExceeded);
                 }
