@@ -1,4 +1,4 @@
-﻿
+
 using Business.BusinessAspects;
 using Core.Aspects.Autofac.Caching;
 using Core.Aspects.Autofac.Logging;
@@ -40,7 +40,7 @@ namespace Business.Handlers.IncomeCategories.Queries
             public async Task<IDataResult<IEnumerable<IncomeCategoryGetAllDto>>> Handle(GetIncomeCategoriesQuery request, CancellationToken cancellationToken)
             {
                 var userId = UserInfoExtensions.GetUserId();
-                var result = await _incomeCategoryRepository.FindAllAsync(u => u.UserId == userId, orderBy:"Name");
+                var result = await _incomeCategoryRepository.FindAllAsync(u => u.UserId == userId || u.UserId == null || u.UserId == 1, orderBy:"Name");
                 var incomeCategoryDto = result.Select(x => new IncomeCategoryGetAllDto
                 {
                     Id = x.Id,

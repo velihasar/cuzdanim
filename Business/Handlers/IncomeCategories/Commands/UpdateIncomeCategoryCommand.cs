@@ -1,4 +1,4 @@
-﻿
+
 using Business.BusinessAspects;
 using Business.Constants;
 using Business.Handlers.IncomeCategories.ValidationRules;
@@ -46,6 +46,10 @@ namespace Business.Handlers.IncomeCategories.Commands
                 var userId = UserInfoExtensions.GetUserId();
                 var isThereIncomeCategoryRecord = await _incomeCategoryRepository.GetAsync(u => u.Id == request.Id);
 
+                if (isThereIncomeCategoryRecord.UserId != userId)
+                {
+                    return new ErrorResult("Sistem kategorilerini güncelleyemezsiniz.");
+                }
 
                 isThereIncomeCategoryRecord.UserId = userId;
                 isThereIncomeCategoryRecord.Name = request.Name;

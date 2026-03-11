@@ -1,4 +1,4 @@
-﻿
+
 using Business.Constants;
 using Core.Aspects.Autofac.Caching;
 using Business.BusinessAspects;
@@ -43,6 +43,12 @@ namespace Business.Handlers.IncomeCategories.Commands
                 if (incomeCategoryToDelete == null)
                 {
                     return new ErrorResult("Gelir kategorisi bulunamadı.");
+                }
+
+                var userId = Core.Extensions.UserInfoExtensions.GetUserId();
+                if (incomeCategoryToDelete.UserId != userId)
+                {
+                    return new ErrorResult("Sistem kategorilerini silmeye yetkiniz yoktur.");
                 }
 
                 // Bağlı Transaction kayıtları var mı kontrol et
