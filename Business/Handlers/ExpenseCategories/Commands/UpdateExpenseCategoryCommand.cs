@@ -29,11 +29,13 @@ namespace Business.Handlers.ExpenseCategories.Commands
         public class UpdateExpenseCategoryCommandHandler : IRequestHandler<UpdateExpenseCategoryCommand, IResult>
         {
             private readonly IExpenseCategoryRepository _expenseCategoryRepository;
+            private readonly ITransactionRepository _transactionRepository;
             private readonly IMediator _mediator;
 
-            public UpdateExpenseCategoryCommandHandler(IExpenseCategoryRepository expenseCategoryRepository, IMediator mediator)
+            public UpdateExpenseCategoryCommandHandler(IExpenseCategoryRepository expenseCategoryRepository, ITransactionRepository transactionRepository, IMediator mediator)
             {
                 _expenseCategoryRepository = expenseCategoryRepository;
+                _transactionRepository = transactionRepository;
                 _mediator = mediator;
             }
 
@@ -44,11 +46,24 @@ namespace Business.Handlers.ExpenseCategories.Commands
             public async Task<IResult> Handle(UpdateExpenseCategoryCommand request, CancellationToken cancellationToken)
             {
                 var isThereExpenseCategoryRecord = await _expenseCategoryRepository.GetAsync(u => u.Id == request.Id);
+
+                if (isThereExpenseCategoryRecord == null)
+                {
+                    return new ErrorResult("Gider kategorisi bulunamadı.");
+                }
+
                 var userId = UserInfoExtensions.GetUserId();
 
                 if (isThereExpenseCategoryRecord.UserId != userId)
                 {
                     return new ErrorResult("Sistem kategorilerini güncelleyemezsiniz.");
+                }
+
+                // Bağlı Transaction kayıtları var mı kontrol et
+                var hasRelatedTransactions = await _transactionRepository.GetAsync(t => t.ExpenseCategoryId == request.Id);
+                if (hasRelatedTransactions != null)
+                {
+                    return new ErrorResult("Bu gider kategorisi kullanılmakta olduğu için güncellenemez. Önce bu kategoriye ait işlemleri silmeniz veya değiştirmeniz gerekmektedir.");
                 }
 
                 isThereExpenseCategoryRecord.UserId = userId;
