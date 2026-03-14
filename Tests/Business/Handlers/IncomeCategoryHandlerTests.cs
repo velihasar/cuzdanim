@@ -1,4 +1,4 @@
-﻿
+
 using Business.Handlers.IncomeCategories.Queries;
 using DataAccess.Abstract;
 using Moq;
@@ -27,11 +27,13 @@ namespace Tests.Business.HandlersTest
     public class IncomeCategoryHandlerTests
     {
         Mock<IIncomeCategoryRepository> _incomeCategoryRepository;
+        Mock<ITransactionRepository> _transactionRepository;
         Mock<IMediator> _mediator;
         [SetUp]
         public void Setup()
         {
             _incomeCategoryRepository = new Mock<IIncomeCategoryRepository>();
+            _transactionRepository = new Mock<ITransactionRepository>();
             _mediator = new Mock<IMediator>();
         }
 
@@ -134,7 +136,7 @@ namespace Tests.Business.HandlersTest
 
             _incomeCategoryRepository.Setup(x => x.Update(It.IsAny<IncomeCategory>())).Returns(new IncomeCategory());
 
-            var handler = new UpdateIncomeCategoryCommandHandler(_incomeCategoryRepository.Object, _mediator.Object);
+            var handler = new UpdateIncomeCategoryCommandHandler(_incomeCategoryRepository.Object, _transactionRepository.Object, _mediator.Object);
             var x = await handler.Handle(command, new System.Threading.CancellationToken());
 
             _incomeCategoryRepository.Verify(x => x.SaveChangesAsync());

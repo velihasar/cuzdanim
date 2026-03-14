@@ -29,11 +29,13 @@ namespace Business.Handlers.IncomeCategories.Commands
         public class UpdateIncomeCategoryCommandHandler : IRequestHandler<UpdateIncomeCategoryCommand, IResult>
         {
             private readonly IIncomeCategoryRepository _incomeCategoryRepository;
+            private readonly ITransactionRepository _transactionRepository;
             private readonly IMediator _mediator;
 
-            public UpdateIncomeCategoryCommandHandler(IIncomeCategoryRepository incomeCategoryRepository, IMediator mediator)
+            public UpdateIncomeCategoryCommandHandler(IIncomeCategoryRepository incomeCategoryRepository, ITransactionRepository transactionRepository, IMediator mediator)
             {
                 _incomeCategoryRepository = incomeCategoryRepository;
+                _transactionRepository = transactionRepository;
                 _mediator = mediator;
             }
 
@@ -43,12 +45,25 @@ namespace Business.Handlers.IncomeCategories.Commands
             [SecuredOperation(Priority = 1)]
             public async Task<IResult> Handle(UpdateIncomeCategoryCommand request, CancellationToken cancellationToken)
             {
-                var userId = UserInfoExtensions.GetUserId();
                 var isThereIncomeCategoryRecord = await _incomeCategoryRepository.GetAsync(u => u.Id == request.Id);
+
+                if (isThereIncomeCategoryRecord == null)
+                {
+                    return new ErrorResult("Gelir kategorisi bulunamadı.");
+                }
+
+                var userId = UserInfoExtensions.GetUserId();
 
                 if (isThereIncomeCategoryRecord.UserId != userId)
                 {
                     return new ErrorResult("Sistem kategorilerini güncelleyemezsiniz.");
+                }
+
+                // Bağlı Transaction kayıtları var mı kontrol et
+                var hasRelatedTransactions = await _transactionRepository.GetAsync(t => t.IncomeCategoryId == request.Id);
+                if (hasRelatedTransactions != null)
+                {
+                    return new ErrorResult("Bu gelir kategorisi kullanılmakta olduğu için güncellenemez. Önce bu kategoriye ait işlemleri silmeniz veya değiştirmeniz gerekmektedir.");
                 }
 
                 isThereIncomeCategoryRecord.UserId = userId;

@@ -1,4 +1,4 @@
-﻿
+
 using Business.Handlers.ExpenseCategories.Queries;
 using DataAccess.Abstract;
 using Moq;
@@ -27,11 +27,13 @@ namespace Tests.Business.HandlersTest
     public class ExpenseCategoryHandlerTests
     {
         Mock<IExpenseCategoryRepository> _expenseCategoryRepository;
+        Mock<ITransactionRepository> _transactionRepository;
         Mock<IMediator> _mediator;
         [SetUp]
         public void Setup()
         {
             _expenseCategoryRepository = new Mock<IExpenseCategoryRepository>();
+            _transactionRepository = new Mock<ITransactionRepository>();
             _mediator = new Mock<IMediator>();
         }
 
@@ -134,7 +136,7 @@ namespace Tests.Business.HandlersTest
 
             _expenseCategoryRepository.Setup(x => x.Update(It.IsAny<ExpenseCategory>())).Returns(new ExpenseCategory());
 
-            var handler = new UpdateExpenseCategoryCommandHandler(_expenseCategoryRepository.Object, _mediator.Object);
+            var handler = new UpdateExpenseCategoryCommandHandler(_expenseCategoryRepository.Object, _transactionRepository.Object, _mediator.Object);
             var x = await handler.Handle(command, new System.Threading.CancellationToken());
 
             _expenseCategoryRepository.Verify(x => x.SaveChangesAsync());
